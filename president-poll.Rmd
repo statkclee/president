@@ -221,3 +221,53 @@ polls_gg +
   transition_reveal(년월)
 ```
 
+
+# 사진 + 그래프 {#visualize-polls-animation-picture}
+
+
+```{r picture}
+library(ggimage)
+library(ggtext)
+library(extrafont)
+loadfonts()
+
+asp_ratio <- 1.618 
+
+gallop_profile_gg <- gallop_tbl %>% 
+  filter(년월 == max(년월)) %>% 
+  pivot_longer(안철수:윤석열, names_to = "후보", values_to = "지지율") %>% 
+  mutate(후보 = fct_reorder(후보, -지지율)) %>% 
+  mutate(profile_href = glue::glue("fig/{후보}.png")) %>% 
+  ggplot(aes(x=후보, y=지지율)) +
+    geom_col(width = 0.3) +
+    theme_minimal(base_family = "NanumGothic") +
+    labs(x="",
+         title = "제20대 대통령 선거/여론조사",
+         subtitle = "조사일자: 2021-05-15") +
+    geom_image(
+    aes(
+      x = 후보, y = 지지율,
+      image = profile_href,
+      asp = asp_ratio
+      ),
+      size = 0.07
+    ) +
+    theme(aspect.ratio = 1/asp_ratio,
+          axis.text    = element_text(colour = "grey50",
+                                      face   = 'bold',
+                                      size   =  13),
+          axis.title   = element_text(colour = "black",
+                                      face   = 'bold',
+                                      size   =  15),
+          axis.title.y = element_text(size = 14,
+                                       colour = 'black',
+                                       face='bold',
+                                       angle = 00),
+          plot.title = element_text(size = 17,
+                                    face = 'bold'))
+
+gallop_profile_gg
+
+```
+
+
