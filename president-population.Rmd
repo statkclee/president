@@ -126,3 +126,52 @@ korea_grp_tbl %>%
   filter(구분 == "신흥국")
 ```
 
+
+# 국가 GDP 순위 {#gdp-ranking}
+
+```{r gdp-ranking}
+
+gdp_url <- "https://en.wikipedia.org/wiki/List_of_countries_by_past_and_projected_GDP_(nominal)"
+
+gdp_1970 <- gdp_url %>% 
+  read_html() %>% 
+  html_node(xpath = '//*[@id="mw-content-text"]/div[1]/table[1]/tbody/tr/td[2]/table') %>% 
+  html_table(fill = TRUE) %>% 
+  as_tibble()
+
+gdp_1980 <- gdp_url %>% 
+  read_html() %>% 
+  html_node(xpath = '//*[@id="mw-content-text"]/div[1]/table[2]/tbody/tr/td[2]/table') %>% 
+  html_table(fill = TRUE) %>% 
+  as_tibble()
+
+gdp_1990 <- gdp_url %>% 
+  read_html() %>% 
+  html_node(xpath = '//*[@id="mw-content-text"]/div[1]/table[3]/tbody/tr/td[2]/table') %>% 
+  html_table(fill = TRUE) %>% 
+  as_tibble()
+
+gdp_2000 <- gdp_url %>% 
+  read_html() %>% 
+  html_node(xpath = '//*[@id="mw-content-text"]/div[1]/table[4]/tbody/tr/td[2]/table') %>% 
+  html_table(fill = TRUE) %>% 
+  as_tibble()
+
+gdp_2010 <- gdp_url %>% 
+  read_html() %>% 
+  html_node(xpath = '//*[@id="mw-content-text"]/div[1]/table[5]/tbody/tr/td[2]/table') %>% 
+  html_table(fill = TRUE) %>% 
+  as_tibble()
+
+# 데이터 결합 ------------------------------
+gdp_tbl <- left_join(gdp_2010, gdp_2000) %>% 
+  left_join(gdp_1990) %>% 
+  left_join(gdp_1980) %>% 
+  left_join(gdp_1970)
+
+gdp_tbl %>% 
+  pivot_longer(`2010`:`1979`, names_to = "year", values_to = "GDP") %>% 
+  rename(country = `Country (or dependent territory)`) %>% 
+  mutate_at( vars(c("year", "GDP")), parse_number) 
+```
+
