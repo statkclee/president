@@ -20,3 +20,4 @@ subtitle: 대통령 선거 2022년
 
 1. [제20대 대통령 선거/여론조사](president-poll.html)
     - [사진 배경 제거](remove-background.html)
+1. [후진국, 개발도상국, 선진국](president-population.html)
