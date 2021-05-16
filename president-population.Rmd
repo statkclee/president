@@ -41,18 +41,88 @@ knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE,
 library(tidyverse)
 library(readxl)
 
-gni_tbl <- read_excel("data/1인당_국민총소득_20210516221455.xlsx")
+world_tbl <- read_excel("data/1인당_국민총소득_20210516221455.xlsx")
 
-korea_tbl <- gni_tbl %>% 
-  select(시점, 한국) %>% 
+gni_tbl <- world_tbl %>% 
+  select(시점, Per_GNI = 한국) %>% 
   mutate(시점 = as.integer(시점))
 
-korea_tbl %>% 
+gni_tbl %>% 
   reactable::reactable()
 ```
 
 
 # 연도별 출생아수 {#birth}
 
+위키백과 [대한민국의 인구](https://ko.wikipedia.org/wiki/대한민국의_인구)에서 년도별 출생자수를 구해낸다.
 
+```{r population}
+library(rvest)
+
+pop_url <- "https://ko.wikipedia.org/wiki/대한민국의_인구"
+
+pop_df <- pop_url %>% 
+  read_html(encoding = "utf-8") %>% 
+  html_node(xpath = '//*[@id="mw-content-text"]/div[1]/table[2]') %>% 
+  html_table(fill = TRUE) %>% 
+  as_tibble()
+
+pop_tbl <- pop_df %>% 
+  select(시점 = `연도 (년)`, 출생자수 = `출생자수(명)`) %>% 
+  mutate(출생자수 = parse_number(출생자수))
+```
+
+# 인당 국민소득 출생아수 {#birth-income}
+
+
+```{r income-population}
+korea_tbl <- left_join(gni_tbl, pop_tbl)
+
+korea_tbl %>% 
+  reactable::reactable()
+```
+
+```{r visualize-gdp-pop}
+library(extrafont)
+loadfonts()
+
+korea_tbl %>% 
+  pivot_longer(-시점, names_to = "key", values_to = "value") %>% 
+  ggplot(aes(x=시점, y=value, color = key)) +
+    geom_line() +
+    facet_wrap(~key, scales = "free_y") +
+    theme_bw(base_family = "NanumGothic") +
+    theme(legend.position = "none") +
+    labs(x="", y="") +
+    scale_y_continuous(labels = scales::comma)
+```
+
+
+
+# 개도국, 선진국 구분 {#선진국}
+
+1. 6,500 달러 미만: 개발도상국 
+1. 6,500달러 ~ 23,000 달러: 신흥국 
+1. 23,000 달러 이상: 선진국
+
+```{r classify-countries}
+korea_grp_tbl <- korea_tbl %>% 
+  mutate(구분 = case_when(Per_GNI < 6500 ~ "개도국",
+                          Per_GNI >= 2600 & Per_GNI < 23000 ~ "신흥국",
+                          TRUE ~ "선진국")) %>% 
+  mutate(구분 = factor(구분, levels = c("개도국", "신흥국", "선진국"))) 
+
+korea_grp_tbl %>% 
+  group_by(구분) %>% 
+  summarise(출생자수 = sum(출생자수)) %>% 
+  ungroup() %>% 
+  mutate(비율 = 출생자수 / sum(출생자수))
+```
+
+
+
+```{r classification}
+korea_grp_tbl %>% 
+  filter(구분 == "신흥국")
+```
 
