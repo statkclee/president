@@ -307,3 +307,23 @@ G7_korea_GDP_gg +
   geom_vline(xintercept = 1998, color = "red", linetype = 3)
 ```
 
+
+# 출생자수 분포 {#korea-population-category}
+
+정확한 것은 아니지만, 1940년 이후 출생자를 기준으로 개도국, 신흥국, 선진국을 출생연도 별로 범주화시켜 대략적인 비율을 보면 다음과 같다.
+
+```{r population-category}
+pop_df %>% 
+  select(시점 = `연도 (년)`, 출생자수 = `출생자수(명)`) %>% 
+  mutate(출생자수 = parse_number(출생자수))  %>% 
+  filter(시점 >= 1940) %>% 
+  mutate(구분 = case_when(시점 < 1980 ~ "개도국",
+                          시점 >= 1980 & 시점 < 1998 ~ "신흥국",
+                          TRUE ~ "선진국")) %>% 
+  mutate(구분 = factor(구분, levels = c("개도국", "신흥국", "선진국")))  %>% 
+  group_by(구분) %>% 
+  summarise(출생자수 = sum(출생자수)) %>% 
+  mutate(비율 = 출생자수 / sum(출생자수))
+```
+
+
