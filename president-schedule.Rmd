@@ -30,6 +30,9 @@ editor_options:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE,
                       comment="", digits = 3, tidy = FALSE, prompt = FALSE, fig.align = 'center')
+library(tidyverse)
+library(rvest)
+library(lubridate)
 ```
 
 # 대통령 재임기간 선거 [^president-duration-period] {#lubridate-case-study}
@@ -166,15 +169,19 @@ reign_election_df %>%
 
 ## 제19대 대통령 여론조사 {#제19대_대통령}
 
-```{r survey-dataset-19}
+```{r survey-dataset-19, eval = FALSE}
 library(tidyverse)
 library(rvest)
 library(lubridate)
+
+Sys.setlocale("LC_ALL", "C")
 
 survey_dat <- read_html("https://ko.wikipedia.org/wiki/대한민국_제19대_대통령_선거") %>% 
   html_nodes(xpath = '//*[@id="mw-content-text"]/div[1]/table[7]') %>% 
   html_table(fill = TRUE) %>% 
   .[[1]]
+
+Sys.setlocale("LC_ALL", "Korean")
 
 survey_tbl <- survey_dat %>% 
   ## 변수명 정제 -------------
@@ -230,3 +237,69 @@ survey_tbl %>%
   scale_x_date(date_labels = "%m월 %d일")
 ```
 
+
+## 제18대 대통령 여론조사 {#제18대_대통령}
+
+```{r survey-dataset-18, eval = FALSE}
+
+Sys.setlocale("LC_ALL", "C")
+
+survey_18_dat <- read_html("https://ko.wikipedia.org/wiki/대한민국_제18대_대통령_선거") %>% 
+  html_nodes(xpath = '//*[@id="mw-content-text"]/div[1]/table[2]') %>% 
+  html_table(fill = TRUE) %>% 
+  .[[1]]
+
+Sys.setlocale("LC_ALL", "Korean")
+
+survey_18_tbl <- survey_18_dat %>% 
+  janitor::clean_names(ascii = FALSE) %>% 
+  # 조사날짜 날짜형 변수 변환 -------------
+  mutate(조사기간 = str_remove(날짜, "일")) %>% 
+  separate(col = 조사기간, into = c("월", "일"), sep = "월", convert = TRUE) %>% 
+  mutate(조사날짜 = make_date(year  = 2012, 
+                              month = 월,
+                              day   = 일)) %>% 
+  select(-날짜, -월, -일) %>% 
+  relocate(조사날짜, .after = 조사기관) %>% 
+  mutate(조사기관 = str_extract(조사기관, pattern = "[^\\[]*")) %>% 
+  add_row(조사기관 = "18대 대선", 조사날짜 = ymd("2012-12-19"), 박근혜 = 51.55, 문재인 = 48.02, 이정희 = NA, 강지원 = 0.17, 기타_무응답 = 100 - 51.55 - 48.02 -0.17) %>% 
+  ## 시각화를 위한 전처리
+  pivot_longer(cols = c(-조사기관, -조사날짜), names_to = "후보", values_to = "지지율") %>% 
+  mutate(지지율 = ifelse(is.na(지지율), 0, 지지율/100)) %>% 
+  ## ggplot 색상 및 평균
+  mutate(후보 = factor(후보, levels = c("박근혜", "문재인", "이정희", "강지원", "기타_무응답"))) %>% 
+  group_by(조사날짜, 후보) %>% 
+  summarise(지지율 = mean(지지율, na.rm = TRUE)) %>% 
+  ungroup()
+  
+## 마지막 대선결과 지지율
+last_18_obs <- survey_18_tbl %>% 
+  filter(조사날짜 == max(조사날짜))
+
+## 대선일과 최종 여론조사일 사이 대쉬선 작성 
+dashed_18_obs <- survey_18_tbl %>% 
+  filter(조사날짜 == max(조사날짜) |
+         조사날짜 == ymd("2012-12-13"))
+
+survey_18_tbl %>% 
+  filter(조사날짜 != max(조사날짜)) %>% 
+  ggplot(aes( x= 조사날짜, y = 지지율, color = 후보)) +
+    geom_line() +
+    geom_point() +
+    ## 대쉬선 -------------
+    geom_line(data = dashed_18_obs, aes(x= 조사날짜, y=지지율), linetype = 3) +
+    ## 최종 지지율 --------
+    geom_point(data = last_18_obs, aes(x= 조사날짜, y=지지율), size = 3) +
+    theme_bw(base_family = "NanumGothic") +
+    labs( x = "",
+          title = "제18대 대통령선거 여론조사와 결과",
+          subtitle = "2012년 11월 27일 ~ 12월 13일, 대선일(12월 19일)") +
+    scale_colour_manual(name="",
+                      values=c(문재인="#065ce8", 
+                               박근혜="#ff0000",
+                               이정희="#ad03fc",
+                               강지원="green",
+                               기타_무응답 = "gray50")) +
+  scale_x_date(date_labels = "%m월 %d일") +
+  scale_y_continuous(labels = scales::label_percent(accuracy =1))
+```
