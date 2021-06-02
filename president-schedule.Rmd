@@ -1,0 +1,232 @@
+---
+layout: page
+title: "대통령 선거 2022년"
+subtitle: "대통령 선거 일정"
+author:
+- name: "이광춘"
+  affiliation: "[Tidyverse Korea](https://www.facebook.com/groups/tidyverse/)"
+date: "`r Sys.Date()`"
+tags: ["여론조사", "제20대", "대통령 선거", "후진국", "중진국", "선진국", "선거일정"]
+output:
+  html_document: 
+    include:
+      after_body: footer.html
+      before_body: header.html
+    toc: yes
+    toc_depth: 2
+    toc_float: true
+    highlight: tango
+    code_folding: show
+    number_section: true
+    self_contained: true
+bibliography: bibliography_presid.bib
+csl: biomed-central.csl
+urlcolor: blue
+linkcolor: blue
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE,
+                      comment="", digits = 3, tidy = FALSE, prompt = FALSE, fig.align = 'center')
+```
+
+# 대통령 재임기간 선거 [^president-duration-period] {#lubridate-case-study}
+
+[^president-duration-period]: [Reinstate support for filtering and arranging lubridate Periods and Intervals #3695](https://github.com/tidyverse/dplyr/issues/3695)
+
+위키백과사전에서 [대한민국의 대통령 목록](https://ko.wikipedia.org/wiki/%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD%EC%9D%98_%EB%8C%80%ED%86%B5%EB%A0%B9_%EB%AA%A9%EB%A1%9D) 확인된 대통령 재임기간은 다음과 같다.
+
+- 이승만: 4,273 일 (11년 8개월 11일)
+- 윤보선:  588 일 (1년 7개월 10일)
+- 박정희: 5,793 일 (15년 10개월 9일)
+- 최규하:  255 일 (8개월 10일)
+- 전두환: 2,733 일 (7년 5개월 23일)
+- 노태우 : 1,827 일 (5년)
+- 김영삼 : 1,826 일
+- 김대중 : 1,825 일
+- 노무현 : 1,826 일
+- 이명박 : 1,827 일
+- 박근혜 : 1,475 일 (4년 13일)
+- 문재인 : 1,825 일 (예상)
+- ㅇㅇㅇ : 1,825 일 (예상)
+
+대통령 취임일과 종료일을 입력하고 시작일과 종료일을 날짜 자료형으로 변형시키게 되면 연산이 가능하다. 따라서 615선언 이후 즉, 노태우 대통령이후 대통령만 추려서 재임기간을 사람이 인식하는 일반적인 재임기간과 절대시간 기준으로 나눠본다. 그리고 나서 정렬을 해야 하는데 현재 `interval` 객체가 데이터프레임에 들어가면 정렬하는 기능은 지원되고 있지 않다. 따라서 다음과같은 표로 확인을 한다.
+
+
+```{r president-period, asis=TRUE}
+library(tidyverse)
+library(lubridate)
+
+president_dat <- tribble(~"이름", ~"시작일", ~"종료일",
+                        "이승만", "1948-08-15", "1960-04-26",
+                        "윤보선", "1960-08-02",	"1962-03-23",
+                        "박정희", "1963-12-17", "1979-10-26",
+                        "최규하", "1979-12-06", "1980-08-16",
+                        "전두환", "1980-09-01", "1988-02-24",
+                        "노태우", "1988-02-25", "1993-02-24",
+                        "김영삼", "1993-02-25", "1998-02-24",
+                        "김대중", "1998-02-25", "2003-02-24",
+                        "노무현", "2003-02-25", "2008-02-24",
+                        "이명박", "2008-02-25", "2013-02-24",
+                        "박근혜", "2013-02-25", "2016-12-09",
+                        "문재인", "2017-05-10", "2022-05-09",
+                        "ㅇㅇㅇ", "2022-05-10", "2027-05-09")
+
+president_tbl <- president_dat %>% 
+  mutate(`시작일` = lubridate::ymd(`시작일`),
+         `종료일` = lubridate::ymd(`종료일`)) %>% 
+  filter(`종료일` > ymd("1988-06-15")) %>%  # 노태우 대통령 이후 ~
+  mutate(`시작종료` = interval(`시작일`, `종료일`)) %>% 
+  mutate(`재임기간` = as.period(`시작종료`)) %>% # 사람이 인지하는 시간
+  mutate(`재임일` = as.duration(`시작종료`) %>% seconds_to_period(.)) %>% # 절대적인 시간
+  mutate(`정렬키`   = unclass(lubridate::int_length(`시작종료`))) 
+
+president_tbl %>% 
+  knitr::kable()
+
+```
+
+두번째로 총선과 지방선거를 넣고 재임기간동안 선거가 얼마나 많이 일어났는지 확인해보자. [위키백과사전, 대한민국의 선거](https://ko.wikipedia.org/wiki/대한민국의_선거)에서 데이터를 받아 정리한다.
+
+지방선거 시작된 이후 선거만 추출하고 재임기간 계산해서 반환하는 Helper 함수를 작성해서 각 대통령별로 해당 재임기간 있었던 선거를 개수한다.
+
+
+```{r president-period-election}
+# 1987년 이후 총선/대선/지선 선거일 
+election_df <- tribble(~"선거", ~"선거일",
+                       "1987년 개헌 국민투표", "1987-10-27",
+                       "제13대 대통령 선거",   "1987-12-16",
+                       "제13대 국회의원 선거", "1988-04-26",
+                       "제14대 국회의원 선거", "1992-03-24",
+                       "제14대 대통령 선거",   "1992-12-18",
+                       "제1회 지방선거",       "1995-06-27",
+                       "제15대 국회의원 선거", "1996-04-11",
+                       "제15대 대통령 선거",   "1997-12-18",
+                       "제2회 지방선거",       "1998-06-04",
+                       "제16대 국회의원 선거", "2000-04-13",
+                       "제3회 지방선거",       "2002-06-13",
+                       "제16대 대통령 선거",   "2002-12-19",
+                       "제17대 국회의원 선거", "2004-04-15",
+                       "제4회 지방선거",       "2006-05-31",
+                       "제17대 대통령 선거",   "2007-12-19",
+                       "제18대 국회의원 선거", "2008-04-09",
+                       "제5회 지방선거",       "2010-06-02",
+                       "제19대 국회의원 선거", "2012-04-11",
+                       "제18대 대통령 선거",   "2012-12-19",
+                       "제6회 지방선거",       "2014-06-04",
+                       "제20대 국회의원 선거", "2016-04-13",
+                       "제19대 대통령 선거",   "2017-05-09",
+                       "제7회 지방선거",       "2018-06-13",
+                       "제21대 국회의원 선거", "2020-04-15",
+                       "제20대 대통령 선거",   "2022-03-09",
+                       "제8회 지방선거",       "2022-06-01")
+
+# 지방선거 시작된 이후 선거만 추출
+election_df <- election_df %>% 
+  mutate(`선거일` = ymd(`선거일`)) %>% 
+  filter(`선거일` > ymd("1995-01-01"))
+
+# 재임기간 계산해서 반환하는 Helper 함수
+get_reign <- function(president_name) {
+  president_reign <- president_dat %>% 
+    filter(`이름` == president_name) %>% 
+    mutate(`시작일` = lubridate::ymd(`시작일`),
+         `종료일` = lubridate::ymd(`종료일`)) %>% 
+    mutate(`시작종료` = interval(`시작일`, `종료일`)) %>% 
+    pull(`시작종료`)
+  return(president_reign)
+}
+
+# get_reign("노무현")
+
+# 선거일별 재임중인 대통령 여부
+
+(reign_election_df <- election_df %>% 
+    arrange(`선거일`) %>%   
+    mutate(`김영삼` = `선거일` %within% get_reign("김영삼"),
+           `김대중` = `선거일` %within% get_reign("김대중"),
+           `노무현` = `선거일` %within% get_reign("노무현"),
+           `이명박` = `선거일` %within% get_reign("이명박"),
+           `박근혜` = `선거일` %within% get_reign("박근혜"),
+           `문재인` = `선거일` %within% get_reign("문재인")) )
+
+# 대통령 재임 기간 중 선거횟수 
+
+reign_election_df %>% 
+  select(-`선거`, -`선거일`) %>% 
+  gather(`대통령`, `선거여부`) %>% 
+  group_by(`대통령`) %>% 
+  summarise(`선거횟수` = sum(`선거여부`)) %>% 
+  arrange(-`선거횟수`)
+```
+
+# 선거 직전 지지율 {#schedule-dataset-survey}
+
+## 제19대 대통령 여론조사 {#제19대_대통령}
+
+```{r survey-dataset-19}
+library(tidyverse)
+library(rvest)
+library(lubridate)
+
+survey_dat <- read_html("https://ko.wikipedia.org/wiki/대한민국_제19대_대통령_선거") %>% 
+  html_nodes(xpath = '//*[@id="mw-content-text"]/div[1]/table[7]') %>% 
+  html_table(fill = TRUE) %>% 
+  .[[1]]
+
+survey_tbl <- survey_dat %>% 
+  ## 변수명 정제 -------------
+  janitor::clean_names(ascii = FALSE) %>% 
+  slice(2:n()) %>% 
+  # 조사날짜 날짜형 변수 변환 -------------
+  mutate(조사기간 = str_extract(조사_기간, pattern = "[0-9]{1,2}월\\s+[0-9]{1,2}")) %>% 
+  separate(col = 조사기간, into = c("월", "일"), sep = "월", convert = TRUE) %>% 
+  mutate(조사날짜 = make_date(year  = 2017, 
+                              month = 월,
+                              day   = 일)) %>% 
+  select(-조사_기간, -응답_인원, -월, -일) %>% 
+  relocate(조사날짜, .after = 조사_기관) %>% 
+  mutate(조사_기관 = str_extract(조사_기관, pattern = "[가-힣0-9\\s]+")) %>% 
+  ## 시각화를 위한 전처리
+  pivot_longer(cols = c(-조사_기관, -조사날짜), names_to = "후보", values_to = "지지율") %>% 
+  mutate(지지율 = parse_number(지지율) / 100) %>% 
+  ## ggplot 색상 및 평균
+  mutate(후보 = factor(후보, levels = c("더불어민주당", "자유한국당", "국민의당", "바른정당", "정의당", "기타_무응답"))) %>% 
+  group_by(조사날짜, 후보) %>% 
+  summarise(지지율 = mean(지지율, na.rm = TRUE)) %>% 
+  ungroup()
+  
+## 마지막 대선결과 지지율
+last_obs <- survey_tbl %>% 
+  filter(조사날짜 == max(조사날짜))
+
+## 대선일과 최종 여론조사일 사이 대쉬선 작성 
+dashed_obs <- survey_tbl %>% 
+  filter(조사날짜 == max(조사날짜) |
+         조사날짜 == ymd("2017-05-02"))
+
+survey_tbl %>% 
+  filter(조사날짜 != max(조사날짜)) %>% 
+  ggplot(aes( x= 조사날짜, y = 지지율, color = 후보)) +
+    geom_line() +
+    geom_point() +
+    ## 대쉬선 -------------
+    geom_line(data = dashed_obs, aes(x= 조사날짜, y=지지율), linetype = 3) +
+    ## 최종 지지율 --------
+    geom_point(data = last_obs, aes(x= 조사날짜, y=지지율), size = 3) +
+    theme_bw(base_family = "NanumGothic") +
+    labs( x = "",
+          title = "제19대 대통령선거 여론조사와 결과",
+          subtitle = "2017년 4월 3일 ~ 5월 2일, 대선일(5월 9일)") +
+    scale_colour_manual(name="",
+                      values=c(더불어민주당="#065ce8", 
+                               자유한국당="#ff0000",
+                               국민의당="#07f91f",
+                               바른정당="#00faff",
+                               정의당="#f2ee09",
+                               기타_무응답 = "gray50")) +
+  scale_x_date(date_labels = "%m월 %d일")
+```
+
