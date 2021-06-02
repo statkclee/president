@@ -169,19 +169,19 @@ reign_election_df %>%
 
 ## 제19대 대통령 여론조사 {#제19대_대통령}
 
-```{r survey-dataset-19, eval = FALSE}
+```{r survey-dataset-19, eval = TRUE}
 library(tidyverse)
 library(rvest)
 library(lubridate)
 
-Sys.setlocale("LC_ALL", "C")
+# Sys.setlocale("LC_ALL", "C")
 
 survey_dat <- read_html("https://ko.wikipedia.org/wiki/대한민국_제19대_대통령_선거") %>% 
   html_nodes(xpath = '//*[@id="mw-content-text"]/div[1]/table[7]') %>% 
   html_table(fill = TRUE) %>% 
   .[[1]]
 
-Sys.setlocale("LC_ALL", "Korean")
+# Sys.setlocale("LC_ALL", "Korean")
 
 survey_tbl <- survey_dat %>% 
   ## 변수명 정제 -------------
@@ -240,16 +240,16 @@ survey_tbl %>%
 
 ## 제18대 대통령 여론조사 {#제18대_대통령}
 
-```{r survey-dataset-18, eval = FALSE}
+```{r survey-dataset-18, eval = TRUE}
 
-Sys.setlocale("LC_ALL", "C")
+# Sys.setlocale("LC_ALL", "C")
 
 survey_18_dat <- read_html("https://ko.wikipedia.org/wiki/대한민국_제18대_대통령_선거") %>% 
   html_nodes(xpath = '//*[@id="mw-content-text"]/div[1]/table[2]') %>% 
   html_table(fill = TRUE) %>% 
   .[[1]]
 
-Sys.setlocale("LC_ALL", "Korean")
+# Sys.setlocale("LC_ALL", "Korean")
 
 survey_18_tbl <- survey_18_dat %>% 
   janitor::clean_names(ascii = FALSE) %>% 
