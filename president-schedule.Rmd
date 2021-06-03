@@ -16,7 +16,7 @@ output:
     toc_depth: 2
     toc_float: true
     highlight: tango
-    code_folding: show
+    code_folding: hide
     number_section: true
     self_contained: true
 bibliography: bibliography_presid.bib
@@ -169,6 +169,8 @@ reign_election_df %>%
 
 ## 제19대 대통령 여론조사 {#제19대_대통령}
 
+지난 대선은 여하튼 대통령에 대한 탄핵으로 이루어진 것이고, 민주당은 받을 만큼 받은 것이라고 볼 수 있다. 꾸준히 40% 대를 유지하고 있다는 것이 증거다. 양자대결이었던 18대 대선에 비해서 9-10% 정도 적은 것은 다자 구도로 갔으니까 그런 것으로 파악된다. 정의당과 안철수 당이 가져 간것(여기에는 보수층의 전임 박근혜 대통령 득표했던 것도 많이 포함됨)으로 보인다. 기타 무응답층은 10% 가량이 쪼개져서, 자유한국당과 국민의 당 그리고 바른정당이 적당히 나누어 가진 것이다. 문재인과 심상정이 거의 가져가지 못한 것은, 탄핵국면으로 보수층은 여론조사에서 매우 소극적으로 응답했다는 것으로 이해가능할 것으로 보인다. 문재인, 심상정 쪽은 여론조사에서도 적극적으로 응답했다는 것으로 보이며, 결국 5월 2일경 무응답 10% 가량은 대부분 보수표와 안칠수 후보에 대한 숨은표였다 해석이 유력하다.  
+
 ```{r survey-dataset-19, eval = TRUE}
 library(tidyverse)
 library(rvest)
@@ -302,4 +304,148 @@ survey_18_tbl %>%
                                기타_무응답 = "gray50")) +
   scale_x_date(date_labels = "%m월 %d일") +
   scale_y_continuous(labels = scales::label_percent(accuracy =1))
+```
+
+## 제17대 대통령 여론조사 {#제17대_대통령}
+
+```{r survey-dataset-17, eval = TRUE}
+
+# Sys.setlocale("LC_ALL", "C")
+
+survey_17_dat <- read_html("https://ko.wikipedia.org/wiki/대한민국_제17대_대통령_선거") %>% 
+  html_nodes(xpath = '//*[@id="mw-content-text"]/div[1]/table[3]') %>% 
+  html_table(fill = TRUE) %>% 
+  .[[1]]
+
+# Sys.setlocale("LC_ALL", "Korean")
+
+survey_17_tbl <- survey_17_dat %>% 
+  janitor::clean_names(ascii = FALSE) %>% 
+  # 조사날짜 날짜형 변수 변환 -------------
+  mutate(날짜 = str_extract(날짜, pattern = "[^\\[]*")) %>% 
+  mutate(날짜 = str_remove(날짜, "일")) %>% 
+  separate(col = 날짜, into = c("월", "일"), sep = "월", convert = TRUE) %>% 
+  mutate(조사날짜 = make_date(year  = 2007, 
+                              month = 월,
+                              day   = 일)) %>% 
+  select(-비고, -월, -일) %>% 
+  mutate(조사기관 = glue::glue("여론조사 {1:nrow(survey_17_dat)}")) %>% 
+  relocate(c(조사기관, 조사날짜), .before = 이명박) %>% 
+  add_row(조사기관 = "17대 대선", 조사날짜 = ymd("2007-12-19"), 이명박 = 48.67, 이회창 = 15.08, 정동영 = 26.15,  문국현 = 5.83, 권영길 = 3.02, 이인제 = 0.68, 모름_무응답 = 100 - 48.67 - 15.08 - 26.15 - 5.83 - 3.02 - 0.68 ) %>% 
+  ## 무응답 처리 --------
+  mutate(이회창 = zoo::na.locf(이회창, fromLast = TRUE),
+        모름_무응답 = ifelse(is.na(모름_무응답), 100 - 51.9 - 20.20 - 8.7 - 3.6 - 3.3, 모름_무응답)) %>% 
+  ## 시각화를 위한 전처리
+  pivot_longer(cols = c(-조사기관, -조사날짜), names_to = "후보", values_to = "지지율") %>% 
+  mutate(지지율 = ifelse(is.na(지지율), 0, 지지율/100)) %>% 
+  ## ggplot 색상 및 평균
+  mutate(후보 = factor(후보, levels = c("이명박", "이회창", "정동영", "문국현", "권영길", "이인제", "모름_무응답"))) %>% 
+  group_by(조사날짜, 후보) %>% 
+  summarise(지지율 = mean(지지율, na.rm = TRUE)) %>% 
+  ungroup()
+  
+## 마지막 대선결과 지지율
+last_17_obs <- survey_17_tbl %>% 
+  filter(조사날짜 == max(조사날짜))
+
+## 대선일과 최종 여론조사일 사이 대쉬선 작성 
+dashed_17_obs <- survey_17_tbl %>% 
+  filter(조사날짜 == max(조사날짜) |
+         조사날짜 == ymd("2007-12-12"))
+
+survey_17_tbl %>% 
+  filter(조사날짜 != max(조사날짜)) %>% 
+  ggplot(aes( x= 조사날짜, y = 지지율, color = 후보)) +
+    geom_line() +
+    geom_point() +
+    ## 대쉬선 -------------
+    geom_line(data = dashed_17_obs, aes(x= 조사날짜, y=지지율), linetype = 3) +
+    ## 최종 지지율 --------
+    geom_point(data = last_17_obs, aes(x= 조사날짜, y=지지율), size = 3) +
+    theme_bw(base_family = "NanumGothic") +
+    labs( x = "",
+          title = "제17대 대통령선거 여론조사와 결과",
+          subtitle = "2007년 10월 16일 ~ 12월 12일, 대선일(12월 19일)") +
+    scale_colour_manual(name="",
+                      values=c(정동영="#065ce8", 
+                               이명박="#ff0000",
+                               이회창="#ad03fc",
+                               문국현="lightgreen",
+                               권영길="lightgreen",
+                               이인제="lightgreen",
+                               모름_무응답 = "gray50")) +
+  scale_x_date(date_labels = "%m월 %d일") +
+  scale_y_continuous(labels = scales::label_percent(accuracy =1))
+```
+
+## 제16대 대통령 여론조사 {#제16대_대통령}
+
+```{r survey-dataset-16, eval = TRUE}
+
+# Sys.setlocale("LC_ALL", "C")
+
+survey_16_dat <- read_html("https://ko.wikipedia.org/wiki/대한민국_제16대_대통령_선거") %>% 
+  html_nodes(xpath = '//*[@id="mw-content-text"]/div[1]/table[2]') %>% 
+  html_table(fill = TRUE) %>% 
+  .[[1]]
+
+# Sys.setlocale("LC_ALL", "Korean")
+
+survey_16_tbl <- survey_16_dat %>% 
+  janitor::clean_names(ascii = FALSE) %>% 
+  # 조사날짜 날짜형 변수 변환 -------------
+  mutate(날짜 = str_extract(날짜, pattern = "[^\\[]*")) %>% 
+  mutate(날짜 = ifelse(str_length(날짜) > 10, 날짜, glue::glue("2002년 {날짜}"))) %>% 
+  mutate(조사날짜 = as.Date(날짜, format = "%Y년 %m월 %d일")) %>% 
+  mutate(조사기관 = glue::glue("여론조사 {1:nrow(survey_16_dat)}")) %>% 
+  relocate(c(조사기관, 조사날짜), .before = 이회창) %>% 
+  rowwise() %>% 
+  mutate(기타_무응답 = 100 - sum(c(이회창, 노무현, 정몽준, 이인제, 박근혜, 권영길, 이한동), na.rm = TRUE)) %>%   ungroup()  %>% 
+  select(-비고, -날짜) %>% 
+  add_row(조사기관 = "16대 대선", 조사날짜 = as.Date("2002년 12월 19일", format = "%Y년 %m월 %d일"), 노무현 = 48.91, 이회창 = 46.59, 권영길 = 3.90,  이한동 = 0.30, 기타_무응답 = 100 - 48.91 - 46.59 - 3.90 - 0.30 - 0.21 ) %>% 
+  ## 시각화를 위한 전처리
+  pivot_longer(cols = c(-조사기관, -조사날짜), names_to = "후보", values_to = "지지율") %>% 
+  mutate(지지율 = ifelse(is.na(지지율), 0, 지지율/100)) %>% 
+  ## ggplot 색상 및 평균
+  mutate(후보 = factor(후보, levels = c("노무현", "이회창", "권영길", "정몽준", "이한동", "이인제", "박근혜",  "기타_무응답"))) %>% 
+  group_by(조사날짜, 후보) %>% 
+  summarise(지지율 = mean(지지율, na.rm = TRUE)) %>% 
+  ungroup()
+  
+## 마지막 대선결과 지지율
+last_16_obs <- survey_16_tbl %>% 
+  filter(조사날짜 == max(조사날짜))
+
+## 대선일과 최종 여론조사일 사이 대쉬선 작성 
+dashed_16_obs <- survey_16_tbl %>% 
+  filter(조사날짜 == max(조사날짜) |
+         조사날짜 == ymd("2002-12-15"))
+
+survey_16_tbl %>% 
+  filter(조사날짜 != max(조사날짜)) %>% 
+  ggplot(aes( x= 조사날짜, y = 지지율, color = 후보)) +
+    geom_line() +
+    geom_point() +
+    ## 대쉬선 -------------
+    geom_line(data = dashed_16_obs, aes(x= 조사날짜, y=지지율), linetype = 3) +
+    ## 최종 지지율 --------
+    geom_point(data = last_16_obs, aes(x= 조사날짜, y=지지율), size = 3) +
+    theme_bw(base_family = "NanumGothic") +
+    labs( x = "",
+          title = "제16대 대통령선거 여론조사와 결과",
+          subtitle = "2001년 12월 11일 ~ 2002년 12월 15일, 대선일(12월 19일)") +
+    scale_colour_manual(name="",
+                      values=c(노무현="#065ce8", 
+                               이회창="#ff0000",
+                               권영길="#ad03fc",
+                               정몽준="lightblue",
+                               이한동="lightgreen",
+                               권영길="lightgreen",
+                               이인제="lightgreen",
+                               박근혜="lightgreen",
+                               기타_무응답 = "gray50")) +
+  scale_x_date(date_labels = "%m월 %d일") +
+  scale_y_continuous(labels = scales::label_percent(accuracy =1))
+
+
 ```
