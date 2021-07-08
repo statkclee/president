@@ -446,6 +446,7 @@ survey_16_tbl %>%
                                기타_무응답 = "gray50")) +
   scale_x_date(date_labels = "%m월 %d일") +
   scale_y_continuous(labels = scales::label_percent(accuracy =1))
-
-
 ```
+
+
+

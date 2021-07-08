@@ -88,3 +88,79 @@ party_18_tbl
 구글 검색을 통해 정당 지지율에 대한 2007년 데이터를 구할 수 없어 한겨레 신문사에서 [민주, 4년8개월만에 한나라에 지지율 앞서](https://www.hani.co.kr/arti/PRINT/357940.html)으로 갈음한다.
 
 ![](data/hani_approval_rating_old.jpg)
+
+# 제20대 정당지지율 {#approval-20}
+
+위키백과사전 [대한민국의 정당 지지율](https://ko.wikipedia.org/wiki/대한민국의_정당_지지율) 웹사이트에서 정당지지율 데이터를 가져온다.
+
+```{r party-20-approval}
+library(tidyverse)
+library(rvest)
+
+wiki_party_html <- read_html("https://ko.wikipedia.org/wiki/대한민국의_정당_지지율")
+
+party_dat <- wiki_party_html %>% 
+  html_node(xpath =  '//*[@id="mw-content-text"]/div[1]/table') %>% 
+  html_table(header = TRUE, fill = TRUE)
+
+party_tbl <- party_dat %>% 
+  janitor::clean_names(ascii = FALSE) %>% 
+  slice(2:n()) %>% 
+  as_tibble()
+
+realm_tbl <- party_tbl %>% 
+  select(`조사_기간`, ends_with("2")) %>% 
+  mutate(조사기관 = "리얼미터") %>% 
+  pivot_longer(더불어민주당_2:시대전환_2, names_to = "정당", values_to = "지지율")
+
+gallup_tbl <- party_tbl %>% 
+  select(`조사_기간`, !ends_with("2")) %>% 
+  mutate(조사기관 = "갤럽") %>% 
+  pivot_longer(더불어민주당:시대전환, names_to = "정당", values_to = "지지율")
+
+party_survey_tbl <- bind_rows(realm_tbl, gallup_tbl) %>% 
+  mutate(정당 = str_remove(정당, "_[0-9]")) %>% 
+  mutate(지지율 = str_remove(지지율, pattern = "미조사\\[[0-9]{1,2}\\]")) %>% 
+  mutate(지지율 = parse_number(지지율)) %>% 
+  mutate(조사년 = str_extract(조사_기간, "[0-9]{4}") %>% parse_number,
+         조사월 = str_extract(조사_기간, "(?<=년\\s).*?(?=월)") %>% parse_number,
+         조사주 = str_extract(조사_기간, "(?<=월\\s).*?(?=주)") %>% parse_number) %>% 
+  mutate(조사일 = 조사주 * 7 - 6) %>% 
+  mutate(조사기간 = lubridate::make_date(year = 조사년, month = 조사월, day = 조사일)) %>% 
+  filter(! 정당 %in% c("시대전환", "기본소득당")) %>% 
+  group_by(조사기관, 정당) %>%
+  arrange(조사기간) %>%
+  mutate(지지율 = imputeTS::na_interpolation(지지율)) %>% 
+  select(조사기간, 조사기관, 정당, 지지율) %>% 
+  ungroup() %>% 
+  mutate(정당 = factor(정당, levels = c("더불어민주당", "국민의힘", "국민의당", "열린민주당", "정의당")))
+
+party_survey_tbl %>% 
+  reactable::reactable()
+
+```
+
+## 시각화 {#visualization}
+
+```{r visualize-party-20}
+
+party_survey_tbl %>% 
+  ggplot(aes(x=조사기간, y= 지지율, color = 정당)) +
+    geom_line() +
+    geom_point() +
+    facet_wrap(~조사기관) +
+    theme_bw(base_family = "NanumGothic") +
+    scale_colour_manual(name="",
+                      values=c(더불어민주당="#065ce8", 
+                               국민의힘="#ff0000",
+                               국민의당="#EA5508",
+                               열린민주당="#FCC800",
+                               정의당="#f2ee09")) +
+   scale_x_date(date_labels = "%m-%d") +
+   labs(x = "", y = "정당지지율(%)",
+        title = "제20대 대통령선거 전 정당지지율") +
+  theme(legend.position = "top")
+```
+
+
+
