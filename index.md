@@ -23,3 +23,4 @@ subtitle: 대통령 선거 2022년
 1. [후진국, 개발도상국, 선진국](president-population.html)
 1. [대통령 선거 일정](president-schedule.html)
 1. [정당지지율](president-party.html)
+1. [JTBC 차기대선주자](president-jtbc.html)
