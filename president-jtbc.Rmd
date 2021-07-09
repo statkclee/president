@@ -63,3 +63,74 @@ sample_html
 
 ```
 
+# 차기대선 주사 선호도 [^1] {#page-main}
+
+[^1]: https://statkclee.github.io/ingest-data/ocr-table.html
+
+## 다운로드 {#page-main-download}
+
+```{r main-page}
+
+download.file(url = "https://www.nesdc.go.kr/files/result/202107/FILE_202104120333254180.pdf.files/6.png", 
+              destfile = "data/nesdc/jtbc/20210401/6.png", mode = "wb")
+
+main_img <- image_read("data/nesdc/jtbc/20210401/6.png")
+
+main_img %>% 
+  image_resize("100%")
+```
+
+
+## 이미지 전처리작업 {#page-main-preprocessing}
+
+```{r preprocessing-page}
+library(tesseract)
+
+table_text <- tesseract::ocr_data("data/nesdc/jtbc/20210401/6.png", engine = "kor")
+table_text %>% head(20)
+
+main_processed_img <- main_img %>% 
+  image_crop(geometry_area(x = 280, y = 125, 700, 820))   %>% 
+  image_transparent("white", fuzz=10) %>% 
+  image_background("white") %>%
+  image_negate() %>%
+  image_morphology(method = "Thinning", kernel = "Rectangle:20x1+0+0^<") %>%
+  image_negate() 
+
+main_processed_img
+```
+
+## 텍스트 추출 {#page-main-extract}
+
+```{r extract-text-page}
+
+whitelist <- glue::glue("1234567890")
+
+table_text <- tesseract::ocr_data(main_processed_img, engine = tesseract(language = "eng",
+                                  options = list(tessedit_char_whitelist = whitelist)))  
+
+table_text %>% head(20)
+
+```
+
+## 칼럼 추출 {#page-main-extract-column}
+
+```{r extract-column}
+main_column_img <- main_img %>% 
+  image_crop(geometry_area(x = 280, y = 125, 70, 820))   %>% 
+  image_transparent("white", fuzz=5) %>% 
+  image_background("white") %>%
+  image_negate() %>%
+  image_morphology(method = "Thinning", kernel = "Rectangle:20x1+0+0^<") %>%
+  image_negate() 
+
+main_column_img
+```
+
+```{r extract-column-data}
+column_text <- tesseract::ocr_data(main_column_img, engine = tesseract(language = "eng",
+                                  options = list(tessedit_char_whitelist = whitelist)))  
+
+column_text
+```
+
