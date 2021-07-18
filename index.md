@@ -25,3 +25,4 @@ subtitle: 대통령 선거 2022년
 1. [정당지지율](president-party.html)
 1. [JTBC 차기대선주자](president-jtbc.html)
 1. [주요 정당 경선](president-candidate.html)
+    - [민주당 후보 선거통계](president-election.html)
