@@ -6,6 +6,7 @@ library(rvest)
 # 1. 나무위키에서 여론조사 긁어오기 -----------------------------------------------------
 
 Sys.setlocale("LC_ALL", "C")
+Sys.sleep(time = 1)
 
 namu_url <- "https://namu.wiki/w/제20대 대통령 선거/여론조사"
 
@@ -51,6 +52,8 @@ hanjil_raw <- namu_html %>%
   html_table()  %>% 
   .[[1]] %>% 
   as_tibble()
+
+Sys.sleep(time = 1)
 
 Sys.setlocale("LC_ALL", "Korean")
 

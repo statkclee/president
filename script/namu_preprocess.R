@@ -51,8 +51,6 @@ clean_tibble <- function(raw_tbl, agency) {
   return(clean_tbl)
 }
 
-clean_tibble(NBS_raw)
-
 NBS_tbl       <- clean_tibble(NBS_raw, "NBS")
 # hanjil_tbl    <- clean_tibble(hanjil_raw, "한길")  # 최재형이 없음
 KSOI_tbl      <- clean_tibble(KSOI_raw, "KSOI")
