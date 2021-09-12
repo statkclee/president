@@ -44,7 +44,9 @@ library(lubridate)
 - [210911_대구경북_제20대_대선_후보자_선출_위한_결과_보도자료](data/minju_race/210911_대구경북_제20대_대선_후보자_선출_위한_결과_보도자료.pdf)
 - [210912_제20대_대선후보자_선출_위한_순회경선_결과_보도자료(강원)](data/minju_race/210912_제20대_대선후보자_선출_위한_순회경선_결과_보도자료(강원)_fn.pdf)
 
-```{r minju-data}
+## HWP &rarr; PDF {#minju-race-hwp}
+
+```{r minju-data, eval = FALSE}
 library(tidyverse)
 library(tabulizer)
 
@@ -78,7 +80,7 @@ library(tabulizer)
 
 ```
 
-```{r 대전충남}
+```{r 대전충남, eval = FALSE}
 
 대전충남_tbl <- `대전충남_선거결과` %>% 
   .[[1]] %>% 
@@ -95,6 +97,214 @@ library(tabulizer)
 
 ```
 
+## HWP &rarr; DOCX [^hwp2docx] {#minju-race-hwp-docx}
+
+[^hwp2docx]: [한글문서파일 워드로 변환하기](https://blog.naver.com/PostView.nhn?isHttpsRedirect=true&blogId=jooyonas&logNo=221537785840&parentCategoryNo=35&categoryNo=&viewDate=&isShowPopularPosts=true&from=search)
+
+`C:\Program Files\Microsoft Office\Office15`
+
+![](fig/hwp2docx.jpg)
+
+### 대전 충청남도 {#minju-race-hwp-docx-충남}
+
+```{r minju-data-docx}
+library(docxtractr)
+library(tidyverse)
+
+choongnam_doc <- read_docx("data/minju_race/210904_대전충남제20대_대선_후보자_선출_위한_결과_보도자료.docx")
+
+choongnam_vote_raw <- docx_extract_tbl(choongnam_doc, 2, header = FALSE)
+
+choongnam_vote_tbl <- choongnam_vote_raw %>% 
+  janitor::clean_names(ascii = FALSE) %>% 
+  set_names(c("구분", "선거인수")) %>% 
+  filter( str_detect(구분, "투표자|기권자|무효표")) %>% 
+  mutate(선거인수 = parse_number(선거인수))
+
+choongnam_vote_tbl %>% 
+  write_rds("data/minju_race/choongnam_vote_tbl.rds")
+
+## 대전 충남 선거결과 -----------------------------
+
+choongnam_raw <- docx_extract_tbl(choongnam_doc, 3)
+
+choongnam_tbl <- choongnam_raw %>% 
+  janitor::clean_names(ascii = FALSE) %>% 
+  set_names(c("기호", "후보자명", "전국대의원", "권리당원", "유선전화", "합계")) %>% 
+  select(-기호, -합계) %>% 
+  filter(후보자명 != "") %>% 
+  pivot_longer(-후보자명, names_to = "구분", values_to = "득표") %>% 
+  mutate(후보자명 = str_remove_all(후보자명, "\\s"))  %>% 
+  mutate(득표 = parse_number(득표))
+
+choongnam_tbl %>% 
+  write_rds("data/minju_race/choongnam_tbl.rds")
+```
 
 
+
+### 세종 충청북도 {#minju-race-hwp-docx-충북}
+
+
+```{r minju-충북}
+choongbook_doc <- read_docx("data/minju_race/210905_(세종충북)_제20대_대선_후보자_선출_위한_결과_보도자료_fn.docx")
+
+choongbook_vote_raw <- docx_extract_tbl(choongbook_doc, 4, header = FALSE)
+
+choongbook_vote_tbl <- choongbook_vote_raw %>% 
+  janitor::clean_names(ascii = FALSE) %>% 
+  set_names(c("구분", "선거인수", "x")) %>% 
+  select(-x) %>% 
+  filter( str_detect(구분, "투표자|기권자|무효표")) %>% 
+  mutate(선거인수 = parse_number(선거인수)) 
+
+choongbook_vote_tbl %>% 
+  write_rds("data/minju_race/choongbook_vote_tbl.rds")
+
+## 세종 충북 선거결과 -----------------------------
+
+choongbook_raw <- docx_extract_tbl(choongbook_doc, 5)
+
+choongbook_tbl <- choongbook_raw %>% 
+  janitor::clean_names(ascii = FALSE) %>% 
+  set_names(c("기호", "후보자명", "전국대의원", "권리당원", "유선전화", "합계")) %>% 
+  select(-기호, -합계) %>% 
+  filter(후보자명 != "") %>% 
+  pivot_longer(-후보자명, names_to = "구분", values_to = "득표") %>% 
+  mutate(후보자명 = str_remove_all(후보자명, "\\s"))  %>% 
+  mutate(득표 = parse_number(득표))
+
+choongbook_tbl %>% 
+  write_rds("data/minju_race/choongbook_tbl.rds")
+```
+
+
+### 대구 경북 {#minju-race-hwp-docx-경북}
+
+
+```{r minju-경북}
+kyungbook_doc <- read_docx("data/minju_race/210911_대구경북_제20대_대선_후보자_선출_위한_결과_보도자료.docx")
+
+kyungbook_vote_raw <- docx_extract_tbl(kyungbook_doc, 4, header = FALSE)
+
+kyungbook_vote_tbl <- kyungbook_vote_raw %>% 
+  janitor::clean_names(ascii = FALSE) %>% 
+  set_names(c("구분", "선거인수", "x")) %>% 
+  select(-x) %>% 
+  filter( str_detect(구분, "투표자|기권자|무효표")) %>% 
+  mutate(선거인수 = parse_number(선거인수)) 
+
+kyungbook_vote_tbl %>% 
+  write_rds("data/minju_race/kyungbook_vote_tbl.rds")
+
+## 대구 경북 선거결과 -----------------------------
+
+kyungbook_raw <- docx_extract_tbl(kyungbook_doc, 5)
+
+kyungbook_tbl <- kyungbook_raw %>% 
+  janitor::clean_names(ascii = FALSE) %>% 
+  set_names(c("기호", "후보자명", "전국대의원", "권리당원", "유선전화", "합계")) %>% 
+  select(-기호, -합계) %>% 
+  filter(후보자명 != "") %>% 
+  pivot_longer(-후보자명, names_to = "구분", values_to = "득표") %>% 
+  mutate(후보자명 = str_remove_all(후보자명, "\\s"))  %>% 
+  mutate(득표 = parse_number(득표))
+
+kyungbook_tbl %>% 
+  write_rds("data/minju_race/kyungbook_tbl.rds")
+```
+
+
+### 강원 {#minju-race-hwp-docx-강원}
+
+
+```{r minju-강원}
+kangwon_doc <- read_docx("data/minju_race/210912_제20대_대선후보자_선출_위한_순회경선_결과_보도자료(강원)_fn.docx")
+
+kangwon_vote_raw <- docx_extract_tbl(kangwon_doc, 4, header = FALSE)
+
+kangwon_vote_tbl <- kangwon_vote_raw %>% 
+  janitor::clean_names(ascii = FALSE) %>% 
+  set_names(c("구분", "선거인수", "x")) %>% 
+  select(-x) %>% 
+  filter( str_detect(구분, "투표자|기권자|무효표")) %>% 
+  mutate(선거인수 = parse_number(선거인수)) 
+
+kangwon_vote_tbl %>% 
+  write_rds("data/minju_race/kangwon_vote_tbl.rds")
+
+## 대구 경북 선거결과 -----------------------------
+
+kangwon_raw <- docx_extract_tbl(kangwon_doc, 5, preserve=FALSE, trim = FALSE)
+
+
+
+kangwon_tbl <- kangwon_raw %>% 
+  janitor::clean_names(ascii = FALSE) %>% 
+  set_names(c("기호", "후보자명", "전국대의원", "권리당원", "유선전화", "합계")) %>% 
+  select(-기호, -합계) %>% 
+  filter(후보자명 != "") %>% 
+  pivot_longer(-후보자명, names_to = "구분", values_to = "득표") %>% 
+  mutate(후보자명 = str_remove_all(후보자명, "\\s"))  %>% 
+  mutate(득표 = parse_number(득표))
+
+kangwon_tbl %>% 
+  write_rds("data/minju_race/kangwon_tbl.rds")
+```
+
+
+# 선거인단 {#minju-race-hwp-docx-table}
+
+
+```{r 선거인단}
+
+kangwon_vote_raw <- read_rds("data/minju_race/kangwon_vote_tbl.rds") 
+choongbook_vote_raw <- read_rds("data/minju_race/choongbook_vote_tbl.rds")
+choongnam_vote_raw <- read_rds("data/minju_race/choongnam_vote_tbl.rds")
+kyungbook_vote_raw <- read_rds("data/minju_race/kyungbook_vote_tbl.rds")
+
+kangwon_vote_tbl <- kangwon_vote_raw %>% 
+  pivot_wider(names_from = "구분", values_from = "선거인수") %>% 
+  mutate(시도 = "강원") %>% 
+  select(시도, everything()) %>% 
+  janitor::clean_names(ascii = FALSE)  %>% 
+  set_names(c("시도", "투표자_수", "기권자_수", "무효표_수"))
+
+preprocess_vote <- function(vote_tbl, sido) {
+  
+  vote_tbl %>% 
+    pivot_wider(names_from = "구분", values_from = "선거인수") %>% 
+    mutate(시도 = sido) %>% 
+    select(시도, everything()) %>% 
+    janitor::clean_names(ascii = FALSE)  %>% 
+  set_names(c("시도", "투표자_수", "기권자_수", "무효표_수"))
+  
+}
+
+강원_투표 <- preprocess_vote(kangwon_vote_raw, "강원")
+경북_투표 <- preprocess_vote(kyungbook_vote_raw, "대구경북")
+충남_투표 <- preprocess_vote(choongnam_vote_raw, "대전충남")
+충북_투표 <- preprocess_vote(choongbook_vote_raw, "세종충북")
+
+민주_투표 <- bind_rows(강원_투표, 경북_투표) %>% 
+  bind_rows(충남_투표) %>% 
+  bind_rows(충북_투표)
+
+민주_투표 %>% 
+  mutate(선거인수 = `투표자_수` + `기권자_수`)
+
+```
+
+
+
+# 경선 결과 {#minju-race-hwp-docx-경선결과}
+
+
+```{r 경선결과}
+
+kangwon_tbl <- read_rds("data/minju_race/kangwon_tbl.rds")
+choongbook_tbl <- read_rds("data/minju_race/choongbook_tbl.rds")
+choongnam_tbl <- read_rds("data/minju_race/choongnam_tbl.rds")
+kyungbook_tbl <- read_rds("data/minju_race/kyungbook_tbl.rds")
+```
 
