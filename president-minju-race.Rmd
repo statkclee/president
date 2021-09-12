@@ -60,19 +60,38 @@ library(tabulizer)
 # 372.71591  55.10433 721.97417 538.15807 
 
 # 대전충남_선거인단 <- extract_tables("data/minju_race/210904_대전충남제20대_대선_후보자_선출_위한_결과_보도자료.pdf",
-대전충남_선거인단 <- extract_tables("data/minju_race/210904.pdf",
+대전충남_선거인단 <- extract_tables("data/minju_race/210904_대전충남제20대_대선_후보자_선출_위한_결과_보도자료.pdf",
                              pages = 1,
                              encoding = "UTF-8",
+                             output = "data.frame",
                              method = "stream",
                              guess = TRUE,
-                             area = list(c(207.64360,  58.57953, 332.75103, 538.15807)))
+                             area = list(c(207.64360, 58.57953, 332.75103, 538.15807)))
 
-대전충남_선거결과 <- extract_tables("data/minju_race/210904.pdf",
+대전충남_선거결과 <- extract_tables("data/minju_race/210904_대전충남제20대_대선_후보자_선출_위한_결과_보도자료.pdf",
                              pages = 1,
                              encoding = "UTF-8",
                              method = "stream",
+                             output = "data.frame",
                              guess = TRUE,
                              area = list(c(372.71591, 55.10433, 721.97417, 538.15807)))
+
+```
+
+```{r 대전충남}
+
+대전충남_tbl <- `대전충남_선거결과` %>% 
+  .[[1]] %>% 
+  janitor::clean_names(ascii=FALSE) %>% 
+  set_names(c("기호", "후보자명", "전국대의원", "권리당원", 
+"x", "유선전화", "합계")) %>% 
+  select(-기호, -x, -합계) %>% 
+  filter(후보자명 != "") %>% 
+  pivot_longer(-후보자명, names_to = "구분", values_to = "득표") %>% 
+  mutate(후보자명 = str_remove_all(후보자명, "\\s"))  %>% 
+  mutate(득표 = parse_number(득표))
+  
+대전충남_tbl
 
 ```
 
