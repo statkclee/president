@@ -35,6 +35,8 @@ library(rvest)
 library(lubridate)
 ```
 
+![](fig/hwp2table.png)
+
 # 민주당 경선 데이터 {#minju-race}
 
 [민주당 보도자료](https://theminjoo.kr/board/lists/presskit)를 통해서 제 20 대 대선 후보자 선출을 위한 민주당 경선 데이터를 얻을 수 있다.
@@ -45,6 +47,8 @@ library(lubridate)
 - [210912_제20대_대선후보자_선출_위한_순회경선_결과_보도자료(강원)](data/minju_race/210912_제20대_대선후보자_선출_위한_순회경선_결과_보도자료(강원)_fn.pdf)
 
 ## HWP &rarr; PDF {#minju-race-hwp}
+
+먼저 HWP 파일을 PDF로 변환시킨 후에 `tabulizer`에서 표를 추출한다.
 
 ```{r minju-data, eval = FALSE}
 library(tidyverse)
@@ -80,6 +84,8 @@ library(tabulizer)
 
 ```
 
+앞서 해당 영역에서 추출한 표를 바탕으로 후처리 작업을 해서 데이터 분석과 시각화가 가능한 형태로 변환시킨다.
+
 ```{r 대전충남, eval = FALSE}
 
 대전충남_tbl <- `대전충남_선거결과` %>% 
@@ -101,9 +107,11 @@ library(tabulizer)
 
 [^hwp2docx]: [한글문서파일 워드로 변환하기](https://blog.naver.com/PostView.nhn?isHttpsRedirect=true&blogId=jooyonas&logNo=221537785840&parentCategoryNo=35&categoryNo=&viewDate=&isShowPopularPosts=true&from=search)
 
-`C:\Program Files\Microsoft Office\Office15`
+HWP 파일에서 표를 추출하는 방식으로 [Microsoft Word를 위한 아래아한글 문서 변환 도구](https://www.microsoft.com/ko-kr/download/details.aspx?id=36772)를 PC에 설치한 다음 `C:\Program Files\Microsoft Office\Office15` 디렉토리 `BATHCHWPCONV.EXE` 파일을 실행시켜 워드 파일을 얻는 것이다.
 
 ![](fig/hwp2docx.jpg)
+
+[`docxtractr`](https://cran.r-project.org/web/packages/docxtractr/index.html) 팩키지를 사용해서 워드파일에서 표를 추출한다.
 
 ### 대전 충청남도 {#minju-race-hwp-docx-충남}
 
@@ -111,7 +119,7 @@ library(tabulizer)
 library(docxtractr)
 library(tidyverse)
 
-choongnam_doc <- read_docx("data/minju_race/210904_대전충남제20대_대선_후보자_선출_위한_결과_보도자료.docx")
+choongnam_doc <- docxtractr::read_docx(path = "data/minju_race/210904.docx")
 
 choongnam_vote_raw <- docx_extract_tbl(choongnam_doc, 2, header = FALSE)
 
@@ -147,7 +155,7 @@ choongnam_tbl %>%
 
 
 ```{r minju-충북}
-choongbook_doc <- read_docx("data/minju_race/210905_(세종충북)_제20대_대선_후보자_선출_위한_결과_보도자료_fn.docx")
+choongbook_doc <- read_docx("data/minju_race/210905.docx")
 
 choongbook_vote_raw <- docx_extract_tbl(choongbook_doc, 4, header = FALSE)
 
@@ -183,7 +191,7 @@ choongbook_tbl %>%
 
 
 ```{r minju-경북}
-kyungbook_doc <- read_docx("data/minju_race/210911_대구경북_제20대_대선_후보자_선출_위한_결과_보도자료.docx")
+kyungbook_doc <- read_docx("data/minju_race/210911.docx")
 
 kyungbook_vote_raw <- docx_extract_tbl(kyungbook_doc, 4, header = FALSE)
 
@@ -219,7 +227,7 @@ kyungbook_tbl %>%
 
 
 ```{r minju-강원}
-kangwon_doc <- read_docx("data/minju_race/210912_제20대_대선후보자_선출_위한_순회경선_결과_보도자료(강원)_fn.docx")
+kangwon_doc <- read_docx("data/minju_race/210912.docx")
 
 kangwon_vote_raw <- docx_extract_tbl(kangwon_doc, 4, header = FALSE)
 
@@ -257,6 +265,8 @@ kangwon_tbl %>%
 
 
 ```{r 선거인단}
+library(tidyverse)
+library(reactable)
 
 kangwon_vote_raw <- read_rds("data/minju_race/kangwon_vote_tbl.rds") 
 choongbook_vote_raw <- read_rds("data/minju_race/choongbook_vote_tbl.rds")
@@ -291,8 +301,14 @@ preprocess_vote <- function(vote_tbl, sido) {
   bind_rows(충북_투표)
 
 민주_투표 %>% 
-  mutate(선거인수 = `투표자_수` + `기권자_수`)
-
+  mutate(선거인수 = `투표자_수` + `기권자_수`,
+         투표율   = `투표자_수` / `선거인수`) %>% 
+  reactable::reactable(columns = list(
+    `투표자_수` = colDef(format = colFormat(separators = TRUE, digits = 0)),
+    `기권자_수` = colDef(format = colFormat(separators = TRUE, digits = 0)),
+    `선거인수` = colDef(format = colFormat(separators = TRUE, digits = 0)),
+    `투표율` = colDef(format = colFormat(percent = TRUE, digits = 1)))
+  )
 ```
 
 
@@ -302,9 +318,29 @@ preprocess_vote <- function(vote_tbl, sido) {
 
 ```{r 경선결과}
 
-kangwon_tbl <- read_rds("data/minju_race/kangwon_tbl.rds")
-choongbook_tbl <- read_rds("data/minju_race/choongbook_tbl.rds")
-choongnam_tbl <- read_rds("data/minju_race/choongnam_tbl.rds")
-kyungbook_tbl <- read_rds("data/minju_race/kyungbook_tbl.rds")
+kangwon_tbl <- read_rds("data/minju_race/kangwon_tbl.rds") %>% 
+  mutate(시도 = "강원")
+choongbook_rds <- read_rds("data/minju_race/choongbook_tbl.rds") %>% 
+  mutate(시도 = "충북세종")
+choongnam_tbl <- read_rds("data/minju_race/choongnam_tbl.rds") %>% 
+  mutate(시도 = "충남대전")
+kyungbook_tbl <- read_rds("data/minju_race/kyungbook_tbl.rds") %>% 
+  mutate(시도 = "경북대구")
+
+sofar_tbl <- bind_rows(kangwon_tbl, choongbook_rds) %>% 
+  bind_rows(choongnam_tbl) %>% 
+  bind_rows(kyungbook_tbl)
+
+sofar_tbl %>% 
+  group_by(후보자명) %>% 
+  summarise(누적득표 = sum(득표)) %>% 
+  ungroup() %>% 
+  arrange(-누적득표) %>% 
+  mutate(득표율 = 누적득표  / sum(누적득표)) %>% 
+  reactable::reactable(columns = list(
+    `누적득표` = colDef(format = colFormat(separators = TRUE, digits = 0)),
+    `득표율` = colDef(format = colFormat(percent = TRUE, digits = 1)))
+  )  
+
 ```
 
