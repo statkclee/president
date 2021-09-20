@@ -28,3 +28,4 @@ subtitle: 대통령 선거 2022년
     - [민주당 후보 선거통계](president-election.html)
     - [민주당 후보 vs 국민의힘 후보](president-main-candidate.html)
     - [민주당 경선](president-minju-race.html)
+    - [민주당 경선 일정](president-minju-race-schedule.html)
