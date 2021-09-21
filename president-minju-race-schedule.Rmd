@@ -58,6 +58,10 @@ library(lubridate)
 
 # 경선 달력 {#race-calendar}
 
+민주당, 국민의 힘 경선달력을 제작하는 방식은 [`calendR`](https://github.com/R-CoderDotCom/calendR) 팩키지를 사용해서 PDF 파일로 내보내는 것도 가능하지만... 한국어 관련 내용이 완벽하지 않아 로고와 배경화면을 조합하여 배경을 만들어내고 각당 경선 일정을 `calendR`로 제작한다. `ggplot`으로 개발이 된 것이라 이를 png 파일로 찍어 `magick` 팩키지로 이미지 전처리를 통해 최종 결과물을 얻어낸다.
+
+![](fig/race_calendar_workflow.jpg)
+
 ## 민주당 경선 달력 {#minju-race-calendar}
 
 먼저 민주당 2021년 9월 달력을 제작해 보자.
@@ -142,8 +146,6 @@ events[30 + 3] <- "09 인천 + 2차 선거인단"
 events[30 + 9] <- "10 경기"
 events[30 + 10] <- "11 서울 + 3차 선거인단"
 
-color_len <- levels(as.factor(events)) %>% length
-
 p <- calendR::calendR(from = "2021-09-01",  # 경선 시작일
         to   = "2021-10-31",  # End date
         title = "제20대 대통령 선거 / 민주당 경선 일정", # 제목
@@ -178,8 +180,6 @@ minju_tbl <- image_info(minju_cal)
 blank_img <- image_blank(width  =  minju_tbl$width, 
                          height = minju_tbl$height,
                          color = "white")
-
-blank_img 
 
 # 민주당 로고 -----------
 
@@ -221,11 +221,90 @@ minju_bg %>%
 minju_cal_img <- image_read("fig/minju_race.png")
 
 minju_race_cal_img <- minju_cal_img %>% 
-  image_composite(minju_bg, operator = "atop")  %>% 
-  image_transparent(color = "white")
+  image_composite(minju_bg, operator = "atop")  
 
 minju_race_cal_img %>% 
   image_write("fig/minju_race_cal.png")
 ```
 
 ![](fig/minju_race_cal.png)
+
+## 국민의 힘 경선 달력 {#people-race-calendar}
+
+이제 국민의 힘 경선 달력을 제작해보자.
+
+```{r people-calendar-race}
+
+people_events <- rep(NA, 91)
+
+people_events[15]      <- "1차 컷오프(8명) \n 여론조사 100%"
+people_events[30 + 8]  <- "2차 컷오프(4명) \n 여론조사 70% + 선거인단 30%"
+people_events[61 + 9]  <- "대선후보 설출 \n 여론조사 50% + 당원 투표 50%"
+
+
+people_race_cal <- calendR::calendR(from = "2021-09-01",  # 경선 시작일
+        to   = "2021-11-30",  # End date
+        title = "제20대 대통령 선거 / 국민의힘 경선  일정", # 제목
+        subtitle = "\n\n\n\n\n",
+        start = "M",                # 월요일 시작
+        font.family = "NanumBarunGothic",
+        font.style  = "plain",
+        special.days = people_events,
+        special.col  = c("#f27178", "#f27178", "#e61e2b"), 
+        legend.pos = "bottom",   
+        legend.title = "지역별 순회",
+        weeknames = c("월", "화", "수", "목",
+                      "금", "토", "일"),
+        lty = 0,
+        title.size = 20,  
+        gradient = FALSE)
+
+people_race_cal %>% 
+  ggsave(filename = "fig/people_race_cal.png")
+
+people_race_cal
+```
+
+국민의힘 로고를 배경 이미지로 놓아 경선 일정 달력을 놓을 수 있도록 준비한다.
+
+```{r people-calendar-background}
+
+people_race_cal <- image_read("fig/people_cal.png")
+
+people_tbl <- image_info(people_race_cal) 
+
+# 달력을 놓을 백지 이미지 준비 ----------
+people_blank_img <- image_blank(width  = people_tbl$width, 
+                                height = people_tbl$height,
+                                color  = "white")
+
+# 국민의힘 로고 -----------
+
+people_logo <- image_read("fig/people_logo.jpg")
+
+# 배경과 로고 결합 -----------
+
+people_bg <- people_blank_img %>% 
+  image_composite(people_logo %>% image_resize("100%"),  offset = "+10+5")  %>% 
+  image_transparent(color = "white")
+
+people_bg %>% 
+  image_write(path = "fig/people_bg.png")
+
+```
+
+마지막으로 로고가 담긴 배경 이미지를 국민의 힘 경선 달력과 합쳐 마무리한다.
+
+
+```{r people-bg-composite, eval = TRUE}
+
+people_race_cal <- image_read("fig/people_race_cal.png")
+
+people_race_cal_img <- people_race_cal %>% 
+  image_composite(people_bg, operator = "atop")  
+
+people_race_cal_img %>% 
+  image_write("fig/people_race_cal_img.png")
+```
+
+![](fig/people_race_cal_img.png)
