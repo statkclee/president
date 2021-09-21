@@ -419,6 +419,7 @@ sofar_first_tbl %>%
 library(gt)
 
 sofar_first_tbl %>% 
+  mutate(누적득표 = 국민일반득표 + 지역득표) %>% 
   mutate(비율 = 국민일반득표 / 지역득표) %>% 
   gt() %>% 
   tab_header(
@@ -447,7 +448,7 @@ sofar_first_tbl %>%
     use_seps = FALSE
   ) %>% 
   fmt_number(
-    columns = c(지역득표, 국민일반득표),
+    columns = c(지역득표, 국민일반득표, 누적득표),
     decimals = 0,
     suffixing = FALSE
   ) %>% 
@@ -455,7 +456,7 @@ sofar_first_tbl %>%
     source_note =  md("**자료출처**: 더불어 민주당 보도자료, https://theminjoo.kr/board/lists/presskit")
   ) %>% 
   data_color(
-    columns = c(지역득표, 국민일반득표, 비율),
+    columns = c(지역득표, 국민일반득표, 누적득표, 비율),
     colors = scales::col_numeric(
       palette = paletteer::paletteer_d(
         palette = "ggsci::blue_material"
@@ -482,8 +483,10 @@ sofar_first_tbl %>%
 
 ```{r sofar-first-race-kangwon-viz}
 sofar_first_tbl %>% 
+  mutate(누적득표 = 국민일반득표 + 지역득표) %>%   
   pivot_longer(-후보자명, names_to = "구분", values_to = "득표") %>% 
-  mutate(후보자명 = factor(후보자명, levels = c("이재명", "김두관", "정세균", "이낙연", "박용진", "추미애"))) %>% 
+  mutate(후보자명 = factor(후보자명, levels = c("이재명", "김두관", "정세균", "이낙연", "박용진", "추미애")),
+         구분     = factor(구분, levels = c("누적득표", "국민일반득표", "지역득표"))) %>% 
   ggplot(aes(x = 후보자명, y = 득표, fill = 후보자명)) +
     geom_col() +
     facet_wrap(~구분) +
