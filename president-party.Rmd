@@ -143,16 +143,31 @@ party_survey_tbl %>%
   write_rds("data/party_survey_tbl_20210921.rds")
 ```
 
+## 갤럽 {#gallup-party-rate}
 
 ```{r visualize-party-20-table}
 party_survey_tbl  <- read_rds("data/party_survey_tbl_20210921.rds")
 
 party_survey_tbl %>% 
   pivot_wider(names_from = 정당, values_from = 지지율) %>% 
+  filter(조사기관 == "갤럽") %>% 
   arrange(desc(조사기간)) %>% 
   reactable::reactable()
 
 ```
+
+## 리얼미터 {#realmeter-party-rate}
+
+```{r visualize-party-20-table-realmeter}
+
+party_survey_tbl %>% 
+  pivot_wider(names_from = 정당, values_from = 지지율) %>% 
+  filter(조사기관 == "리얼미터") %>% 
+  arrange(desc(조사기간)) %>% 
+  reactable::reactable()
+
+```
+
 
 ## 시각화 {#visualization}
 
