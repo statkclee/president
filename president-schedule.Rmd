@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "대통령 선거 2022년"
-subtitle: "대통령 선거 일정"
+subtitle: "대통령 선거 일정과 역대 여론조사 결과"
 author:
 - name: "이광춘"
   affiliation: "[Tidyverse Korea](https://www.facebook.com/groups/tidyverse/)"
@@ -35,32 +35,32 @@ library(rvest)
 library(lubridate)
 ```
 
-# 대통령 재임기간 선거 [^president-duration-period] {#lubridate-case-study}
+# 대통령 재임기간 선거 [^1] {#lubridate-case-study}
 
-[^president-duration-period]: [Reinstate support for filtering and arranging lubridate Periods and Intervals #3695](https://github.com/tidyverse/dplyr/issues/3695)
+[^1]: [Reinstate support for filtering and arranging lubridate Periods and Intervals \#3695](https://github.com/tidyverse/dplyr/issues/3695)
 
 위키백과사전에서 [대한민국의 대통령 목록](https://ko.wikipedia.org/wiki/%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD%EC%9D%98_%EB%8C%80%ED%86%B5%EB%A0%B9_%EB%AA%A9%EB%A1%9D) 확인된 대통령 재임기간은 다음과 같다.
 
-- 이승만: 4,273 일 (11년 8개월 11일)
-- 윤보선:  588 일 (1년 7개월 10일)
-- 박정희: 5,793 일 (15년 10개월 9일)
-- 최규하:  255 일 (8개월 10일)
-- 전두환: 2,733 일 (7년 5개월 23일)
-- 노태우 : 1,827 일 (5년)
-- 김영삼 : 1,826 일
-- 김대중 : 1,825 일
-- 노무현 : 1,826 일
-- 이명박 : 1,827 일
-- 박근혜 : 1,475 일 (4년 13일)
-- 문재인 : 1,825 일 (예상)
-- ㅇㅇㅇ : 1,825 일 (예상)
+-   이승만: 4,273 일 (11년 8개월 11일)
+-   윤보선: 588 일 (1년 7개월 10일)
+-   박정희: 5,793 일 (15년 10개월 9일)
+-   최규하: 255 일 (8개월 10일)
+-   전두환: 2,733 일 (7년 5개월 23일)
+-   노태우 : 1,827 일 (5년)
+-   김영삼 : 1,826 일
+-   김대중 : 1,825 일
+-   노무현 : 1,826 일
+-   이명박 : 1,827 일
+-   박근혜 : 1,475 일 (4년 13일)
+-   문재인 : 1,825 일 (예상)
+-   ㅇㅇㅇ : 1,825 일 (예상)
 
 대통령 취임일과 종료일을 입력하고 시작일과 종료일을 날짜 자료형으로 변형시키게 되면 연산이 가능하다. 따라서 615선언 이후 즉, 노태우 대통령이후 대통령만 추려서 재임기간을 사람이 인식하는 일반적인 재임기간과 절대시간 기준으로 나눠본다. 그리고 나서 정렬을 해야 하는데 현재 `interval` 객체가 데이터프레임에 들어가면 정렬하는 기능은 지원되고 있지 않다. 따라서 다음과같은 표로 확인을 한다.
-
 
 ```{r president-period, asis=TRUE}
 library(tidyverse)
 library(lubridate)
+library(gt)
 
 president_dat <- tribble(~"이름", ~"시작일", ~"종료일",
                         "이승만", "1948-08-15", "1960-04-26",
@@ -84,17 +84,36 @@ president_tbl <- president_dat %>%
   mutate(`시작종료` = interval(`시작일`, `종료일`)) %>% 
   mutate(`재임기간` = as.period(`시작종료`)) %>% # 사람이 인지하는 시간
   mutate(`재임일` = as.duration(`시작종료`) %>% seconds_to_period(.)) %>% # 절대적인 시간
-  mutate(`정렬키`   = unclass(lubridate::int_length(`시작종료`))) 
+  mutate(`정렬키`   = unclass(lubridate::int_length(`시작종료`))) %>% 
+  select(-정렬키, -시작종료)
 
 president_tbl %>% 
-  knitr::kable()
+  mutate(재임일 = as.numeric(재임일, "days")) %>% 
+  gt() %>% 
+  tab_header(title = "대한민국 역대 대통령 재임기간") %>% 
+  fmt_date(
+    columns = c(시작일, 종료일),
+    date_style = "iso"
+  )  %>% 
+  fmt_number(
+    columns = 재임일,
+    decimals = 0,
+    suffixing = FALSE
+  ) %>% 
+  tab_options(
+    heading.background.color = "#1E61B0", # R logo 파란색
+    heading.title.font.size = "20px",
+    column_labels.background.color = "#F7F7F7", # R logo 회색 
+    column_labels.font.weight = "bold",
+    stub.background.color = "#ffffff",
+    stub.font.weight = "bold"
+  )  
 
 ```
 
 두번째로 총선과 지방선거를 넣고 재임기간동안 선거가 얼마나 많이 일어났는지 확인해보자. [위키백과사전, 대한민국의 선거](https://ko.wikipedia.org/wiki/대한민국의_선거)에서 데이터를 받아 정리한다.
 
 지방선거 시작된 이후 선거만 추출하고 재임기간 계산해서 반환하는 Helper 함수를 작성해서 각 대통령별로 해당 재임기간 있었던 선거를 개수한다.
-
 
 ```{r president-period-election}
 # 1987년 이후 총선/대선/지선 선거일 
@@ -162,28 +181,39 @@ reign_election_df %>%
   gather(`대통령`, `선거여부`) %>% 
   group_by(`대통령`) %>% 
   summarise(`선거횟수` = sum(`선거여부`)) %>% 
-  arrange(-`선거횟수`)
+  arrange(-`선거횟수`) %>% 
+  gt() %>% 
+  tab_header(title = "재임기간 중 선거횟수") %>% 
+  tab_options(
+    heading.background.color = "#1E61B0", # R logo 파란색
+    heading.title.font.size = "20px",
+    column_labels.background.color = "#F7F7F7", # R logo 회색 
+    column_labels.font.weight = "bold",
+    stub.background.color = "#ffffff",
+    stub.font.weight = "bold"
+  )  
+
 ```
 
 # 선거 직전 지지율 {#schedule-dataset-survey}
 
 ## 제19대 대통령 여론조사 {#제19대_대통령}
 
-지난 대선은 여하튼 대통령에 대한 탄핵으로 이루어진 것이고, 민주당은 받을 만큼 받은 것이라고 볼 수 있다. 꾸준히 40% 대를 유지하고 있다는 것이 증거다. 양자대결이었던 18대 대선에 비해서 9-10% 정도 적은 것은 다자 구도로 갔으니까 그런 것으로 파악된다. 정의당과 안철수 당이 가져 간것(여기에는 보수층의 전임 박근혜 대통령 득표했던 것도 많이 포함됨)으로 보인다. 기타 무응답층은 10% 가량이 쪼개져서, 자유한국당과 국민의 당 그리고 바른정당이 적당히 나누어 가진 것이다. 문재인과 심상정이 거의 가져가지 못한 것은, 탄핵국면으로 보수층은 여론조사에서 매우 소극적으로 응답했다는 것으로 이해가능할 것으로 보인다. 문재인, 심상정 쪽은 여론조사에서도 적극적으로 응답했다는 것으로 보이며, 결국 5월 2일경 무응답 10% 가량은 대부분 보수표와 안칠수 후보에 대한 숨은표였다 해석이 유력하다.  
+지난 대선은 여하튼 대통령에 대한 탄핵으로 이루어진 것이고, 민주당은 받을 만큼 받은 것이라고 볼 수 있다. 꾸준히 40% 대를 유지하고 있다는 것이 증거다. 양자대결이었던 18대 대선에 비해서 9-10% 정도 적은 것은 다자 구도로 갔으니까 그런 것으로 파악된다. 정의당과 안철수 당이 가져 간것(여기에는 보수층의 전임 박근혜 대통령 득표했던 것도 많이 포함됨)으로 보인다. 기타 무응답층은 10% 가량이 쪼개져서, 자유한국당과 국민의 당 그리고 바른정당이 적당히 나누어 가진 것이다. 문재인과 심상정이 거의 가져가지 못한 것은, 탄핵국면으로 보수층은 여론조사에서 매우 소극적으로 응답했다는 것으로 이해가능할 것으로 보인다. 문재인, 심상정 쪽은 여론조사에서도 적극적으로 응답했다는 것으로 보이며, 결국 5월 2일경 무응답 10% 가량은 대부분 보수표와 안칠수 후보에 대한 숨은표였다 해석이 유력하다.
 
-```{r survey-dataset-19, eval = TRUE}
+```{r survey-dataset-19, eval = FALSE}
 library(tidyverse)
 library(rvest)
 library(lubridate)
 
-# Sys.setlocale("LC_ALL", "C")
+Sys.setlocale("LC_ALL", "C")
 
 survey_dat <- read_html("https://ko.wikipedia.org/wiki/대한민국_제19대_대통령_선거") %>% 
   html_nodes(xpath = '//*[@id="mw-content-text"]/div[1]/table[7]') %>% 
   html_table(fill = TRUE) %>% 
   .[[1]]
 
-# Sys.setlocale("LC_ALL", "Korean")
+Sys.setlocale("LC_ALL", "Korean")
 
 survey_tbl <- survey_dat %>% 
   ## 변수명 정제 -------------
@@ -237,21 +267,24 @@ survey_tbl %>%
                                정의당="#f2ee09",
                                기타_무응답 = "gray50")) +
   scale_x_date(date_labels = "%m월 %d일")
+
+ggsave(filename = "fig/presid_19_survey.png")
 ```
 
+![](fig/presid_19_survey.png)
 
 ## 제18대 대통령 여론조사 {#제18대_대통령}
 
-```{r survey-dataset-18, eval = TRUE}
+```{r survey-dataset-18, eval = FALSE}
 
-# Sys.setlocale("LC_ALL", "C")
+Sys.setlocale("LC_ALL", "C")
 
 survey_18_dat <- read_html("https://ko.wikipedia.org/wiki/대한민국_제18대_대통령_선거") %>% 
   html_nodes(xpath = '//*[@id="mw-content-text"]/div[1]/table[2]') %>% 
   html_table(fill = TRUE) %>% 
   .[[1]]
 
-# Sys.setlocale("LC_ALL", "Korean")
+Sys.setlocale("LC_ALL", "Korean")
 
 survey_18_tbl <- survey_18_dat %>% 
   janitor::clean_names(ascii = FALSE) %>% 
@@ -304,20 +337,24 @@ survey_18_tbl %>%
                                기타_무응답 = "gray50")) +
   scale_x_date(date_labels = "%m월 %d일") +
   scale_y_continuous(labels = scales::label_percent(accuracy =1))
+
+ggsave(filename = "fig/presid_18_survey.png")
 ```
+
+![](fig/presid_18_survey.png)
 
 ## 제17대 대통령 여론조사 {#제17대_대통령}
 
-```{r survey-dataset-17, eval = TRUE}
+```{r survey-dataset-17, eval = FALSE}
 
-# Sys.setlocale("LC_ALL", "C")
+Sys.setlocale("LC_ALL", "C")
 
 survey_17_dat <- read_html("https://ko.wikipedia.org/wiki/대한민국_제17대_대통령_선거") %>% 
   html_nodes(xpath = '//*[@id="mw-content-text"]/div[1]/table[3]') %>% 
   html_table(fill = TRUE) %>% 
   .[[1]]
 
-# Sys.setlocale("LC_ALL", "Korean")
+Sys.setlocale("LC_ALL", "Korean")
 
 survey_17_tbl <- survey_17_dat %>% 
   janitor::clean_names(ascii = FALSE) %>% 
@@ -376,20 +413,25 @@ survey_17_tbl %>%
                                모름_무응답 = "gray50")) +
   scale_x_date(date_labels = "%m월 %d일") +
   scale_y_continuous(labels = scales::label_percent(accuracy =1))
+
+ggsave(filename = "fig/presid_17_survey.png")
 ```
+
+![](fig/presid_17_survey.png)
+
 
 ## 제16대 대통령 여론조사 {#제16대_대통령}
 
-```{r survey-dataset-16, eval = TRUE}
+```{r survey-dataset-16, eval = FALSE}
 
-# Sys.setlocale("LC_ALL", "C")
+Sys.setlocale("LC_ALL", "C")
 
 survey_16_dat <- read_html("https://ko.wikipedia.org/wiki/대한민국_제16대_대통령_선거") %>% 
   html_nodes(xpath = '//*[@id="mw-content-text"]/div[1]/table[2]') %>% 
   html_table(fill = TRUE) %>% 
   .[[1]]
 
-# Sys.setlocale("LC_ALL", "Korean")
+Sys.setlocale("LC_ALL", "Korean")
 
 survey_16_tbl <- survey_16_dat %>% 
   janitor::clean_names(ascii = FALSE) %>% 
@@ -446,7 +488,90 @@ survey_16_tbl %>%
                                기타_무응답 = "gray50")) +
   scale_x_date(date_labels = "%m월 %d일") +
   scale_y_continuous(labels = scales::label_percent(accuracy =1))
+
+ggsave(filename = "fig/presid_16_survey.png")
 ```
 
+![](fig/presid_16_survey.png)
 
 
+# 제 20 대 대선 주요일정 {#제20대_대선주요일정}
+
+YTN에서 [제20대 대선 주요 일정](https://www.yna.co.kr/view/GYH20210712000800044)을 시각화하여 보기 좋게 주요일정을 정리했다.
+
+![](fig/president_20th_schedule.jpg){width="307"}
+
+중앙선거관리위원회 [제20대 대통령선거 주요사무일정](https://m.nec.go.kr/site/nec/ex/bbs/View.do?cbIdx=1104&bcIdx=145719)이 담긴 한글파일을 참조해도 큰 도움이 될 수 있다. 하지만 직관적인 달력형태로 일정을 보는 것이 더욱 도움이 된다.
+
+```{r ytn2calendar}
+library(tidyverse)
+extrafont::loadfonts()
+library(calendR)
+library(lubridate)
+
+## 시작일부터 완료일까지 총 기간 계산
+# start_date <- lubridate::ymd("2021-07-01")
+# end_date <- lubridate::ymd("2022-01-31")
+# start_end_date <- lubridate::interval(start_date, end_date)
+# 
+# total_interval <- as.duration(start_end_date) %>% seconds_to_period(.) %>% as.numeric("days")
+# events <- rep(NA, total_interval + 28)
+
+events <- rep(NA, 28+31)
+
+## 선거 주요 일정을 이벤트로 등록
+
+# events[12]     <- "2022/02/07 \n재외선거인명부 확정"
+events[13:14]  <- "2022/02/13~14 \n후보자등록신청"
+events[15]     <- "2022/02/15 \n선거기간 개시일"
+events[23:28]  <- "2022/02/23~28 \n재외투표소 투표"
+events[(28+4):(28+5)]  <- "2022/03/04~5 \n사전투표소 투표"
+events[(28+9)]  <- "2022/03/09 \n선거일"
+
+presid_calendar_g <- calendR::calendR(from = "2022-02-01",  # 경선 시작일
+                  to  = "2022-03-31",  # End date
+                  mbg.col = 4,
+                  months.col = "white",
+                  months.pos = 0.5,
+                  day.size = 5,
+                  days.col = "black",
+                  title = "제20대 대통령 선거 주요 일정", # 제목
+                  start = "M",                # 월요일 시작
+                  font.family = "NanumBarunPen",
+                  font.style  = "plain",
+                  weeknames = c("월", "화", "수", "목",  "금", "토", "일"),
+                  special.days = events,
+                  special.col  = c("#d7ff80", "#b5ff78", "#8099ff", "#8099ff", "#264aff"),
+                  legend.pos = "bottom",
+                  legend.title = "주요일정",
+                  lty = 0,
+                  gradient = FALSE) +
+    theme(strip.text.x = element_text(size = 13, colour = "black", family = "NanumMyeongjo", face="bold"),
+          strip.background=element_rect(fill="white"),
+          plot.title=element_text(size=20, face="bold", family = "NanumBarunpen"),
+          plot.subtitle=element_text(face="bold", size=13, colour="grey10", family = "NanumBarunpen"),
+          text = element_text(size=13))
+
+presid_calendar_g %>% 
+  ggsave(filename = "fig/presid_calendar_g.png")
+
+presid_calendar_g
+```
+
+## 민주당 대선 달력 {#president-minju-calendar}
+
+
+```{r minju-president-calendar}
+library(magick)
+
+presid_calendar_img <- image_read(path = "fig/presid_calendar_g.png")
+minju_bg <- image_read(path = "fig/minju_bg.png")
+
+president_cal_img <- presid_calendar_img %>% 
+  image_composite(minju_bg, operator = "atop")  
+
+president_cal_img %>% 
+  image_write("fig/president_cal_img.png")
+```
+
+![](fig/president_cal_img.png)
