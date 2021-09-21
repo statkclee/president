@@ -20,6 +20,7 @@ subtitle: 대통령 선거 2022년
 
 1. [대통령 선거 일정과 역대 여론조사 결과](president-schedule.html)
 1. [제20대 대통령 선거/여론조사](president-poll.html)
+    - [제20대 대통령 선거/여론조사 (2020-09-21)](president-poll-20210921.html)
     - [사진 배경 제거](remove-background.html)
 1. [후진국, 개발도상국, 선진국](president-population.html)
 1. [정당지지율](president-party.html)

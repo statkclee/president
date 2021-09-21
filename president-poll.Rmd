@@ -6,7 +6,7 @@ author:
 - name: "이광춘"
   affiliation: "[Tidyverse Korea](https://www.facebook.com/groups/tidyverse/)"
 date: "`r Sys.Date()`"
-tags: ["여론조사", "제20대", "대통령 선거", "이재명", "윤석열"]
+tags: ["여론조사", "제20대", "대통령 선거", "이재명", "윤석열", "홍준표", "이낙연", "추미애"]
 output:
   html_document: 
     include:
@@ -60,7 +60,7 @@ gallop_2020 <- namu_html %>%
   as_tibble()
 
 gallop_2021 <- namu_html %>% 
-  html_nodes(xpath = '//*[@id="app"]/div/div[2]/article/div[3]/div[2]/div/div/div[16]/div/table') %>% 
+  html_nodes(xpath = '//*[@id="app"]/div/div[2]/article/div[3]/div[2]/div/div/div[15]/div[1]/table') %>% 
   html_table()  %>% 
   .[[1]] %>% 
   as_tibble()
@@ -80,8 +80,11 @@ gallop_2020_tbl <- gallop_2020 %>%
 
 gallop_2021_tbl <- gallop_2021 %>% 
   set_names(gallop_2021 %>% slice(1)) %>% 
+  janitor::clean_names(ascii = FALSE) %>% 
+  select(!starts_with("na")) %>% 
   filter(str_detect(월, "^[0-9]")) %>% 
   mutate(연도 = 2021)
+
 ```
 
 비교를 위해 후보자 추출 단계를 진행한다.
@@ -93,7 +96,7 @@ c(names(gallop_2019_tbl) %>% setdiff(c("월", "연도")),
   table() %>% 
   sort(decreasing = TRUE)
 
-candidates <- c("안철수", "오세훈", "이낙연", "이재명", "홍준표", "윤석열")
+candidates <- c("이낙연", "이재명", "홍준표", "윤석열")
 ```
 
 
@@ -123,16 +126,16 @@ gallop_df <- bind_rows(gallop_2019_df, gallop_2020_df) %>%
 
 gallop_tbl <- gallop_df %>% 
   mutate(년월 = lubridate::make_date(year = 연도, month = 월, day = 15)) %>% 
-  select(년월, 안철수:윤석열)
+  select(년월, 이낙연:윤석열)
 
 gallop_tbl %>% 
-  write_csv("data/gallop_tbl.csv")
+  write_csv("data/gallop_tbl_20210921.csv")
 ```
 
 ```{r show-dataframe, eval = TRUE}
 library(tidyverse)
 gallop_tbl <- 
-  read_csv("data/gallop_tbl.csv")
+  read_csv("data/gallop_tbl_20210921.csv")
 
 gallop_tbl %>% 
   reactable::reactable()
@@ -142,15 +145,11 @@ gallop_tbl %>%
 # 대선주자 이미지 {#photo}
 
 ```{r photo-download, eval = FALSE}
-안철수 <- "https://w.namu.la/s/2e95ac847ec8efbe47f0ad7dbe51d33c6746a10eebafaac383a0d80290634f262506488ed6c0e811822c25ca586c0c0b52c83b9ebe3a8a38813b88b1077b43a90b1774262bdc96d1e98c033eee478dc2142b892d889466e16b3dc3c0c9421bbd0a8820f74e5cdad0eb69c395e11ed9be"
-오세훈 <- "https://w.namu.la/s/66dc586d13b34736a7da81a300027a0c0a5cf4204ebd7b9263752256a6854e02419925fd096c0fe8406157bef4df52dc7307031bb67968ab5c37a7c1d758eaa45367136d16f293a422dee53502262431c03e397b3e1bd080b8769cab8e250f1216f3c8f1e93dfb1c22cba5408fb8a017"
 이낙연 <- "https://w.namu.la/s/86688a03b1b55f21c021332ecded85c4b50043b3a07cb7ccfadd2b446c2758102831e3fa9abdbac4c3e5f171a9c7ce9ddcf917a89f64881ff672aca01f7456576636667eb6485cfd8cb0a29f0faad9040a60c9f86c1302420b39c93fe1af9adc768db82dd624d3c4f1dc8dcf3afa5c60"
 이재명 <- "https://w.namu.la/s/ed1bce056fcf1f4476a74d523a6a1790c4042217afb6ef2157f3ad5dd64ebd385acf48131579e8f904615f79a4d37861ab66ec1245f0d7bb3428b1f101015edb73dbf6a942126ee094695a4b2c56b970ec16ac755fc288c8799b79615d59d6b7db38c6cd41bb5154403a7f3058091a4e"
 홍준표 <- "https://w.namu.la/s/08a72765f4b9ac4da868da2b286777bbe62971f5fca5cb74a957f0e734b11506838e9953887efb88a39002b7951892f6e204a624de069fab5d11752a3ebb62601715763976c8141ed4ffc690aafcd4e4a760ab3bceda07fef9026c9a4d2d195411330792b0e320716c7c45781d61b53f"
 윤석열 <- "https://w.namu.la/s/f87b603533b2894dd4a412765e0e28f79b57aaa036ca72e87096114eb2b9e1bf59cf0abdc6af964eef9434a6a657ff1787392d5e10d9d6c95f62efd8837a96e81cdaad7c76bbf4d3f9c89b392bfdef076e4c525dc7c28839a5cfdeb0dbed682d"
 
-download.file(안철수, destfile = "fig/안철수.png", mode = "wb")
-download.file(오세훈, destfile = "fig/오세훈.png", mode = "wb")
 download.file(이낙연, destfile = "fig/이낙연.png", mode = "wb")
 download.file(이재명, destfile = "fig/이재명.png", mode = "wb")
 download.file(홍준표, destfile = "fig/홍준표.png", mode = "wb")
