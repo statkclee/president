@@ -160,7 +160,72 @@ p <- calendR::calendR(from = "2021-09-01",  # 경선 시작일
         lty = 0,
         gradient = FALSE)
 
-p
+p %>% 
+  ggsave(filename = "fig/minju_race.png")
 ```
 
+민주당 경선 달력의 배경 이미지를 준비해보자.
 
+```{r minju-calendar-background}
+# 달력 이미지 정보 획득 -- 가로 x 세로
+library(magick)
+
+minju_cal <- image_read("fig/minju_race.png")
+
+minju_tbl <- image_info(minju_cal) 
+
+# 달력을 놓을 백지 이미지 준비 ----------
+blank_img <- image_blank(width  =  minju_tbl$width, 
+                         height = minju_tbl$height,
+                         color = "white")
+
+blank_img 
+
+# 민주당 로고 -----------
+
+minju_logo <- image_read("fig/minju_logo_section.png")
+
+# 배경과 로고 결합 -----------
+
+minju_bg <- blank_img %>% 
+  image_composite(minju_logo %>% image_resize("150%"),  offset = "+10+5")  %>% 
+  image_transparent(color = "white")
+
+
+minju_bg %>% 
+  image_write(path = "fig/minju_bg.png")
+
+```
+
+민주당 경선 달력과 배경 이미지를 결합시키자.
+
+```{r minju-bg-composite, eval = FALSE}
+# minju_race_cal_g <- calendR::calendR(from = "2021-09-01",  # 경선 시작일
+#         to   = "2021-10-31",  # End date
+#         title = "제20대 대통령 선거 / 민주당 경선 일정", # 제목
+#         # subtitle = "민주당 경선 일정",
+#         start = "M",                # 월요일 시작
+#         font.family = "NanumBarunGothic",
+#         font.style  = "plain",
+#         special.days = events,
+#         special.col  = c("#DBE4EB", "#DBE4EB", "#DBE4EB", "#5787AD", 
+#                          "#DBE4EB", "#DBE4EB", "#DBE4EB", "#DBE4EB",
+#                          "#5787AD", "#DBE4EB", "#5787AD"),
+#         legend.title = "지역별 순회",
+#         legend.pos = "bottom",   
+#         lty = 0,
+#         gradient = FALSE,
+#         bg.img = "fig/minju_bg.png",
+#         low.col = "transparent") 
+
+minju_cal_img <- image_read("fig/minju_race.png")
+
+minju_race_cal_img <- minju_cal_img %>% 
+  image_composite(minju_bg, operator = "atop")  %>% 
+  image_transparent(color = "white")
+
+minju_race_cal_img %>% 
+  image_write("fig/minju_race_cal.png")
+```
+
+![](fig/minju_race_cal.png)
