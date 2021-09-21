@@ -93,15 +93,19 @@ party_18_tbl
 
 위키백과사전 [대한민국의 정당 지지율](https://ko.wikipedia.org/wiki/대한민국의_정당_지지율) 웹사이트에서 정당지지율 데이터를 가져온다.
 
-```{r party-20-approval}
+```{r party-20-approval, eval= FALSE}
 library(tidyverse)
 library(rvest)
+
+Sys.setlocale("LC_ALL", "C")
 
 wiki_party_html <- read_html("https://ko.wikipedia.org/wiki/대한민국의_정당_지지율")
 
 party_dat <- wiki_party_html %>% 
   html_node(xpath =  '//*[@id="mw-content-text"]/div[1]/table') %>% 
   html_table(header = TRUE, fill = TRUE)
+
+Sys.setlocale("LC_ALL", "Korean")
 
 party_tbl <- party_dat %>% 
   janitor::clean_names(ascii = FALSE) %>% 
@@ -136,19 +140,34 @@ party_survey_tbl <- bind_rows(realm_tbl, gallup_tbl) %>%
   mutate(정당 = factor(정당, levels = c("더불어민주당", "국민의힘", "국민의당", "열린민주당", "정의당")))
 
 party_survey_tbl %>% 
+  write_rds("data/party_survey_tbl_20210921.rds")
+```
+
+
+```{r visualize-party-20-table}
+party_survey_tbl  <- read_rds("data/party_survey_tbl_20210921.rds")
+
+party_survey_tbl %>% 
+  pivot_wider(names_from = 정당, values_from = 지지율) %>% 
+  arrange(desc(조사기간)) %>% 
   reactable::reactable()
 
 ```
 
 ## 시각화 {#visualization}
 
-```{r visualize-party-20}
+깔끔한 형태 데이터로 정리한 후에 이를 ggplot으로 시각화해보자.
+
+```{r visualize-party-20-viz, layout="l-body-outset"}
 
 party_survey_tbl %>% 
+  mutate(지지율 = 지지율 / 100) %>% 
   ggplot(aes(x=조사기간, y= 지지율, color = 정당)) +
     geom_line() +
     geom_point() +
     facet_wrap(~조사기관) +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+    scale_x_date(date_labels = "%y년%m월") +
     theme_bw(base_family = "NanumGothic") +
     scale_colour_manual(name="",
                       values=c(더불어민주당="#065ce8", 
@@ -156,10 +175,16 @@ party_survey_tbl %>%
                                국민의당="#EA5508",
                                열린민주당="#FCC800",
                                정의당="#f2ee09")) +
-   scale_x_date(date_labels = "%m-%d") +
-   labs(x = "", y = "정당지지율(%)",
-        title = "제20대 대통령선거 전 정당지지율") +
-  theme(legend.position = "top")
+   labs(x = "", 
+        y = "정당지지율(%)",
+        title = "제20대 대통령선거 전 정당지지율",
+        subtitle = "2021년 9월 21일 기준",
+        caption = "자료: 위키백과, https://ko.wikipedia.org/wiki/대한민국의_정당_지지율") +
+    theme(legend.position = "top",
+          strip.text.x = element_text(size = 13, colour = "black", family = "NanumMyeongjo", face="bold"),
+          strip.background=element_rect(fill="gray95"),
+          plot.title=element_text(size=18, face="bold", family = "NanumBarunpen"),
+          plot.subtitle=element_text(face="bold", size=13, colour="grey10", family = "NanumBarunpen"))
 ```
 
 
