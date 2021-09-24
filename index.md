@@ -31,3 +31,5 @@ subtitle: 대통령 선거 2022년
 1. [후진국, 개발도상국, 선진국](president-population.html)
 1. [JTBC 차기대선주자](president-jtbc.html)
 1. [사진 배경 제거](remove-background.html)
+1. [중앙 선거여론 조사 심의 위원회](president-nesdc.html)
+

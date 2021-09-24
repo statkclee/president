@@ -1,0 +1,130 @@
+---
+layout: page
+title: "대통령 선거 2022년"
+subtitle: "중앙 선거여론 조사 심의 위원회"
+author:
+- name: "이광춘"
+  affiliation: "[Tidyverse Korea](https://www.facebook.com/groups/tidyverse/)"
+date: "`r Sys.Date()`"
+tags: ["여론조사", "제20대", "대통령 선거", "후진국", "중진국", "선진국", "선거일정", "경선", "선거통계", "중앙선거여론조사"]
+output:
+  html_document: 
+    include:
+      after_body: footer.html
+      before_body: header.html
+    toc: yes
+    toc_depth: 2
+    toc_float: true
+    highlight: tango
+    code_folding: hide
+    number_section: true
+    self_contained: true
+bibliography: bibliography_presid.bib
+csl: biomed-central.csl
+urlcolor: blue
+linkcolor: blue
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE,
+                      comment="", digits = 3, tidy = FALSE, prompt = FALSE, fig.align = 'center')
+library(tidyverse)
+library(rvest)
+library(lubridate)
+```
+
+# KBS 8145번 여론조사 {#kbs-survey-8145}
+
+여론조사결과 등록현황 상세보기 KBS가 조사의뢰하고 (주)한국리서치가 조사기관우로 참여한 [정기(정례)조사,대통령선거,정당지지도 (전국 정기(정례)조사 대통령선거 정당지지도 정치, 사회현안 등 )](https://www.nesdc.go.kr/portal/bbs/B0000005/view.do?nttId=9005) 사례를 들어 데이터 추출방법을 살펴보자.
+
+-   PDF → 이미지
+
+    -   <https://www.nesdc.go.kr/files/result/202109/FILE_202109180931525561.pdf.htm>
+
+-   이미지 파일
+
+    -   <https://www.nesdc.go.kr/files/result/202109/FILE_202109180931525561.pdf.files/1.png>
+    -   <https://www.nesdc.go.kr/files/result/202109/FILE_202109180931525561.pdf.files/2.png>
+    -   ...
+    -   <https://www.nesdc.go.kr/files/result/202109/FILE_202109180931525561.pdf.files/23.png>
+
+-   XML 페이지 이미지 메타파일
+
+    -   <https://www.nesdc.go.kr/files/result/202109/FILE_202109180931525561.pdf.files/FILE_202109180931525561.pdf.xml>
+
+-   XML 페이지 텍스트 본문 <https://www.nesdc.go.kr/files/result/202109/FILE_202109180931525561.pdf.files/FILE_202109180931525561.pdf.text.xml>
+
+## 페이지 메타 데이터 {#kbs-survey-8145-meta}
+
+[XML 페이지 이미지 메타파일](https://www.nesdc.go.kr/files/result/202109/FILE_202109180931525561.pdf.files/FILE_202109180931525561.pdf.xml)에 포함된 XML 정보를 추후 작업이 가능한 형태로 데이터를 전처리 작업한다.
+
+```{r xml-survey-meta}
+library(tidyverse)
+library(xml2)
+
+kbs_meta <- read_xml("https://www.nesdc.go.kr/files/result/202109/FILE_202109180931525561.pdf.files/FILE_202109180931525561.pdf.xml")
+
+kbs_meta %>% 
+  xml_attrs("title")
+
+kbs_meta_nodes <- xml_find_all(kbs_meta, "//page")
+
+kbs_meta_attributes <- kbs_meta_nodes[[1]] %>% xml_attrs(.) %>% names()
+
+kbs_meta_df <- xml_attrs(kbs_meta_nodes) %>% 
+  list2DF() %>% 
+  janitor::clean_names() 
+
+row.names(kbs_meta_df)  <- kbs_meta_attributes
+
+kbs_meta_tbl <- kbs_meta_df %>% 
+  rownames_to_column(var = "attributes") %>% 
+  pivot_longer(cols = -attributes)  %>% 
+  pivot_wider(names_from = attributes, values_from = value) %>% 
+  select(-name)
+
+kbs_meta_tbl %>% 
+  reactable::reactable()
+```
+
+## 여론조사결과 {#kbs-survey-8145-main}
+
+여론조사 결과 본문을 페이지 단위로 추출하자.
+
++-------------------------------------+--------------------------------------------+
+| ![](fig/kbs_table.png){width="400"} | ![](fig/kbs_xml.png){width="400"}          |
++-------------------------------------+--------------------------------------------+
+
+```{r xml-survey-main}
+
+kbs_survey <- read_xml("https://www.nesdc.go.kr/files/result/202109/FILE_202109180931525561.pdf.files/FILE_202109180931525561.pdf.text.xml")
+
+## KBS 여론조사 페이지 ------
+kbs_survey_page <- kbs_survey %>% 
+  xml_children()
+
+xml_length(kbs_survey_page) %>% length
+
+## 특정 페이지 : 응답자 분포표 값 --------------
+xml_siblings(kbs_survey_page)[[3]] %>% 
+  xml_children() %>% 
+  xml_contents() %>% 
+  as.character()
+
+## 특정 페이지 : 응답자 분포표 좌표 --------------
+table_h <- xml_siblings(kbs_survey_page)[[3]] %>% 
+  xml_children() %>% 
+  xml_attr("h")
+
+table_w <- xml_siblings(kbs_survey_page)[[3]] %>% 
+  xml_children() %>% 
+  xml_attr("w")
+
+table_l <- xml_siblings(kbs_survey_page)[[3]] %>% 
+  xml_children() %>% 
+  xml_attr("w")
+
+
+```
