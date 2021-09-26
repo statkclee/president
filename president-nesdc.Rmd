@@ -191,6 +191,7 @@ tibble(t = xml_siblings(kbs_survey_page)[[2]] %>% xml_children() %>% xml_attr("t
        l = xml_siblings(kbs_survey_page)[[2]] %>% xml_children() %>% xml_attr("l"),      # l = left
        h = xml_siblings(kbs_survey_page)[[2]] %>% xml_children() %>% xml_attr("h"),      # h = height
        w = xml_siblings(kbs_survey_page)[[2]] %>% xml_children() %>% xml_attr("w"),      # w = width
+       p = xml_siblings(kbs_survey_page)[[2]] %>% xml_children() %>% xml_attr("p"),      # p = paragraph(?)
        content = xml_siblings(kbs_survey_page)[[2]] %>% xml_children() %>% xml_contents() %>%  as.character()) %>% 
   mutate( t = as.numeric(t),
           l = as.numeric(l),
@@ -198,12 +199,13 @@ tibble(t = xml_siblings(kbs_survey_page)[[2]] %>% xml_children() %>% xml_attr("t
           w = as.numeric(w))
 
 kbs_xml_tbl %>% 
+  select(-p) %>% 
   reactable::reactable(
     columns = list(
-      t = colDef(width = 50),
-      l = colDef(width = 50),
-      h = colDef(width = 50),
-      w = colDef(width = 50)
+      t = colDef(width = 80),
+      l = colDef(width = 80),
+      h = colDef(width = 80),
+      w = colDef(width = 80)
     )
   )
 
@@ -211,6 +213,7 @@ kbs_xml_tbl %>%
 
 ## 페이지 이미지 겹쳐 확인 {#kbs-xml-parsing-check}
 
+뭔가 좌표가 직관적이 아니라 이를 해결할 수 있는 방법을 찾아보자.
 
 
 ```{r xml-file-parsing-check}
@@ -218,22 +221,14 @@ library(magick)
 
 kbs_xml_img <- image_read('data/nesdc/kbs/kbs_3.png')
 
-kbs_xml_img
-
 kbs_xml_img_box <- image_draw(kbs_xml_img)
 
-kbs_xml_tbl
-
-rect(xleft   = kbs_xml_tbl$l[1]/2, 
-     ytop    = kbs_xml_tbl$t[1]/2, 
-     xright  = kbs_xml_tbl$l[1]/2 + kbs_xml_tbl$w[1]/2,
-     ybottom = kbs_xml_tbl$t[1]/2 + kbs_xml_tbl$h[1]/2,
+rect(xleft   = kbs_xml_tbl$l[2], 
+     ytop    = kbs_xml_tbl$t[2], 
+     xright  = kbs_xml_tbl$l[2] + kbs_xml_tbl$w[2]/10,
+     ybottom = kbs_xml_tbl$t[2] + abs(kbs_xml_tbl$h[2]),
      border = "red", lty = "solid", lwd = 3)
 
 dev.off()
-
-kbs_xml_tbl %>% 
-  summary
-
 ```
 
