@@ -7,9 +7,6 @@ output:
     logo: fig/minju_logo_section.png
     theme: readable
     css: css/minju.css
-mainfont: NanumGothic 
-editor_options: 
-  chunk_output_type: console
 ---
 
 
@@ -28,9 +25,16 @@ loadfonts()
 library(here)
 library(fs)
 library(glue)
+library(gt)
 
 race_tbl <-
   read_rds(file = "data/race_tbl.rds")
+
+electoral_college <- 
+  read_rds(file = "data/electoral_college.rds")
+
+report_day <- "10월 4일"
+file_date <- "20211004"
 
 
 candidate_tbl <- race_tbl %>% 
@@ -41,7 +45,10 @@ candidate_tbl <- race_tbl %>%
 ```
 
 
-```{r child="dashboard/minju/overview.Rmd", encoding="UTF-8"} 
+```{r child="dashboard/minju/graph.Rmd", encoding="UTF-8"} 
+```
+
+```{r child="dashboard/minju/table.Rmd", encoding="UTF-8"} 
 ```
 
 

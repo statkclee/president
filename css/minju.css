@@ -27,3 +27,30 @@ img{
     font-weight: 700;
     content: '6';
 }
+
+
+@import url(https://fonts.googleapis.com/css?family=Noto+Sans+CJK+KR);
+@import url('https://fonts.googleapis.com/css2?family=Inconsolata');
+@import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR');
+
+h1 { 
+  font-family: "Nanum Gothic", sans-serif; 
+  font-size: 30px; 
+}
+
+h2, h3 { 
+  font-family: "Noto Sans CJK KR", sans-serif; 
+  font-size: 20px; 
+}
+
+tt, code, pre { 
+  font-family: "Inconsolata"", monospace; 
+  font-size: 15px; 
+}
+
+body { 
+  font-family: "Noto Serif KR", serif; 
+  font-size: 15px; 
+}
+

@@ -1,0 +1,333 @@
+
+```{r setup, include=FALSE}
+## 0. R 마크다운 환경설정 ------
+knitr::opts_chunk$set(echo = FALSE, warning=FALSE, message=FALSE,
+                    comment="", digits = 3, tidy = FALSE, prompt = FALSE, fig.align = 'center')
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+options(knitr.duplicate.label = 'allow')
+## 0. R 팩키지 ------
+library(flexdashboard)
+library(tidyverse)
+library(janitor)
+library(extrafont)
+loadfonts()
+library(here)
+library(fs)
+library(glue)
+```
+
+
+표 (Table)
+=================================================================================================
+
+Row
+-------------------------------------------------------------------------------
+
+###  이재명
+
+```{r minju-one}
+ljm <- candidate_tbl %>% filter(후보자명 == "이재명") %>% pull(득표) %>% 
+  scales::comma(.)
+valueBox(ljm, caption = "이재명", icon = "fa-one", color = "#4287f5")
+```
+
+### 이낙연
+
+```{r minju-four}
+lny <- candidate_tbl %>% filter(후보자명 == "이낙연") %>% pull(득표) %>% 
+  scales::comma(.)
+valueBox(lny, caption = "이낙연", icon = "fa-four", color = "#f54242")
+```
+
+### 박용진 
+
+```{r minju-five}
+pyj <- candidate_tbl %>% filter(후보자명 == "박용진") %>% pull(득표) %>% 
+  scales::comma(.)
+valueBox(pyj, caption = "박용진", icon = "fa-five", color = "gray")
+```
+
+### 추미애 
+
+```{r minju-six}
+cma <- candidate_tbl %>% filter(후보자명 == "추미애") %>% pull(득표) %>% 
+  scales::comma(.)
+valueBox(cma, caption = "추미애", icon = "fa-six", color = "#42f578")
+```
+
+Column {.tabset}
+-------------------------------------------------------------------------------
+
+### 선거인단
+
+
+```{r electoral_college-table}
+electoral_college %>% 
+  mutate(비율 = 선거인단 / sum(선거인단)) %>% 
+  gt::gt(
+    rowname_col = "시도"
+    ) %>% 
+      tab_header(
+      title = md("**&#9755; 제20대 대통령 선거 &#9754;**"),
+      subtitle = md("*민주당 경선: 선거인단*")
+    ) %>% 
+    tab_source_note(
+      source_note = md("기준 시점: 2021년 10월 04일")
+    ) %>% 
+    tab_options(
+      table.width = pct(50),
+      heading.background.color = "#1E61B0", # R logo 파란색
+      heading.title.font.size = "32px",
+      column_labels.background.color = "#F7F7F7", # R logo 회색 
+      column_labels.font.weight = "bold",
+      stub.background.color = "#ffffff",
+      stub.font.weight = "bold"
+    ) %>% 
+    cols_align(
+      align = "center",
+      columns = c(시도)
+    ) %>% 
+    fmt_number(
+      columns = 선거인단,
+      decimals = 0
+    ) %>% 
+    fmt_percent(
+      columns = 비율,
+      decimals = 1
+    ) %>% 
+    tab_style(
+      style = list(
+        cell_fill(color = "#4083ef"),
+        cell_text(weight = "bold")
+      ),
+      locations = cells_body(columns = c(시도, 선거인단, 비율), 
+                             rows = str_detect(시도, "슈퍼"))) %>% 
+    grand_summary_rows(
+      columns = c(선거인단),
+      fns = list(
+        합계 = ~sum(.)),
+      formatter = fmt_number,
+      use_seps = TRUE,
+      decimals = 0
+    ) %>% 
+    grand_summary_rows(
+      columns = c(비율),
+      fns = list(
+        합계 = ~sum(.)),
+      formatter = fmt_percent,
+      use_seps = TRUE,
+      decimals = 1
+    ) %>% 
+    cols_width(
+      시도 ~ px(90),
+      선거인단 ~ px(100),
+      비율 ~ px(100)
+    )
+```
+
+### 누적 득표
+
+
+```{r cumulative-votes-table}
+
+race_tbl %>% 
+  group_by(후보자명) %>%
+  summarise(득표 = sum(득표)) %>% 
+  ungroup() %>% 
+  mutate(비율 = 득표 / sum(득표)) %>% 
+  gt(rowname_col = "후보자명") %>% 
+    tab_header(
+      title = md("**&#9755; 제20대 대통령 선거 &#9754;**"),
+      subtitle = md("*민주당 경선: 누적 득표수*")
+    ) %>% 
+    tab_source_note(
+      source_note = md("기준 시점: 2021년 10월 04일")
+    ) %>% 
+    tab_options(
+      table.width = pct(50),
+      heading.background.color = "#1E61B0", # R logo 파란색
+      heading.title.font.size = "32px",
+      column_labels.background.color = "#F7F7F7", # R logo 회색 
+      column_labels.font.weight = "bold",
+      stub.background.color = "#ffffff",
+      stub.font.weight = "bold"
+    ) %>% 
+    fmt_percent(
+      columns = 비율,
+      decimals = 1
+    ) %>% 
+    fmt_number(
+      columns = 득표,
+      decimals = 0
+    ) %>% 
+    grand_summary_rows(
+      
+      columns = c(득표),
+      fns = list(
+        합계 = ~sum(.)),
+      formatter = fmt_number,
+      use_seps = TRUE,
+      decimals = 0
+    ) %>% 
+    grand_summary_rows(
+      columns = c(비율),
+      fns = list(
+        합계 = ~sum(.)),
+      formatter = fmt_percent,
+      use_seps = TRUE,
+      decimals = 1
+    )  %>% 
+    tab_style(
+      style = list(
+        cell_text(align = "center")
+      ),
+    locations = cells_stub(rows = TRUE)
+  )
+```
+
+### 당원 국민선거인단
+
+
+```{r dashboard-party-table}
+
+race_tbl %>% 
+  group_by(당원여론, 후보자명) %>%
+  summarise(득표 = sum(득표)) %>% 
+  ungroup() %>% 
+  pivot_wider(names_from = 후보자명, values_from = 득표) %>% 
+  gt(rowname_col = "당원여론") %>% 
+    tab_header(
+      title = md("**&#9755; 제20대 대통령 선거 &#9754;**"),
+      subtitle = md("*민주당 경선: 당원/여론 누적 득표수*")
+    ) %>% 
+    tab_source_note(
+      source_note = md("기준 시점: 2021년 10월 04일")
+    ) %>% 
+    tab_options(
+      table.width = pct(50),
+      heading.background.color = "#1E61B0", # R logo 파란색
+      heading.title.font.size = "32px",
+      column_labels.background.color = "#F7F7F7", # R logo 회색 
+      column_labels.font.weight = "bold",
+      stub.background.color = "#ffffff",
+      stub.font.weight = "bold"
+    ) %>% 
+    fmt_number(
+      columns = c(이재명, 이낙연, 박용진, 추미애),
+      decimals = 0
+    ) %>% 
+    grand_summary_rows(
+      columns = c(이재명, 이낙연, 박용진, 추미애),
+      fns = list(
+        합계 = ~sum(.)),
+      formatter = fmt_number,
+      use_seps = TRUE,
+      decimals = 0
+    ) %>% 
+    tab_style(
+      style = list(
+        cell_text(align = "center")
+      ),
+    locations = cells_stub(rows = TRUE)
+    )
+
+```
+
+
+### 지역별
+
+
+```{r table-sido}
+
+race_tbl %>% 
+  filter(!str_detect(시도, "슈퍼")) %>% 
+  group_by(시도, 후보자명) %>%
+  summarise(득표 = sum(득표)) %>% 
+  ungroup() %>% 
+  pivot_wider(names_from = 후보자명, values_from = 득표) %>% 
+  gt(rowname_col = "시도") %>% 
+    tab_header(
+      title = md("**&#9755; 제20대 대통령 선거 &#9754;**"),
+      subtitle = md("*민주당 경선: 시도별 누적 득표수*")
+    ) %>% 
+    tab_source_note(
+      source_note = md("기준 시점: 2021년 10월 04일")
+    ) %>% 
+    tab_options(
+      table.width = pct(50),
+      heading.background.color = "#1E61B0", # R logo 파란색
+      heading.title.font.size = "32px",
+      column_labels.background.color = "#F7F7F7", # R logo 회색 
+      column_labels.font.weight = "bold",
+      stub.background.color = "#ffffff",
+      stub.font.weight = "bold"
+    ) %>% 
+    fmt_number(
+      columns = c(이재명, 이낙연, 박용진, 추미애),
+      decimals = 0
+    ) %>% 
+    grand_summary_rows(
+      columns = c(이재명, 이낙연, 박용진, 추미애),
+      fns = list(
+        합계 = ~sum(.)),
+      formatter = fmt_number,
+      use_seps = TRUE,
+      decimals = 0
+    ) %>% 
+    tab_style(
+      style = list(
+        cell_text(align = "center")
+      ),
+    locations = cells_stub(rows = TRUE)
+    )
+```
+
+### 국민선거인단
+
+
+```{r table-people}
+
+race_tbl %>% 
+  filter(str_detect(시도, "슈퍼")) %>% 
+  group_by(시도, 후보자명) %>%
+  summarise(득표 = sum(득표)) %>% 
+  ungroup() %>% 
+  pivot_wider(names_from = 후보자명, values_from = 득표) %>% 
+  gt(rowname_col = "시도") %>% 
+    tab_header(
+      title = md("**&#9755; 제20대 대통령 선거 &#9754;**"),
+      subtitle = md("*민주당 경선: 국민선거인단 누적 득표수*")
+    ) %>% 
+    tab_source_note(
+      source_note = md("기준 시점: 2021년 10월 04일")
+    ) %>% 
+    tab_options(
+      table.width = pct(50),
+      heading.background.color = "#1E61B0", # R logo 파란색
+      heading.title.font.size = "32px",
+      column_labels.background.color = "#F7F7F7", # R logo 회색 
+      column_labels.font.weight = "bold",
+      stub.background.color = "#ffffff",
+      stub.font.weight = "bold"
+    ) %>% 
+    fmt_number(
+      columns = c(이재명, 이낙연, 박용진, 추미애),
+      decimals = 0
+    ) %>% 
+    grand_summary_rows(
+      columns = c(이재명, 이낙연, 박용진, 추미애),
+      fns = list(
+        합계 = ~sum(.)),
+      formatter = fmt_number,
+      use_seps = TRUE,
+      decimals = 0
+    ) %>% 
+    tab_style(
+      style = list(
+        cell_text(align = "center")
+      ),
+    locations = cells_stub(rows = TRUE)
+    )
+
+```
+
