@@ -25,7 +25,7 @@ subtitle: 대통령 선거 2022년
     - [제20대 대통령 선거/여론조사 (2020-09-21)](president-poll-20210921.html)
 1. [주요 정당 경선](president-candidate.html)
     - [민주당/국민의힘 경선 일정](president-minju-race-schedule.html)
-    - [민주당 경선](president-minju-race.html)
+    - [민주당 경선 EDA](president-minju-race.html): [모듈](minju_module.html),  [대쉬보드](minj_dashboard.html)
     - [민주당 후보 선거통계](president-election.html)
     - [민주당 후보 vs 국민의힘 후보](president-main-candidate.html)
 1. [후진국, 개발도상국, 선진국](president-population.html)
