@@ -51,4 +51,3 @@ candidate_tbl <- race_tbl %>%
 ```{r child="dashboard/minju/table.Rmd", encoding="UTF-8"} 
 ```
 
-
