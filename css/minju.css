@@ -1,0 +1,29 @@
+.navbar-logo.pull-left {
+  padding-top:8px;
+}
+
+img{
+     max-width:48px;
+     max-height:48px;
+}
+
+.fa-one:before {
+    font-weight: 700;
+    content: '1';
+}
+
+.fa-four:before {
+    font-weight: 700;
+    content: '4';
+}
+
+
+.fa-five:before {
+    font-weight: 700;
+    content: '5';
+}
+
+.fa-six:before {
+    font-weight: 700;
+    content: '6';
+}
