@@ -1,24 +1,7 @@
 
-```{r setup, include=FALSE}
-## 0. R 마크다운 환경설정 ------
-knitr::opts_chunk$set(echo = FALSE, warning=FALSE, message=FALSE,
-                    comment="", digits = 3, tidy = FALSE, prompt = FALSE, fig.align = 'center')
-knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
-options(knitr.duplicate.label = 'allow')
-## 0. R 팩키지 ------
-library(flexdashboard)
-library(tidyverse)
-library(janitor)
-library(extrafont)
-loadfonts()
-library(here)
-library(fs)
-library(glue)
-```
-
-
 그래프
 =================================================================================================
+
 
 Row
 -------------------------------------------------------------------------------
@@ -28,7 +11,12 @@ Row
 ```{r minju-one}
 ljm <- candidate_tbl %>% filter(후보자명 == "이재명") %>% pull(득표) %>% 
   scales::comma(.)
-valueBox(ljm, caption = "이재명", icon = "fa-one", color = "#4287f5")
+
+ljm_pcnt <- candidate_tbl %>% filter(후보자명 == "이재명") %>% pull(득표율) %>% 
+   scales::percent(accuracy = 0.1)
+
+ljm_vb <- glue::glue("{ljm} ({ljm_pcnt})")
+valueBox(ljm_vb, caption = "이재명", icon = "fa-one", color = "#4287f5")
 ```
 
 ### 이낙연
@@ -36,7 +24,12 @@ valueBox(ljm, caption = "이재명", icon = "fa-one", color = "#4287f5")
 ```{r minju-four}
 lny <- candidate_tbl %>% filter(후보자명 == "이낙연") %>% pull(득표) %>% 
   scales::comma(.)
-valueBox(lny, caption = "이낙연", icon = "fa-four", color = "#f54242")
+
+lny_pcnt <- candidate_tbl %>% filter(후보자명 == "이낙연") %>% pull(득표율) %>% 
+   scales::percent(accuracy = 0.1)
+
+lny_vb <- glue::glue("{lny} ({lny_pcnt})")
+valueBox(lny_vb, caption = "이낙연", icon = "fa-four", color = "#f54242")
 ```
 
 ### 박용진 
@@ -44,7 +37,13 @@ valueBox(lny, caption = "이낙연", icon = "fa-four", color = "#f54242")
 ```{r minju-five}
 pyj <- candidate_tbl %>% filter(후보자명 == "박용진") %>% pull(득표) %>% 
   scales::comma(.)
-valueBox(pyj, caption = "박용진", icon = "fa-five", color = "gray")
+
+pyj_pcnt <- candidate_tbl %>% filter(후보자명 == "박용진") %>% pull(득표율) %>% 
+   scales::percent(accuracy = 0.1)
+
+pyj_vb <- glue::glue("{pyj} ({pyj_pcnt})")
+
+valueBox(pyj_vb, caption = "박용진", icon = "fa-five", color = "gray")
 ```
 
 ### 추미애 
@@ -52,8 +51,15 @@ valueBox(pyj, caption = "박용진", icon = "fa-five", color = "gray")
 ```{r minju-six}
 cma <- candidate_tbl %>% filter(후보자명 == "추미애") %>% pull(득표) %>% 
   scales::comma(.)
-valueBox(cma, caption = "추미애", icon = "fa-six", color = "#42f578")
+
+cma_pcnt <- candidate_tbl %>% filter(후보자명 == "추미애") %>% pull(득표율) %>% 
+   scales::percent(accuracy = 0.1)
+
+cma_vb <- glue::glue("{cma} ({cma_pcnt})")
+
+valueBox(cma_vb, caption = "추미애", icon = "fa-six", color = "#42f578")
 ```
+
 
 Column {.tabset}
 -------------------------------------------------------------------------------
@@ -76,7 +82,13 @@ electoral_g <- electoral_college %>%
   ggplot(aes(x = 시도, y = value, fill = name, width = ifelse(name == "총투표수", 0.3, 0.5))) +
     geom_col(stat = "identity") +
     theme_bw(base_family = "NanumGothic") +
-    theme(legend.position = "right",
+    theme(legend.position = "top",
+          legend.box = "horizontal",
+          legend.margin=margin(t = 0, unit='cm'),
+          legend.spacing.x = unit(0.5, 'cm'),
+          legend.text = element_text(margin = margin(r = 3, unit = 'cm')),
+          legend.key.height = unit(0.5, 'cm'), #change legend key height
+          legend.key.width  = unit(1.5, 'cm'), #change legend key width
           axis.text.y = element_text(size = rel(1.5), colour = "gray35", family = "NanumBarunpen", face="bold"),
           axis.text.x = element_text(size = rel(1.0), colour = "black", family = "NanumBarunpen", face="bold",
                                      angle = 15, vjust = 0.5, hjust=0.5),
@@ -87,7 +99,6 @@ electoral_g <- electoral_college %>%
          y        = "",
          title    = "제20대 대통령 선거 / 민주당 경선",
          subtitle = glue::glue("{report_day} 기준 선거인단과 총투표수"),
-         caption  = "자료 출처: 더불어 민주당 보도자료, https://theminjoo.kr/board/lists/presskit",
          fill     = "") +
     scale_y_continuous(labels = scales::comma) +
     # coord_flip() +
@@ -121,8 +132,8 @@ cumsum_g <- race_sum_tbl %>%
     labs(x = "",
          y = "",
          title = "제20대 대통령 선거 / 민주당 경선",
-         subtitle = glue::glue("{report_day} 기준 누적 득표수"),
-         caption = "자료 출처: 더불어 민주당 보도자료, https://theminjoo.kr/board/lists/presskit") +
+         subtitle = glue::glue("{report_day} 기준 누적 득표수")) +
+         # caption = "자료 출처: 더불어 민주당 보도자료, https://theminjoo.kr/board/lists/presskit") +
     scale_y_continuous(labels = scales::comma) +
     scale_fill_manual(values = c("blue", "red", "gray", "green"))
 
@@ -166,34 +177,7 @@ cumsum_two_g
 ```
 
 
-### 지역별 득표수
 
-
-```{r dashboard-sido}
-
-sido_g <- race_tbl %>% 
-  filter(!str_detect(시도, "슈퍼")) %>% 
-  ggplot(aes(x = 후보자명, y = 득표, fill = 후보자명)) +
-    geom_col() +
-    facet_wrap(~시도) +
-    theme_bw(base_family = "NanumGothic") +
-    theme(legend.position = "none",
-          strip.text.x = element_text(size = rel(1.1), colour = "black", family = "NanumMyeongjo", face="bold"),
-          axis.text.y = element_text(size = rel(1.5), colour = "gray35", family = "NanumBarunpen", face="bold"),
-          axis.text.x = element_text(size = rel(1.3), colour = "black", family = "NanumBarunpen", face="bold"),
-          strip.background=element_rect(fill="gray95"),
-          plot.title=element_text(size=18, face="bold", family = "NanumBarunpen"),
-          plot.subtitle=element_text(face="bold", size=13, colour="grey10", family = "NanumBarunpen")) +
-    labs(x = "",
-         y = "",
-         title = "제20대 대통령 선거 / 민주당 경선",
-         subtitle = "지역순회 시도별 득표수") +
-    scale_y_continuous(labels = scales::comma) +
-    scale_fill_manual(values = c("blue", "gray", "gray", "red", "gray", "green"))
-
-sido_g
-
-```
 
 ### 국민선거인단
 
@@ -221,5 +205,34 @@ people_g <- race_tbl %>%
     scale_fill_manual(values = c("blue", "red", "gray", "green"))
 
 people_g
+```
+
+### 지역별 득표수
+
+
+```{r dashboard-sido}
+
+sido_g <- race_tbl %>% 
+  filter(!str_detect(시도, "슈퍼")) %>% 
+  ggplot(aes(x = 후보자명, y = 득표, fill = 후보자명)) +
+    geom_col() +
+    facet_wrap(~시도) +
+    theme_bw(base_family = "NanumGothic") +
+    theme(legend.position = "none",
+          strip.text.x = element_text(size = rel(1.1), colour = "black", family = "NanumMyeongjo", face="bold"),
+          axis.text.y = element_text(size = rel(1.5), colour = "gray35", family = "NanumBarunpen", face="bold"),
+          axis.text.x = element_text(size = rel(1.3), colour = "black", family = "NanumBarunpen", face="bold"),
+          strip.background=element_rect(fill="gray95"),
+          plot.title=element_text(size=18, face="bold", family = "NanumBarunpen"),
+          plot.subtitle=element_text(face="bold", size=13, colour="grey10", family = "NanumBarunpen")) +
+    labs(x = "",
+         y = "",
+         title = "제20대 대통령 선거 / 민주당 경선",
+         subtitle = "지역순회 시도별 득표수") +
+    scale_y_continuous(labels = scales::comma) +
+    scale_fill_manual(values = c("blue", "gray", "gray", "red", "gray", "green"))
+
+sido_g
+
 ```
 

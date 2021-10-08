@@ -68,22 +68,24 @@ body {
   font-size: 15px; 
 }
 
-/* Valuebox 글꼴 
+/* Valuebox 글꼴  */
 
 .value-box .value {
   font-family: "Nanum Gothic", sans-serif; 
-  font-size: 38px;
+  font-size: 30px;
   font-weight: bold;
-  margin: 0 0 3px 0;
+  margin: 12px 0 3px 0;
   white-space: nowrap;
   padding: 0;
 } 
 
 .caption {
   font-family: "Nanum Gothic", sans-serif; 
-  font-size: 77px;
-  margin: 0 0 3px 0;
+  font-size: 30px;
+  margin: 10px 0 0 0;
+  font-weight: bold;
   white-space: nowrap;
   color: black;
 }
-*/
+
+

@@ -45,9 +45,10 @@ candidate_tbl <- race_tbl %>%
 ```
 
 
+
+
 ```{r child="dashboard/minju/graph.Rmd", encoding="UTF-8"} 
 ```
 
 ```{r child="dashboard/minju/table.Rmd", encoding="UTF-8"} 
 ```
-
