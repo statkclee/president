@@ -310,11 +310,28 @@ race_tbl %>%
 ### 당원 vs 국민선거인단 {#gt-table-sido-member-opinion}
 
 ```{r gt-votes-member-opinion}
+library(janitor)
+
+## janitor 득표와 득표율에 큰 숫자에 천단위 콤마 추가
+add_comma_seprator <- function(x) {
+  first_half  <- str_extract(x, pattern = "^(.+?)\\(") %>% parse_number %>% scales::comma()
+  second_half <- str_extract(x, pattern = "\\((.*?)\\)")
+  glue::glue("{first_half}\n{second_half}")
+}
+
 race_tbl %>% 
   group_by(당원여론, 후보자명) %>%
   summarise(득표 = sum(득표)) %>% 
   ungroup() %>% 
   pivot_wider(names_from = 후보자명, values_from = 득표) %>% 
+  ## janitor table decoration -----------
+  adorn_totals(where = c("row", "col"), name = "합계") %>% 
+  # mutate_if(is.numeric, scales::comma) %>% 
+  adorn_percentages(denominator = "all") %>% 
+  adorn_pct_formatting(digits = 1) %>% 
+  adorn_ns(position = "front") %>% 
+  mutate_at(vars(이재명, 이낙연, 박용진, 추미애, 합계), .funs =  add_comma_seprator) %>% 
+
   gt(rowname_col = "당원여론") %>% 
     tab_header(
       title = md("**&#9755; 제20대 대통령 선거 &#9754;**"),
@@ -324,7 +341,7 @@ race_tbl %>%
       source_note = md("기준 시점: 2021년 10월 04일")
     ) %>% 
     tab_options(
-      table.width = pct(50),
+      table.width = pct(100),
       heading.background.color = "#1E61B0", # R logo 파란색
       heading.title.font.size = "32px",
       column_labels.background.color = "#F7F7F7", # R logo 회색 
@@ -332,24 +349,34 @@ race_tbl %>%
       stub.background.color = "#ffffff",
       stub.font.weight = "bold"
     ) %>% 
-    fmt_number(
-      columns = c(이재명, 이낙연, 박용진, 추미애),
-      decimals = 0
-    ) %>% 
-    grand_summary_rows(
-      columns = c(이재명, 이낙연, 박용진, 추미애),
-      fns = list(
-        합계 = ~sum(.)),
-      formatter = fmt_number,
-      use_seps = TRUE,
-      decimals = 0
-    ) %>% 
+    # fmt_number(
+    #   columns = c(이재명, 이낙연, 박용진, 추미애, 합계),
+    #   decimals = 0
+    # ) %>% 
     tab_style(
       style = list(
         cell_text(align = "center")
       ),
     locations = cells_stub(rows = TRUE)
-    )
+    ) %>% 
+    tab_style(
+      style = list(
+        cell_fill(color = "#3c8ae8"),
+        cell_text(
+          align = "center",
+          size = "medium",
+          weight = "bold")
+        ),
+    locations = cells_body(rows = "합계")) %>% 
+    tab_style(
+      style = list(
+        cell_fill(color = "#3c8ae8"),
+        cell_text(
+          align = "center",
+          size = "medium",
+          weight = "bold")
+        ),
+    locations = cells_body(columns = "합계"))
 ```
 
 ### 지역별 당원 {#gt-table-sido-member}
@@ -361,6 +388,13 @@ race_tbl %>%
   summarise(득표 = sum(득표)) %>% 
   ungroup() %>% 
   pivot_wider(names_from = 후보자명, values_from = 득표) %>% 
+  ## janitor table decoration -----------
+  adorn_totals(where = c("row", "col"), name = "합계") %>% 
+  # mutate_if(is.numeric, scales::comma) %>% 
+  adorn_percentages(denominator = "all") %>% 
+  adorn_pct_formatting(digits = 1) %>% 
+  adorn_ns(position = "front") %>% 
+  mutate_at(vars(이재명, 이낙연, 박용진, 추미애, 합계), .funs =  add_comma_seprator)  %>%  
   gt(rowname_col = "시도") %>% 
     tab_header(
       title = md("**&#9755; 제20대 대통령 선거 &#9754;**"),
@@ -370,7 +404,7 @@ race_tbl %>%
       source_note = md("기준 시점: 2021년 10월 04일")
     ) %>% 
     tab_options(
-      table.width = pct(50),
+      table.width = pct(80),
       heading.background.color = "#1E61B0", # R logo 파란색
       heading.title.font.size = "32px",
       column_labels.background.color = "#F7F7F7", # R logo 회색 
@@ -378,24 +412,42 @@ race_tbl %>%
       stub.background.color = "#ffffff",
       stub.font.weight = "bold"
     ) %>% 
-    fmt_number(
-      columns = c(이재명, 이낙연, 박용진, 추미애),
-      decimals = 0
-    ) %>% 
-    grand_summary_rows(
-      columns = c(이재명, 이낙연, 박용진, 추미애),
-      fns = list(
-        합계 = ~sum(.)),
-      formatter = fmt_number,
-      use_seps = TRUE,
-      decimals = 0
-    ) %>% 
+    # fmt_number(
+    #   columns = c(이재명, 이낙연, 박용진, 추미애),
+    #   decimals = 0
+    # ) %>% 
+    # grand_summary_rows(
+    #   columns = c(이재명, 이낙연, 박용진, 추미애),
+    #   fns = list(
+    #     합계 = ~sum(.)),
+    #   formatter = fmt_number,
+    #   use_seps = TRUE,
+    #   decimals = 0
+    # ) %>% 
     tab_style(
       style = list(
         cell_text(align = "center")
       ),
     locations = cells_stub(rows = TRUE)
-    )
+    ) %>% 
+    tab_style(
+      style = list(
+        cell_fill(color = "#3c8ae8"),
+        cell_text(
+          align = "center",
+          size = "medium",
+          weight = "bold")
+        ),
+    locations = cells_body(rows = "합계")) %>% 
+    tab_style(
+      style = list(
+        cell_fill(color = "#3c8ae8"),
+        cell_text(
+          align = "center",
+          size = "medium",
+          weight = "bold")
+        ),
+    locations = cells_body(columns = "합계"))
 
 ```
 
@@ -407,7 +459,15 @@ race_tbl %>%
   group_by(시도, 후보자명) %>%
   summarise(득표 = sum(득표)) %>% 
   ungroup() %>% 
-  pivot_wider(names_from = 후보자명, values_from = 득표) %>% 
+  pivot_wider(names_from = 후보자명, values_from = 득표) %>%
+  ## janitor table decoration -----------
+  adorn_totals(where = c("row", "col"), name = "합계") %>% 
+  # mutate_if(is.numeric, scales::comma) %>% 
+  adorn_percentages(denominator = "all") %>% 
+  adorn_pct_formatting(digits = 1) %>% 
+  adorn_ns(position = "front") %>% 
+  mutate_at(vars(이재명, 이낙연, 박용진, 추미애, 합계), .funs =  add_comma_seprator)  %>%  
+  
   gt(rowname_col = "시도") %>% 
     tab_header(
       title = md("**&#9755; 제20대 대통령 선거 &#9754;**"),
@@ -417,7 +477,7 @@ race_tbl %>%
       source_note = md("기준 시점: 2021년 10월 04일")
     ) %>% 
     tab_options(
-      table.width = pct(50),
+      table.width = pct(100),
       heading.background.color = "#1E61B0", # R logo 파란색
       heading.title.font.size = "32px",
       column_labels.background.color = "#F7F7F7", # R logo 회색 
@@ -425,24 +485,42 @@ race_tbl %>%
       stub.background.color = "#ffffff",
       stub.font.weight = "bold"
     ) %>% 
-    fmt_number(
-      columns = c(이재명, 이낙연, 박용진, 추미애),
-      decimals = 0
-    ) %>% 
-    grand_summary_rows(
-      columns = c(이재명, 이낙연, 박용진, 추미애),
-      fns = list(
-        합계 = ~sum(.)),
-      formatter = fmt_number,
-      use_seps = TRUE,
-      decimals = 0
-    ) %>% 
+    # fmt_number(
+    #   columns = c(이재명, 이낙연, 박용진, 추미애),
+    #   decimals = 0
+    # ) %>% 
+    # grand_summary_rows(
+    #   columns = c(이재명, 이낙연, 박용진, 추미애),
+    #   fns = list(
+    #     합계 = ~sum(.)),
+    #   formatter = fmt_number,
+    #   use_seps = TRUE,
+    #   decimals = 0
+    # ) %>% 
     tab_style(
       style = list(
         cell_text(align = "center")
       ),
     locations = cells_stub(rows = TRUE)
-    )
+    ) %>% 
+    tab_style(
+      style = list(
+        cell_fill(color = "#3c8ae8"),
+        cell_text(
+          align = "center",
+          size = "medium",
+          weight = "bold")
+        ),
+    locations = cells_body(rows = "합계")) %>% 
+    tab_style(
+      style = list(
+        cell_fill(color = "#3c8ae8"),
+        cell_text(
+          align = "center",
+          size = "medium",
+          weight = "bold")
+        ),
+    locations = cells_body(columns = "합계"))  
 ```
 
 ## `ggplot` 그래프 {.tabset}
