@@ -86,7 +86,7 @@ electoral_college %>%
       subtitle = md("*민주당 경선: 선거인단*")
     ) %>% 
     tab_source_note(
-      source_note = md("기준 시점: 2021년 10월 04일")
+      source_note = md(gt_md)
     ) %>% 
     tab_options(
       table.width = pct(50),
@@ -155,7 +155,7 @@ race_tbl %>%
       subtitle = md("*민주당 경선: 누적 득표수*")
     ) %>% 
     tab_source_note(
-      source_note = md("기준 시점: 2021년 10월 04일")
+      source_note = md(gt_md)
     ) %>% 
     tab_options(
       table.width = pct(50),
@@ -230,7 +230,7 @@ race_tbl %>%
       subtitle = md("*민주당 경선: 당원/여론 누적 득표수*")
     ) %>% 
     tab_source_note(
-      source_note = md("기준 시점: 2021년 10월 04일")
+      source_note = md(gt_md)
     ) %>% 
     tab_options(
       table.width = pct(80),
@@ -299,7 +299,7 @@ race_tbl %>%
       subtitle = md("*민주당 경선: 국민선거인단 누적 득표수*")
     ) %>% 
     tab_source_note(
-      source_note = md("기준 시점: 2021년 10월 04일")
+      source_note = md(gt_md)
     ) %>% 
     tab_options(
       table.width = pct(80),
@@ -373,7 +373,7 @@ race_tbl %>%
       subtitle = md("*민주당 경선: 시도별 누적 득표수*")
     ) %>% 
     tab_source_note(
-      source_note = md("기준 시점: 2021년 10월 04일")
+      source_note = md(gt_md)
     ) %>% 
     tab_options(
       table.width = pct(100),

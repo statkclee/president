@@ -78,7 +78,7 @@ votes_tbl <- race_tbl %>%
 electoral_g <- electoral_college %>% 
   left_join(votes_tbl) %>% 
   pivot_longer(-시도) %>%  
-  mutate(시도 = factor(시도, levels = c("대전충남", "세종충북", "대구경북", "강원", "1차 슈퍼데이", "광주전남", "전북", "제주", "부울경", "인천", "2차 슈퍼데이"))) %>% 
+  mutate(시도 = factor(시도, levels = c("대전충남", "세종충북", "대구경북", "강원", "1차 슈퍼데이", "광주전남", "전북", "제주", "부울경", "인천", "2차 슈퍼데이", "경기"))) %>% 
   ggplot(aes(x = 시도, y = value, fill = name, width = ifelse(name == "총투표수", 0.3, 0.5))) +
     geom_col(stat = "identity") +
     theme_bw(base_family = "NanumGothic") +
@@ -221,7 +221,7 @@ sido_g <- race_tbl %>%
     theme(legend.position = "none",
           strip.text.x = element_text(size = rel(1.1), colour = "black", family = "NanumMyeongjo", face="bold"),
           axis.text.y = element_text(size = rel(1.5), colour = "gray35", family = "NanumBarunpen", face="bold"),
-          axis.text.x = element_text(size = rel(1.3), colour = "black", family = "NanumBarunpen", face="bold"),
+          axis.text.x = element_text(size = rel(1.0), colour = "black", family = "NanumBarunpen", face="bold"),
           strip.background=element_rect(fill="gray95"),
           plot.title=element_text(size=18, face="bold", family = "NanumBarunpen"),
           plot.subtitle=element_text(face="bold", size=13, colour="grey10", family = "NanumBarunpen")) +

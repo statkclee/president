@@ -33,8 +33,11 @@ race_tbl <-
 electoral_college <- 
   read_rds(file = "data/electoral_college.rds")
 
-report_day <- "10월 4일"
-file_date <- "20211004"
+sido_fct <- c("대전충남", "세종충북", "대구경북", "강원", "광주전남", "전북", "제주", "부울경", "인천", "경기")
+report_day <- "10월 9일"
+file_date <- "20211009"
+
+gt_md <- glue::glue("기준 시점: 2021년 {report_day}")
 
 
 candidate_tbl <- race_tbl %>% 
