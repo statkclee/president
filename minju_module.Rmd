@@ -107,7 +107,7 @@ race_tbl <- bind_rows(type_01_tbl, type_02_tbl) %>%
   bind_rows(type_04_tbl) %>% 
   mutate(득표 = as.numeric(득표)) %>% 
   mutate(후보자명 = factor(후보자명, levels = c("이재명", "이낙연", "박용진", "추미애"))) %>% 
-  mutate(시도 = factor(시도, levels = c("대전충남", "세종충북", "대구경북", "강원", "1차 슈퍼데이", "광주전남", "전북", "제주", "부울경", "인천", "2차 슈퍼데이"))) %>% 
+  mutate(시도 = factor(시도, levels = c("대전충남", "세종충북", "대구경북", "강원", "1차 슈퍼데이", "광주전남", "전북", "제주", "부울경", "인천", "2차 슈퍼데이", "경기"))) %>% 
   mutate(당원여론 = ifelse(str_detect(시도, "슈퍼데이"), "국민선거인단", "당원"))
 
 
@@ -126,13 +126,13 @@ test_that("엑셀 데이터 정합성", {
     summarise(합계 = sum(득표)) %>% 
     pull()
 
-  expect_equal(total_sum, 993656  )
+  expect_equal(total_sum, 1089497)
 })
 
 
-sido_fct <- c("대전충남", "세종충북", "대구경북", "강원", "광주전남", "전북", "제주", "부울경", "인천")
-report_day <- "10월 4일"
-file_date <- "20211004"
+sido_fct <- c("대전충남", "세종충북", "대구경북", "강원", "광주전남", "전북", "제주", "부울경", "인천", "경기")
+report_day <- "10월 9일"
+file_date <- "20211009"
 ```
 
 
@@ -192,7 +192,7 @@ electoral_college %>%
       subtitle = md("*민주당 경선: 선거인단*")
     ) %>% 
     tab_source_note(
-      source_note = md("기준 시점: 2021년 10월 04일")
+      source_note = md("기준 시점: 2021년 10월 09일")
     ) %>% 
     tab_options(
       table.width = pct(50),
@@ -261,7 +261,7 @@ race_tbl %>%
       subtitle = md("*민주당 경선: 누적 득표수*")
     ) %>% 
     tab_source_note(
-      source_note = md("기준 시점: 2021년 10월 04일")
+      source_note = md("기준 시점: 2021년 10월 09일")
     ) %>% 
     tab_options(
       table.width = pct(50),
@@ -338,7 +338,7 @@ race_tbl %>%
       subtitle = md("*민주당 경선: 당원/여론 누적 득표수*")
     ) %>% 
     tab_source_note(
-      source_note = md("기준 시점: 2021년 10월 04일")
+      source_note = md("기준 시점: 2021년 10월 09일")
     ) %>% 
     tab_options(
       table.width = pct(100),
@@ -401,7 +401,7 @@ race_tbl %>%
       subtitle = md("*민주당 경선: 시도별 누적 득표수*")
     ) %>% 
     tab_source_note(
-      source_note = md("기준 시점: 2021년 10월 04일")
+      source_note = md("기준 시점: 2021년 10월 09일")
     ) %>% 
     tab_options(
       table.width = pct(80),
