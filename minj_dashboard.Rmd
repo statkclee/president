@@ -26,6 +26,7 @@ library(here)
 library(fs)
 library(glue)
 library(gt)
+library(plotly)
 
 race_tbl <-
   read_rds(file = "data/race_tbl.rds")

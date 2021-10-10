@@ -69,7 +69,7 @@ cma_vb <- glue::glue("{cma} ({cma_pcnt})")
 valueBox(cma_vb, caption = "추미애", icon = "fa-six", color = "#42f578")
 ```
 
-Column {.tabset}
+Column {.tabset .tabset-fade}
 -------------------------------------------------------------------------------
 
 ### 선거인단
@@ -355,7 +355,7 @@ race_tbl %>%
 ```{r table-sido}
 
 race_tbl %>% 
-  filter(!str_detect(시도, "슈퍼")) %>% 
+  filter(!str_detect(시도, "슈퍼|재외")) %>% 
   group_by(시도, 후보자명) %>%
   summarise(득표 = sum(득표)) %>% 
   ungroup() %>% 
@@ -420,5 +420,77 @@ race_tbl %>%
           weight = "bold")
         ),
     locations = cells_body(columns = "합계"))
+```
+
+### 재외국민 {#gt-table-sido-member-overseas}
+
+```{r gt-votes-member-overseas}
+race_tbl %>% 
+  filter(str_detect(시도, "재외")) %>% 
+  group_by(시도, 후보자명) %>%
+  summarise(득표 = sum(득표)) %>% 
+  ungroup() %>% 
+  pivot_wider(names_from = 후보자명, values_from = 득표) %>%
+  ## janitor table decoration -----------
+  adorn_totals(where = c("row", "col"), name = "합계") %>% 
+  # mutate_if(is.numeric, scales::comma) %>% 
+  adorn_percentages(denominator = "all") %>% 
+  adorn_pct_formatting(digits = 1) %>% 
+  adorn_ns(position = "front") %>% 
+  mutate_at(vars(이재명, 이낙연, 박용진, 추미애, 합계), .funs =  add_comma_seprator)  %>%  
+  
+  gt(rowname_col = "시도") %>% 
+    tab_header(
+      title = md("**&#9755; 제20대 대통령 선거 &#9754;**"),
+      subtitle = md("*민주당 경선: 재외국민 누적 득표수*")
+    ) %>% 
+    tab_source_note(
+      source_note = md(gt_md)
+    ) %>% 
+    tab_options(
+      table.width = pct(100),
+      heading.background.color = "#1E61B0", # R logo 파란색
+      heading.title.font.size = "32px",
+      column_labels.background.color = "#F7F7F7", # R logo 회색 
+      column_labels.font.weight = "bold",
+      stub.background.color = "#ffffff",
+      stub.font.weight = "bold"
+    ) %>% 
+    # fmt_number(
+    #   columns = c(이재명, 이낙연, 박용진, 추미애),
+    #   decimals = 0
+    # ) %>% 
+    # grand_summary_rows(
+    #   columns = c(이재명, 이낙연, 박용진, 추미애),
+    #   fns = list(
+    #     합계 = ~sum(.)),
+    #   formatter = fmt_number,
+    #   use_seps = TRUE,
+    #   decimals = 0
+    # ) %>% 
+    tab_style(
+      style = list(
+        cell_text(align = "center")
+      ),
+    locations = cells_stub(rows = TRUE)
+    ) %>% 
+    tab_style(
+      style = list(
+        cell_fill(color = "#3c8ae8"),
+        cell_text(
+          align = "center",
+          size = "medium",
+          weight = "bold")
+        ),
+    locations = cells_body(rows = "합계")) %>% 
+    tab_style(
+      style = list(
+        cell_fill(color = "#3c8ae8"),
+        cell_text(
+          align = "center",
+          size = "medium",
+          weight = "bold")
+        ),
+    locations = cells_body(columns = "합계"))  
 ```
 
