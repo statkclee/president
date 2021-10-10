@@ -43,8 +43,6 @@ knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE,
 
 ```{r minju-module-data}
 library(tidyverse)
-
-library(tidyverse)
 library(readxl)
 library(testthat)
 
@@ -78,7 +76,8 @@ type_04 <- race_tbl %>%
 electoral_college <- race_tbl %>% 
   select(시도 = x1, 선거인단) %>% 
   filter(!str_detect(시도, "누적")) %>% 
-  drop_na()
+  drop_na() %>% 
+  add_row(시도 = "재외국민", 선거인단 = 4933)
 
 ## 데이터 정규화
 
@@ -102,14 +101,30 @@ type_04_tbl <- type_04 %>%
   mutate(후보자명 = str_remove(후보자명, pattern = "_[0-9]+$")) %>% 
   mutate(구분 = "국민선거인단")
 
+# 재외국민 -------------------------------------
+
+overseas_raw <- read_excel("data/2021_민주당 경선결과.xlsx", sheet = "Sheet2", skip =1)
+
+overseas_tbl  <- overseas_raw %>%  
+  na.omit() %>% 
+  select(이재명:추미애) %>% 
+  pivot_longer(everything(), names_to = "후보자명", values_to = "득표") %>% 
+  mutate(시도 = "재외국민",
+         구분 = "재외국민",
+         당원여론 = "재외국민")
+
+# 최종 결합 ------------------------------------------------------
 race_tbl <- bind_rows(type_01_tbl, type_02_tbl) %>% 
   bind_rows(type_03_tbl) %>% 
   bind_rows(type_04_tbl) %>% 
+  bind_rows(overseas_tbl) %>% 
   mutate(득표 = as.numeric(득표)) %>% 
   mutate(후보자명 = factor(후보자명, levels = c("이재명", "이낙연", "박용진", "추미애"))) %>% 
-  mutate(시도 = factor(시도, levels = c("대전충남", "세종충북", "대구경북", "강원", "1차 슈퍼데이", "광주전남", "전북", "제주", "부울경", "인천", "2차 슈퍼데이", "경기"))) %>% 
-  mutate(당원여론 = ifelse(str_detect(시도, "슈퍼데이"), "국민선거인단", "당원"))
-
+  mutate(시도 = factor(시도, levels = c("대전충남", "세종충북", "대구경북", "강원", "1차 슈퍼데이", "광주전남", "전북", "제주", "부울경", "인천", "2차 슈퍼데이", "경기", "서울", "3차 슈퍼데이", "재외국민"))) %>% 
+  mutate(당원여론 = case_when(str_detect(시도, "슈퍼데이") ~ "국민선거인단",
+                              str_detect(시도, "재외국민") ~ "재외국민",
+                              TRUE ~ "당원"))
+  
 
 ## 데이터 내보내기 -----------------------------------------
 
@@ -118,7 +133,9 @@ race_tbl %>%
 
 electoral_college %>% 
   write_rds(file = "data/electoral_college.rds")
+
 ## 엑셀 데이터 정합성 확인 ---------------------------------
+### 1370+2403+9+541 = 4323 (재외국민)
 
 test_that("엑셀 데이터 정합성", {
 
@@ -126,13 +143,13 @@ test_that("엑셀 데이터 정합성", {
     summarise(합계 = sum(득표)) %>% 
     pull()
 
-  expect_equal(total_sum, 1089497)
+  expect_equal(total_sum, 1427270 + 4323 )
 })
 
 
-sido_fct <- c("대전충남", "세종충북", "대구경북", "강원", "광주전남", "전북", "제주", "부울경", "인천", "경기")
-report_day <- "10월 9일"
-file_date <- "20211009"
+sido_fct <- c("대전충남", "세종충북", "대구경북", "강원", "광주전남", "전북", "제주", "부울경", "인천", "경기", "서울")
+report_day <- "10월 10일"
+file_date <- "20211010"
 ```
 
 
@@ -261,7 +278,7 @@ race_tbl %>%
       subtitle = md("*민주당 경선: 누적 득표수*")
     ) %>% 
     tab_source_note(
-      source_note = md("기준 시점: 2021년 10월 09일")
+      source_note = md("기준 시점: 2021년 10월 10일")
     ) %>% 
     tab_options(
       table.width = pct(50),
@@ -338,7 +355,7 @@ race_tbl %>%
       subtitle = md("*민주당 경선: 당원/여론 누적 득표수*")
     ) %>% 
     tab_source_note(
-      source_note = md("기준 시점: 2021년 10월 09일")
+      source_note = md("기준 시점: 2021년 10월 10일")
     ) %>% 
     tab_options(
       table.width = pct(100),
@@ -383,7 +400,7 @@ race_tbl %>%
 
 ```{r gt-votes-member-sido2}
 race_tbl %>% 
-  filter(!str_detect(시도, "슈퍼")) %>% 
+  filter(!str_detect(시도, "슈퍼|재외")) %>% 
   group_by(시도, 후보자명) %>%
   summarise(득표 = sum(득표)) %>% 
   ungroup() %>% 
@@ -401,7 +418,7 @@ race_tbl %>%
       subtitle = md("*민주당 경선: 시도별 누적 득표수*")
     ) %>% 
     tab_source_note(
-      source_note = md("기준 시점: 2021년 10월 09일")
+      source_note = md("기준 시점: 2021년 10월 10일")
     ) %>% 
     tab_options(
       table.width = pct(80),
@@ -474,7 +491,7 @@ race_tbl %>%
       subtitle = md("*민주당 경선: 국민선거인단 누적 득표수*")
     ) %>% 
     tab_source_note(
-      source_note = md("기준 시점: 2021년 10월 04일")
+      source_note = md("기준 시점: 2021년 10월 10일")
     ) %>% 
     tab_options(
       table.width = pct(100),
@@ -523,6 +540,79 @@ race_tbl %>%
     locations = cells_body(columns = "합계"))  
 ```
 
+### 재외국민 {#gt-table-sido-member-overseas}
+
+```{r gt-votes-member-overseas}
+race_tbl %>% 
+  filter(str_detect(시도, "재외")) %>% 
+  group_by(시도, 후보자명) %>%
+  summarise(득표 = sum(득표)) %>% 
+  ungroup() %>% 
+  pivot_wider(names_from = 후보자명, values_from = 득표) %>%
+  ## janitor table decoration -----------
+  adorn_totals(where = c("row", "col"), name = "합계") %>% 
+  # mutate_if(is.numeric, scales::comma) %>% 
+  adorn_percentages(denominator = "all") %>% 
+  adorn_pct_formatting(digits = 1) %>% 
+  adorn_ns(position = "front") %>% 
+  mutate_at(vars(이재명, 이낙연, 박용진, 추미애, 합계), .funs =  add_comma_seprator)  %>%  
+  
+  gt(rowname_col = "시도") %>% 
+    tab_header(
+      title = md("**&#9755; 제20대 대통령 선거 &#9754;**"),
+      subtitle = md("*민주당 경선: 재외국민 누적 득표수*")
+    ) %>% 
+    tab_source_note(
+      source_note = md("기준 시점: 2021년 10월 10일")
+    ) %>% 
+    tab_options(
+      table.width = pct(100),
+      heading.background.color = "#1E61B0", # R logo 파란색
+      heading.title.font.size = "32px",
+      column_labels.background.color = "#F7F7F7", # R logo 회색 
+      column_labels.font.weight = "bold",
+      stub.background.color = "#ffffff",
+      stub.font.weight = "bold"
+    ) %>% 
+    # fmt_number(
+    #   columns = c(이재명, 이낙연, 박용진, 추미애),
+    #   decimals = 0
+    # ) %>% 
+    # grand_summary_rows(
+    #   columns = c(이재명, 이낙연, 박용진, 추미애),
+    #   fns = list(
+    #     합계 = ~sum(.)),
+    #   formatter = fmt_number,
+    #   use_seps = TRUE,
+    #   decimals = 0
+    # ) %>% 
+    tab_style(
+      style = list(
+        cell_text(align = "center")
+      ),
+    locations = cells_stub(rows = TRUE)
+    ) %>% 
+    tab_style(
+      style = list(
+        cell_fill(color = "#3c8ae8"),
+        cell_text(
+          align = "center",
+          size = "medium",
+          weight = "bold")
+        ),
+    locations = cells_body(rows = "합계")) %>% 
+    tab_style(
+      style = list(
+        cell_fill(color = "#3c8ae8"),
+        cell_text(
+          align = "center",
+          size = "medium",
+          weight = "bold")
+        ),
+    locations = cells_body(columns = "합계"))  
+```
+
+
 ## `ggplot` 그래프 {.tabset}
 
 ### 선거인단 {#ggplot-electoral-college}
@@ -538,7 +628,7 @@ votes_tbl <- race_tbl %>%
 electoral_g <- electoral_college %>% 
   left_join(votes_tbl) %>% 
   pivot_longer(-시도) %>%  
-  mutate(시도 = factor(시도, levels = c("대전충남", "세종충북", "대구경북", "강원", "1차 슈퍼데이", "광주전남", "전북", "제주", "부울경", "인천", "2차 슈퍼데이"))) %>% 
+  mutate(시도 = factor(시도, levels = c("대전충남", "세종충북", "대구경북", "강원", "1차 슈퍼데이", "광주전남", "전북", "제주", "부울경", "인천", "2차 슈퍼데이", "경기", "서울", "3차 슈퍼데이", "재외국민"))) %>% 
   ggplot(aes(x = 시도, y = value, fill = name, width = ifelse(name == "총투표수", 0.3, 0.5))) +
     geom_col(stat = "identity") +
     theme_bw(base_family = "NanumGothic") +
@@ -618,10 +708,10 @@ cumsum_two_g <- race_tbl %>%
   summarise(득표 = sum(득표)) %>% 
   ungroup() %>% 
   pivot_wider(names_from = 당원여론, values_from = 득표) %>% 
-  mutate(누적득표 = 국민선거인단  + 당원) %>% 
+  mutate(누적득표 = 국민선거인단  + 당원 + 재외국민) %>% 
   pivot_longer(국민선거인단:누적득표, names_to = "구분", values_to = "득표") %>% 
   mutate(후보자명 = factor(후보자명, levels = c("이재명", "김두관", "정세균", "이낙연", "박용진", "추미애")),
-         구분     = factor(구분, levels = c("누적득표", "국민선거인단", "당원"))) %>% 
+         구분     = factor(구분, levels = c("누적득표", "국민선거인단", "당원", "재외국민"))) %>% 
   ggplot(aes(x = 후보자명, y = 득표, fill = 후보자명)) +
     geom_col(width = 0.5) +
     facet_wrap(~구분) +
@@ -650,7 +740,7 @@ cumsum_two_g
 
 ## 누적 ----------
 sido_g <- race_tbl %>% 
-  filter(!str_detect(시도, "슈퍼")) %>% 
+  filter(!str_detect(시도, "슈퍼|재외")) %>% 
   ggplot(aes(x = 후보자명, y = 득표, fill = 후보자명)) +
     geom_col() +
     facet_wrap(~시도) +
@@ -700,5 +790,32 @@ people_g <- race_tbl %>%
 people_g
 ```
 
+### 재외국민 {#ggplot-cumsum-votes-sido-overseas}
+
+```{r ggplot-cumsum-votes-sido-overseas}
+
+## 누적 ----------
+overseas_g <- race_tbl %>% 
+  filter(str_detect(시도, "재외")) %>% 
+  ggplot(aes(x = 후보자명, y = 득표, fill = 후보자명)) +
+    geom_col(width = 0.3) +
+    facet_wrap(~시도) +
+    theme_bw(base_family = "NanumGothic") +
+    theme(legend.position = "none",
+          strip.text.x = element_text(size = rel(1.7), colour = "black", family = "NanumMyeongjo", face="bold"),
+          axis.text.y = element_text(size = rel(1.5), colour = "gray35", family = "NanumBarunpen", face="bold"),
+          axis.text.x = element_text(size = rel(1.3), colour = "black", family = "NanumBarunpen", face="bold"),
+          strip.background=element_rect(fill="gray95"),
+          plot.title=element_text(size=18, face="bold", family = "NanumBarunpen"),
+          plot.subtitle=element_text(face="bold", size=13, colour="grey10", family = "NanumBarunpen")) +
+    labs(x = "",
+         y = "",
+         title = "제20대 대통령 선거 / 민주당 경선",
+         subtitle = "재외국민 득표수") +
+    scale_y_continuous(labels = scales::comma) +
+    scale_fill_manual(values = c("blue", "red", "gray", "green"))
+
+overseas_g
+```
 
 
