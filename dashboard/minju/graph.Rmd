@@ -215,7 +215,7 @@ ggplotly(people_g)
 sido_g <- race_tbl %>% 
   filter(!str_detect(시도, "슈퍼|재외")) %>% 
   ggplot(aes(x = 후보자명, y = 득표, fill = 후보자명)) +
-    geom_col() +
+    geom_col(width = 0.4) +
     facet_wrap(~시도) +
     theme_bw(base_family = "NanumGothic") +
     theme(legend.position = "none",
@@ -230,7 +230,7 @@ sido_g <- race_tbl %>%
          title = "제20대 대통령 선거 / 민주당 경선",
          subtitle = "지역순회 시도별 득표수") +
     scale_y_continuous(labels = scales::comma) +
-    scale_fill_manual(values = c("blue", "gray", "gray", "red", "gray", "green"))
+    scale_fill_manual(values = c("blue", "red", "gray", "green"))
 
 plotly::ggplotly(sido_g)
 
