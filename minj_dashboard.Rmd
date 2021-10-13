@@ -7,6 +7,8 @@ output:
     logo: fig/minju_logo_section.png
     theme: readable
     css: css/minju.css
+editor_options: 
+  chunk_output_type: console
 ---
 
 

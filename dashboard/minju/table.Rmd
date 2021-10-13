@@ -288,7 +288,7 @@ race_tbl %>%
   ## janitor table decoration -----------
   adorn_totals(where = c("row", "col"), name = "합계") %>% 
   # mutate_if(is.numeric, scales::comma) %>% 
-  adorn_percentages(denominator = "all") %>% 
+  adorn_percentages(denominator = "row") %>% 
   adorn_pct_formatting(digits = 1) %>% 
   adorn_ns(position = "front") %>% 
   mutate_at(vars(이재명, 이낙연, 박용진, 추미애, 합계), .funs =  add_comma_seprator)  %>%  
@@ -363,7 +363,7 @@ race_tbl %>%
   ## janitor table decoration -----------
   adorn_totals(where = c("row", "col"), name = "합계") %>% 
   # mutate_if(is.numeric, scales::comma) %>% 
-  adorn_percentages(denominator = "all") %>% 
+  adorn_percentages(denominator = "row") %>% 
   adorn_pct_formatting(digits = 1) %>% 
   adorn_ns(position = "front") %>% 
   mutate_at(vars(이재명, 이낙연, 박용진, 추미애, 합계), .funs =  add_comma_seprator)  %>%  

@@ -78,7 +78,7 @@ votes_tbl <- race_tbl %>%
 electoral_g <- electoral_college %>% 
   left_join(votes_tbl) %>% 
   pivot_longer(-시도) %>%  
-  mutate(시도 = factor(시도, levels = c("대전충남", "세종충북", "대구경북", "강원", "1차 슈퍼데이", "광주전남", "전북", "제주", "부울경", "인천", "2차 슈퍼데이", "경기", "재외국민"))) %>% 
+  mutate(시도 = factor(시도, levels = c("대전충남", "세종충북", "대구경북", "강원", "1차 슈퍼데이", "광주전남", "전북", "제주", "부울경", "인천", "2차 슈퍼데이", "경기", "서울", "재외국민", "3차 슈퍼데이"))) %>% 
   ggplot(aes(x = 시도, y = value, fill = name, width = ifelse(name == "총투표수", 0.3, 0.5))) +
     geom_col(stat = "identity") +
     theme_bw(base_family = "NanumGothic") +
