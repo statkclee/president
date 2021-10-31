@@ -32,4 +32,7 @@ subtitle: 대통령 선거 2022년
 1. [JTBC 차기대선주자](president-jtbc.html)
 1. [사진 배경 제거](remove-background.html)
 1. [중앙 선거여론 조사 심의 위원회](president-nesdc.html)
+1. [**대통령 선거**](president-data.html)
+    - [제18대 대통령 선거 결과](president-election-2012.html)
+    - [제19대 대통령 선거 결과](president-election-2017.html)
 
