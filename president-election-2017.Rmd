@@ -183,3 +183,40 @@ presid_hubo_sido_2017_gt <- gt_sido_hubo_ttl %>%
 presid_hubo_sido_2017_gt
 ```
 
+# 시군구 [^rmarkdown-dt] {#table-sigungu}
+
+[^rmarkdown-dt]: ["Using crosstalk with DT in R Markdown" - This is a template for using the crosstalk with several grouped datatable widgets to create filterable reports in R Markdown (i.e. in a non-Shiny setting).](https://www.gerkelab.com/blog/2021/09/crosstalk-with-dt/)
+
+
+```{r presid-18-sigungu}
+presid_17_sigungu_tbl <- presid_17_tbl %>% 
+  filter(후보 %in% c("문재인", "홍준표", "안철수", "유승민", "심상정")) %>% 
+  group_by(시도명, 구시군명, 후보) %>% 
+  summarise(득표 = sum(득표))
+
+presid_17_sigungu_tbl
+```
+
+
+
+```{r crosstalk-sharddata}
+library(crosstalk)
+library(leaflet)
+library(DT)
+
+# Wrap data frame in SharedData
+sigungu_sd <- SharedData$new(presid_17_sigungu_tbl, key = ~시도명)
+
+# Use SharedData like a dataframe with Crosstalk-enabled widgets
+bscols(
+  # Create a filter input
+  crosstalk::filter_select("sido", "시도", sigungu_sd, group = ~시도명, multiple = FALSE),
+  crosstalk::filter_select("sido", "시군구명", sigungu_sd, group = ~구시군명, multiple = FALSE),
+
+  datatable(sigungu_sd, extensions="Scroller", style="bootstrap", class="compact", width="100%",
+    options=list(deferRender=TRUE, scrollY=300, scroller=TRUE))
+)
+
+
+```
+
