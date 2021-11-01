@@ -196,7 +196,8 @@ presid_17_sigungu_tbl <- presid_17_tbl %>%
   filter(후보 %in% c("문재인", "홍준표", "안철수", "유승민", "심상정")) %>% 
   group_by(시도명, 구시군명, 후보) %>% 
   summarise(득표 = sum(득표)) %>% 
-  unite("key", 시도명:구시군명, sep="_", remove = FALSE)
+  unite("key", 시도명:구시군명, sep="_", remove = FALSE) %>% 
+  ungroup()
 ```
 
 
@@ -223,3 +224,52 @@ bscols(
 
 ```
 
+
+## 시군구 - `gt` {#table-sigungu-gt}
+
+```{r crosstalk-sharddata-sigungu}
+presid_17_sigungu_display_tbl <- presid_17_sigungu_tbl %>% 
+  filter(str_detect(시도명, "경기"),
+         str_detect(구시군명, "성남")) %>% 
+  separate(구시군명, into = c("시명", "구명"), sep = "시") %>% 
+  group_by(시도명, 시명, 후보) %>% 
+  summarise(득표 = sum(득표)) %>% 
+  mutate(득표율 = 득표 / sum(득표)) %>% 
+  ungroup() %>% 
+  mutate(득표 = scales::comma(득표),
+         득표율 = scales::percent(득표율, accuracy = 1)) %>%
+  mutate(득표종합 = glue::glue("{득표}<br>( {득표율} )")) %>%
+  select(-득표, -득표율) %>%
+  pivot_wider(names_from = "후보", values_from = "득표종합") %>%
+  ungroup() %>%
+  select(시도명, 시명, 문재인, 홍준표, 안철수, 유승민, 심상정)
+
+presid_17_sigungu_display_tbl %>% 
+    gt() %>%
+  gt_theme_538() %>%
+  tab_header(
+    title = md("**&#x2600; 제19대 대통령 선거 &#x2600;**"),
+    subtitle = md("*구시군별 득표율 (2017년 5월 9일)*")
+  ) %>%
+  opt_align_table_header(align = "center") %>%
+  tab_options(
+    table.width = "600px",
+    heading.background.color = "#1E61B0", # R logo 파란색
+    heading.title.font.size = "20px",
+    column_labels.background.color = "#F7F7F7", # R logo 회색
+    column_labels.font.weight = "bold",
+    stub.background.color = "#ffffff",
+    stub.font.weight = "bold"
+  ) %>%
+  fmt_markdown(columns = 문재인:심상정)  %>%
+  cols_align(
+    align = "center",
+    columns = `시도명`
+  ) %>%
+  gt_highlight_cols(columns = 문재인, font_weight = "bold", fill  = "#0388fc") %>%
+  gt_highlight_cols(columns = 홍준표, font_weight = "bold", fill  = "#ff6161") %>%
+  cols_width(
+    시도명 ~ px(100)
+  ) 
+
+```
