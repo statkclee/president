@@ -165,7 +165,7 @@ kbs_tbl <- tibble(file_path = kbs_pages)
 slickR(kbs_tbl$file_path, height = 600)
 ```
 
-## XML 파일 파싱 {#kbs-xml-parsing}
+# XML 파일 파싱 {#kbs-xml-parsing}
 
 특정 페이지에서 좌표값과 함께 해당 영역의 텍스트를 추출하는 로직을 구현해보자.
 
@@ -176,59 +176,40 @@ library(reactable)
 kbs_survey <- read_xml("https://www.nesdc.go.kr/files/result/202109/FILE_202109180931525561.pdf.files/FILE_202109180931525561.pdf.text.xml")
 
 ## KBS 여론조사 페이지 ------
-kbs_survey_page <- kbs_survey %>% 
-  xml_children()
+kbs_children <- xml_children(kbs_survey)
 
-## 특정 페이지 : 목차 --------------
-xml_siblings(kbs_survey_page)[[2]] %>% 
-  xml_children() %>% 
-  xml_contents() %>% 
-  as.character()
+support_tbl <- kbs_children[7] %>% 
+  xml_find_all(".//text") %>% 
+  xml_text() %>% 
+  enframe() %>% 
+  mutate(구분 = case_when(str_detect(value, "성별") ~ "성별",
+                           str_detect(value, "연령") ~ "연령",
+                           str_detect(value, "거주지역") ~ "거주지역",
+                           str_detect(value, "학력") ~ "학력",
+                           str_detect(value, "직업") ~ "직업",
+                           TRUE ~ as.character(NA))) %>% 
+  
+  fill(구분, .direction = "down")
 
-## 특정 페이지 : 응답자 분포표 좌표 --------------
-kbs_xml_tbl <- 
-tibble(t = xml_siblings(kbs_survey_page)[[2]] %>% xml_children() %>% xml_attr("t"),      # t = top
-       l = xml_siblings(kbs_survey_page)[[2]] %>% xml_children() %>% xml_attr("l"),      # l = left
-       h = xml_siblings(kbs_survey_page)[[2]] %>% xml_children() %>% xml_attr("h"),      # h = height
-       w = xml_siblings(kbs_survey_page)[[2]] %>% xml_children() %>% xml_attr("w"),      # w = width
-       p = xml_siblings(kbs_survey_page)[[2]] %>% xml_children() %>% xml_attr("p"),      # p = paragraph(?)
-       content = xml_siblings(kbs_survey_page)[[2]] %>% xml_children() %>% xml_contents() %>%  as.character()) %>% 
-  mutate( t = as.numeric(t),
-          l = as.numeric(l),
-          h = as.numeric(h),
-          w = as.numeric(w))
+column_name <- c("조사완료수", "가중조사수", "이재명", "윤석열", "홍준표", "이낙연", "유승민", "안철수", "추미애", "심상정", "최재형", "원희룡", "황교안", "김동연", "하태경", "김두관", "이정미", "그외", "없다", "모름", "계")
 
-kbs_xml_tbl %>% 
-  select(-p) %>% 
-  reactable::reactable(
-    columns = list(
-      t = colDef(width = 80),
-      l = colDef(width = 80),
-      h = colDef(width = 80),
-      w = colDef(width = 80)
-    )
-  )
+gender_tbl <- support_tbl %>% 
+  filter(구분 == "성별") %>% 
+  filter(value != "성별") %>% 
+  select(value) %>% 
+  mutate(value = str_trim(value)) %>% 
+  mutate(split_value = map(value, str_split, pattern = " ")) %>% 
+  select(split_value) %>% 
+  pivot_longer(cols = everything()) %>% 
+  unnest(value) %>% 
+  mutate(name = c("남성", "여성")) %>% 
+  unnest(value) %>% 
+  filter(!value %in% c("남자", "여자")) %>% 
+  mutate(varname = rep(column_name, 2)) %>% 
+  pivot_wider(names_from = name, values_from = value)
 
-```
+gender_tbl %>% 
+  reactable::reactable()
 
-## 페이지 이미지 겹쳐 확인 {#kbs-xml-parsing-check}
-
-뭔가 좌표가 직관적이 아니라 이를 해결할 수 있는 방법을 찾아보자.
-
-
-```{r xml-file-parsing-check}
-library(magick)
-
-kbs_xml_img <- image_read('data/nesdc/kbs/kbs_3.png')
-
-kbs_xml_img_box <- image_draw(kbs_xml_img)
-
-rect(xleft   = kbs_xml_tbl$l[2], 
-     ytop    = kbs_xml_tbl$t[2], 
-     xright  = kbs_xml_tbl$l[2] + kbs_xml_tbl$w[2]/10,
-     ybottom = kbs_xml_tbl$t[2] + abs(kbs_xml_tbl$h[2]),
-     border = "red", lty = "solid", lwd = 3)
-
-dev.off()
 ```
 
