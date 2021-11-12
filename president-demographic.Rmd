@@ -174,3 +174,50 @@ presid_2030_vs_gt %>%
 
 # presid_2030_vs_gt
 ```
+
+
+# 시각화 {#deomgraphic-viz}
+
+
+
+```{r vis-demographics}
+read_rds("data/korea_demographic.rds") %>% 
+  filter(time <= 2030) %>% 
+  janitor::clean_names(ascii = FALSE) %>% 
+  mutate(age_group = case_when(age >= 0 & age  <=18 ~ "00-18",
+                               age >= 19 & age <=39 ~ "20-30",
+                               age >= 40 & age <=59 ~ "40-50",
+                               TRUE ~ "60+")) %>% 
+  group_by(time, age_group) %>% 
+  summarise(인구수 = sum(abs_pop), .groups = "drop") %>% 
+  group_by(age_group) %>% 
+  summarise(viz_data = list(인구수), .groups = "drop") %>% 
+  rename(세대 = age_group, 유권자수 = viz_data) %>% 
+  gt() %>%
+  gt_sparkline(유권자수) %>% 
+  gt_theme_538() %>%
+    tab_header(
+      title = md("**&#x2600; 제20대 대통령 선거 &#x2600;**"),
+      subtitle = md("*세대별 유권자수 변화 (1990년 ~ 2030년)*")
+    ) %>%
+    opt_align_table_header(align = "center") %>%
+    tab_options(
+      table.width = "300px",
+      heading.background.color = "#1E61B0", # R logo 파란색
+      heading.title.font.size = "20px",
+      column_labels.background.color = "#F7F7F7", # R logo 회색
+      column_labels.font.weight = "bold",
+      stub.background.color = "#ffffff",
+      stub.font.weight = "bold"
+    ) %>% 
+    gt_highlight_rows(rows = 세대 == "20-30", font_weight = "bold", fill  = "#ffffff") %>% 
+    cols_align(
+      align = "center",
+      columns = c(세대, 유권자수)
+    )  %>% 
+    cols_width(
+      유권자수 ~ px(200)
+    )
+  
+```
+
