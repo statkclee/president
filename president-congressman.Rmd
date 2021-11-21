@@ -142,7 +142,9 @@ congressman %>%
 
 # 네이버 인물정보 {#naver-info}
 
-```{r naver-info}
+## 분당을 김병욱 의원 {#naver-info-bundang}
+
+```{r naver-info-one}
 # 1. 데이터: 네이버 인물정보 -----
 
 ## 1.1. 네이버 주소 -----
@@ -193,11 +195,8 @@ sns_url <- html_children(info_nodes) %>%
 sns_raw <- tibble(SNS = sns_name, 
                   link = sns_url)
 
-sns_tbl <- tibble(key = "SNS",
-                  value = sns_raw)
-
-sns_raw %>% 
-  nest()
+sns_tbl <- sns_raw %>% 
+  nest(SNS = everything())
 
 ### 데이터프레임 변환 -------------------------
 p_info_tbl <- bind_cols(key=key, value=value) %>% 
@@ -205,8 +204,101 @@ p_info_tbl <- bind_cols(key=key, value=value) %>%
   pivot_wider(names_from = key, values_from = value) %>% 
   mutate(sns = sns_tbl)
 
-DT::datatable(p_info_df)
-
+DT::datatable(p_info_tbl)
 ```
 
+
+## 인물정보 함수 {#naver-info-bundang-funciton}
+
+```{r naver-info-function}
+
+people_info <- function(people_name = "김병욱") {
+
+  ## 1.1. 네이버 주소 -----
+
+  naver_url <- glue::glue("https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=1&ie=utf8&query={people_name}")
+  
+  ## 1.2. 네이버 인물정보 긁어오기 -----
+  ### 사진정보 
+  pic_info <- read_html(naver_url) %>% 
+    html_node(css = ".cm_info_box") %>% 
+    html_node(css = 'img') %>% 
+    html_attr('src')
+    
+  pic_info_df <- tibble(key="사진", value=pic_info)
+  
+  ### 인물정보 ---------------------------------
+  key <- read_html(naver_url) %>% 
+    html_node(css = ".cm_info_box") %>% 
+    html_nodes("dt") %>% 
+    html_text()
+  
+  tmp_value <- read_html(naver_url) %>% 
+    html_node(css = "div.cm_info_box > div.detail_info") %>% 
+    html_nodes('div.info_group') %>% 
+    html_text()
+  
+  value <- str_remove(str_trim(tmp_value), key) %>% 
+    str_trim(.)
+  
+  ### SNS 서비스 ------------------------
+  #### 전체 링크와 전체 링크명
+  all_link <- read_html(naver_url) %>% 
+      html_node(css = ".cm_info_box") %>% 
+      html_nodes('dd') %>% 
+      html_nodes("a") %>% 
+      html_attr("href")
+  
+  all_link_name <- read_html(naver_url) %>% 
+    html_node(css = ".cm_info_box") %>% 
+    html_nodes('dd') %>% 
+    html_nodes("a") %>% 
+    html_text()
+  
+  #### SNS 마스크
+  SNS_mask <- str_detect(all_link, pattern = "^http")
+  
+  SNS_link <- all_link[SNS_mask]
+  SNS_name <- all_link_name[SNS_mask]
+  
+  #### SNS 데이터프레임
+  
+  sns_raw <- tibble(SNS = SNS_name, 
+                    link = SNS_link)
+  
+  sns_tbl <- sns_raw %>% 
+    nest(SNS = everything())
+
+  ### 데이터프레임 변환 -------------------------
+  p_info_tbl <- bind_cols(key=key, value=value) %>% 
+    bind_rows(pic_info_df) %>% 
+    pivot_wider(names_from = key, values_from = value) %>% 
+    mutate(sns = sns_tbl)
+  
+  return(p_info_tbl)
+}
+
+people_info("송영길")
+```
+
+## 전체 국회의원 {#all-congressman}
+
+```{r all-congressman, eval = FALSE}
+
+
+people_info_possibly <- possibly(.f = people_info, otherwise = "Error")
+
+congressman_info_list <- map(congressman$의원명, people_info_possibly)
+
+congressman_info_list %>% 
+  write_rds("data/congressman_info_list.rds")
+
+congressman_tbl <- map_df(congressman_info_list, rbind) %>% 
+  mutate(의원명 = congressman$의원명) %>% 
+  select(의원명, everything())
+
+congressman_tbl %>% 
+  write_rds("data/congressman_tbl.rds")
+
+```
 
