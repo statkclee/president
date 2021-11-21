@@ -302,3 +302,88 @@ congressman_tbl %>%
 
 ```
 
+
+# EDA {#all-congressman-EDA}
+
+```{r all-congressman-EDA}
+congressman_raw <- 
+  read_rds("data/congressman_tbl.rds")
+
+congressman_tbl <- congressman_raw %>% 
+  select(의원명, 소속, sns) %>% 
+  mutate(SNS수 = map_int(sns$SNS, ~nrow(.x)))
+
+congressman_tbl %>% 
+  mutate(정당 = str_extract(소속, pattern = "[^(]*")) %>% 
+  group_by(정당) %>% 
+  summarise(평균SNS = mean(SNS수))
+```
+
+# SNS {#all-congressman-SNS}
+
+```{r sns-count}
+SNS_tbl <- congressman_tbl %>% 
+  select(의원명, SNS수, sns) %>% 
+  mutate(SNS_ALL = map(sns$SNS, ~mutate(.x, new = glue::glue("{SNS}*{link}")))) %>% 
+  mutate(SNS_name_link = map(SNS_ALL, ~select(.x, new))) %>% 
+  group_by(의원명) %>% 
+  unnest(SNS_name_link) %>% 
+  select(의원명, new) %>% 
+  separate(new, into = c("사이트", "링크"), sep = "\\*") %>% 
+  ungroup() %>% 
+  mutate(사이트 = ifelse(str_detect(사이트, "[배준영|우상호]TV"), "유튜브", 사이트))
+
+SNS_tbl  %>% 
+  write_rds("data/SNS_tbl.rds")
+```
+
+```{r sns-stat}
+SNS_tbl  %>% 
+  count(사이트, sort =TRUE) %>% 
+  mutate(pcnt = n /295)
+```
+
+- 유튜브: https://www.yuichiotsuka.com/youtube-data-extract-r/
+
+
+```{r sns-stat-gt}
+library(gt)
+
+SNS_stat_gt <- SNS_tbl %>% 
+  count(사이트, sort =TRUE, name = "의원수") %>% 
+  mutate(비율 = 의원수 /295) %>% 
+  gt() %>% 
+  tab_header(
+      title = md("**&#9755; 제20대 대통령 선거 &#9754;**"),
+      subtitle = md("*제21대 국회의원 SNS 활용현황*")
+    ) %>% 
+    tab_source_note(
+      source_note = md("기준 시점: 2021년 11월 22일")
+    ) %>% 
+    tab_options(
+      table.width = pct(100),
+      heading.background.color = "#1E61B0", # R logo 파란색
+      heading.title.font.size = "32px",
+      column_labels.background.color = "#F7F7F7", # R logo 회색 
+      column_labels.font.weight = "bold",
+      stub.background.color = "#ffffff",
+      stub.font.weight = "bold"
+    ) %>% 
+    cols_align(
+      align = "center",
+      columns = c(사이트)
+    ) %>% 
+    fmt_number(
+      columns = 의원수,
+      decimals = 0
+    ) %>% 
+    fmt_percent(
+      columns = 비율,
+      decimals = 1
+    ) 
+
+SNS_stat_gt
+
+# SNS_stat_gt %>% 
+#   gtsave(filename = "SNS_stat_gt.png", path = "fig")
+```
