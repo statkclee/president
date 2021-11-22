@@ -224,6 +224,8 @@ congressman_tbl %>%
   select(-id, -대수, -지역, -선수, - 당선방법) %>% 
   arrange(desc(시도명)) %>% 
   reactable::reactable(
+      searchable = TRUE,
+      # groupBy = "시도명",
       defaultColDef = colDef(
         header = function(value) gsub(".", " ", value, fixed = TRUE),
         cell = function(value) format(value, nsmall = 1),
