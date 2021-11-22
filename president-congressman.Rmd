@@ -39,106 +39,37 @@ library(lubridate)
 
 [^previous-crawling]: [데이터 가져오기 - 네이버 인물정보](https://statkclee.github.io/ingest-data/naver-people-info.html)
 
-## 제 21 대 국회의원 위키백과 {#congressman-data-21}
+[제21대 국회의원 - 마스터](https://statkclee.github.io/president/president-congressman-master.html)에서 현재 시점(2021년 11월 22일) 기준 제21대 국회의원 마스터를 작성한다.
 
-```{r crawl-congressman-21, eval = FALSE}
-# 0. 환경설정 -----
-library(httr)
-library(rvest)
+```{r get-congressman-master}
+library(reactable)
 library(tidyverse)
-library(urltools)
-library(glue)
-library(extrafont)
-loadfonts()
+library(rvest)
 
-# 1. 국회의원 명단 -----
-## 1.1. 긁어오기 -----
-Sys.setlocale("LC_ALL", "C")
+congressman_tbl <- 
+  read_rds("data/congressman/congressman_21_master.rds") %>% 
+  arrange(의원명)
 
-url <- "https://ko.wikipedia.org/wiki/대한민국_제21대_국회의원_목록_(지역구별)"
-
-cm_list <- vector("list", length=19)
-
-for(idx in 1:17) {
-  cm_list[[idx]] <- url %>% 
-    read_html() %>% 
-    html_node(xpath = glue::glue('//*[@id="mw-content-text"]/div/table[{idx+1}]')) %>% 
-    html_table(fill=TRUE) %>% 
-    as_tibble()
-}
-
-Sys.setlocale("LC_ALL", "Korean")
-
-for(idx in 1:17) {
-  cm_list[[idx]] <- cm_list[[idx]] %>% 
-    filter(str_detect(성명, pattern = "[가-힣]{2,4}"))
-}
-
-## 1.2. 시도별 국회의원 정보 -----
-cm_list <- cm_list[1:17] 
-
-sido_name <- c("서울특별시","부산광역시","대구광역시","인천광역시","광주광역시","대전광역시","울산광역시","세종특별자치시","경기도","강원도","충청북도","충청남도","전라북도","전라남도","경상북도","경상남도", "제주특별자치도")
-
-names(cm_list) <- sido_name
-
-## 2.3. 리스트 --> 데이터프레임 -----
-
-name_v <- map(cm_list, "성명") %>% flatten %>% unlist %>% as.character()
-precinct_v <- map(cm_list, "선거구명") %>% flatten %>% unlist %>% as.character()
-party_v <- map(cm_list, "소속 정당") %>% flatten %>% unlist %>% as.character()
-geo_v <- map(cm_list, "관할구역") %>% flatten %>% unlist %>% as.character()
-num_v <- map(cm_list, "선수") %>% flatten %>% unlist %>% as.numeric()
-
-cm_df <- tibble(시도   = rep(sido_name, map_int(cm_list, nrow)),
-                선거구 = precinct_v,
-                이름   = name_v, 
-                정당   = party_v,
-                지역   = geo_v,
-                선수   = num_v)
-
-# fs::dir_create("data/congressman")
-# 
-# cm_df %>%
-#   write_rds("data/congressman/cm_df.rds")
-
-# listviewer::jsonedit(cm_list)
-
+congressman_tbl %>% 
+  select(-id, -대수, -지역, -선수, - 당선방법) %>% 
+  arrange(desc(시도명)) %>% 
+  reactable::reactable(
+      defaultColDef = colDef(
+        header = function(value) gsub(".", " ", value, fixed = TRUE),
+        cell = function(value) format(value, nsmall = 1),
+        align = "center",
+        minWidth = 30,
+        headerStyle = list(background = "#f7f7f8")
+      ),
+      columns = list(
+        소속위원회 = colDef(minWidth = 50),
+        지역구명 = colDef(minWidth = 100)
+      ),
+      bordered = TRUE,
+      highlight = TRUE
+)
 ```
 
-
-
-```{r congressman-list-DT}
-cm_tbl <- 
-  read_rds("data/congressman/cm_df.rds")
-
-DT::datatable(cm_tbl)
-```
-
-
-
-## 제 21 대 국회의원 국회DB {#congressman-data-21-DB}
-
-자료출처: [제21대 국회의원 검색](https://open.assembly.go.kr/portal/assm/search/memberSchPage.do)
-
-```{r congressman-db}
-library(readxl)
-
-electorates_raw <- read_excel("data/제21대_지역구.xlsx")
-
-electorates_tbl <- electorates_raw %>% 
-  mutate(시도명 = str_sub(지역, start =1, end =2))
-
-proportion_raw <- read_excel("data/제21대_비례의원.xlsx")
-
-proportion_tbl <- proportion_raw %>% 
-  mutate(시도명 = str_sub(지역, start =1, end =2))
-
-congressman <- bind_rows(proportion_tbl, electorates_tbl) %>% 
-  select(-번호)
-
-congressman %>% 
-  DT::datatable()
-```
 
 # 네이버 인물정보 {#naver-info}
 
@@ -204,7 +135,7 @@ p_info_tbl <- bind_cols(key=key, value=value) %>%
   pivot_wider(names_from = key, values_from = value) %>% 
   mutate(sns = sns_tbl)
 
-DT::datatable(p_info_tbl)
+reactable(p_info_tbl)
 ```
 
 
@@ -213,6 +144,8 @@ DT::datatable(p_info_tbl)
 ```{r naver-info-function}
 
 people_info <- function(people_name = "김병욱") {
+  
+  cat("----------------", people_name, "\n")
 
   ## 1.1. 네이버 주소 -----
 
@@ -283,33 +216,154 @@ people_info("송영길")
 
 ## 전체 국회의원 {#all-congressman}
 
+중복된 국회의원을 확인한다.
+
+```{r all-congressman-stat}
+congressman_tbl %>% 
+  count(의원명, sort = TRUE) %>% 
+  filter(n !=1)
+```
+
+전체 국회의원을 초벌로 쭉 돌려 국회의원 인물정보 데이터를 추출한다.
+
 ```{r all-congressman, eval = FALSE}
 
+congressman_tbl %>% 
+  count(의원명, sort = TRUE) %>% 
+  filter(n !=1)
 
 people_info_possibly <- possibly(.f = people_info, otherwise = "Error")
 
-congressman_info_list <- map(congressman$의원명, people_info_possibly)
+congressman_info_raw_list <- map(congressman_tbl$의원명, people_info_possibly)
 
-congressman_info_list %>% 
-  write_rds("data/congressman_info_list.rds")
+congressman_info_raw_list %>% 
+  write_rds("data/congressman_info_raw_list.rds")
 
-congressman_tbl <- map_df(congressman_info_list, rbind) %>% 
+congressman_info_raw_tbl <- map_df(congressman_info_raw_list, rbind) %>% 
   mutate(의원명 = congressman$의원명) %>% 
   select(의원명, everything())
 
-congressman_tbl %>% 
-  write_rds("data/congressman_tbl.rds")
+congressman_info_raw_tbl %>% 
+  write_rds("data/congressman_info_raw_tbl.rds")
 
 ```
 
+## 중복 국회의원 {#all-congressman-dedup}
+
+김병욱, 이수진 두명이 동명이인이기 때문에 이를 크롤링 함수를 일부 수정하여 반영한다.
+김병욱 의원은 당이 다른데 이수진 의원은 정당도 동일한데 한분은 지역구, 한분은 비례의원이다.
+
+![](fig/naver-congressman-info.jpeg)
+
+```{r dedup-congressman, eval = FALSE}
+congressman_info_raw_tbl %>% 
+  # filter(의원명 %in% c("김병욱", "이수진"))
+  filter(의원명 %in% c("이수진"))
+
+second_person_info <- function(people_name = "이수진") {
+
+  ## 1.1. 네이버 주소 -----
+  
+  naver_url <- glue::glue("https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=1&ie=utf8&query={people_name}")
+  
+  ## 1.2. 네이버 인물정보 긁어오기 -----
+  ### 사진정보 
+  pic_info <- read_html(naver_url) %>% 
+    html_nodes(css = ".cm_info_box") %>% 
+    .[[2]] %>% 
+    html_node(css = 'img') %>% 
+    html_attr('src')
+    
+  pic_info_df <- tibble(key="사진", value=pic_info)
+  
+  ### 인물정보 ---------------------------------
+  key <- read_html(naver_url) %>% 
+    html_nodes(css = ".cm_info_box") %>% 
+    .[[2]] %>% 
+    html_nodes("dt") %>% 
+    html_text()
+  
+  tmp_value <- read_html(naver_url) %>% 
+    html_nodes(css = "div.cm_info_box > div.detail_info") %>% 
+    .[[2]] %>% 
+    html_nodes('div.info_group') %>% 
+    html_text()
+  
+  value <- str_remove(str_trim(tmp_value), key) %>% 
+    str_trim(.)
+  
+  ### SNS 서비스 ------------------------
+  #### 전체 링크와 전체 링크명
+  all_link <- read_html(naver_url) %>% 
+    html_nodes(css = ".cm_info_box") %>% 
+    .[[2]] %>% 
+      html_nodes('dd') %>% 
+      html_nodes("a") %>% 
+      html_attr("href")
+  
+  all_link_name <- read_html(naver_url) %>% 
+    html_nodes(css = ".cm_info_box") %>% 
+    .[[2]] %>% 
+    html_nodes('dd') %>% 
+    html_nodes("a") %>% 
+    html_text()
+  
+  #### SNS 마스크
+  SNS_mask <- str_detect(all_link, pattern = "^http")
+  
+  SNS_link <- all_link[SNS_mask]
+  SNS_name <- all_link_name[SNS_mask]
+  
+  #### SNS 데이터프레임
+  
+  sns_raw <- tibble(SNS = SNS_name, 
+                    link = SNS_link)
+  
+  sns_tbl <- sns_raw %>% 
+    nest(SNS = everything())
+  
+  ### 데이터프레임 변환 -------------------------
+  p_info_tbl <- bind_cols(key=key, value=value) %>% 
+    bind_rows(pic_info_df) %>% 
+    pivot_wider(names_from = key, values_from = value) %>% 
+    mutate(sns = sns_tbl)
+  
+  return(p_info_tbl)
+}
+
+lsj_tbl <- people_info("이수진") %>% mutate(의원명 = "이수진")
+lsj_second_tbl <- second_person_info("이수진") %>% mutate(의원명 = "이수진2")
+
+kbu_tbl <- people_info("김병욱") %>% mutate(의원명 = "김병욱")
+kbu_second_tbl <- second_person_info("김병욱") %>% mutate(의원명 = "김병욱")
+
+
+```
+
+## 최종 마무리 {#all-congressman-dedup-clear}
+
+
+```{r dedup-congressman-clear, eval = FALSE}
+congressman_info_tbl <- congressman_info_raw_tbl %>% 
+  filter(! 의원명 %in% c("김병욱", "이수진")) %>% 
+  bind_rows(lsj_tbl) %>% 
+  bind_rows(lsj_second_tbl) %>% 
+  bind_rows(kbu_tbl) %>% 
+  bind_rows(kbu_second_tbl)
+
+congressman_info_tbl
+
+congressman_info_tbl %>% 
+  write_rds("data/congressman/congressman_info_tbl.rds")
+```
 
 # EDA {#all-congressman-EDA}
 
 ```{r all-congressman-EDA}
-congressman_raw <- 
-  read_rds("data/congressman_tbl.rds")
+congressman_info_raw <- 
+  read_rds("data/congressman/congressman_info_tbl.rds")
 
-congressman_tbl <- congressman_raw %>% 
+congressman_tbl <- congressman_info_raw %>% 
   select(의원명, 소속, sns) %>% 
   mutate(SNS수 = map_int(sns$SNS, ~nrow(.x)))
 
@@ -321,35 +375,57 @@ congressman_tbl %>%
 
 # SNS {#all-congressman-SNS}
 
-```{r sns-count}
-SNS_tbl <- congressman_tbl %>% 
-  select(의원명, SNS수, sns) %>% 
+## 데이터 정제 {#all-congressman-SNS-clean}
+
+```{r sns-count-clean, eval = FALSE}
+congressman_tbl <- 
+  read_rds("data/congressman/congressman_info_tbl.rds")
+
+congressman_id_tbl <- congressman_tbl %>% 
+  select(의원명, 소속, sns) %>% 
+  mutate(정당 = str_extract(소속, pattern = "[^(]*")) %>% 
+  mutate(정당 = case_when(의원명 == "유정주" ~ "더불어민주당",
+                           의원명 == "윤미향" ~ "무소속",
+                           의원명 == "최승재" ~ "국민의힘",
+                           의원명 == "강병원" ~ "더불어민주당",
+                           의원명 == "권칠승" ~ "더불어민주당",
+                           의원명 == "박병석" ~ "더불어민주당",
+                           의원명 == "서동용" ~ "더불어민주당",
+                           의원명 == "유기홍" ~ "더불어민주당",
+                           의원명 == "정진석" ~ "국민의힘",
+                           TRUE ~ 정당)) %>% 
+  mutate(id = glue::glue("{의원명}_{정당}")) %>% 
+  select(id, 의원명, 정당, sns)
+
+congressman_sns_tbl <- congressman_id_tbl  %>% 
   mutate(SNS_ALL = map(sns$SNS, ~mutate(.x, new = glue::glue("{SNS}*{link}")))) %>% 
   mutate(SNS_name_link = map(SNS_ALL, ~select(.x, new))) %>% 
-  group_by(의원명) %>% 
+  group_by(id) %>% 
   unnest(SNS_name_link) %>% 
   select(의원명, new) %>% 
   separate(new, into = c("사이트", "링크"), sep = "\\*") %>% 
   ungroup() %>% 
-  mutate(사이트 = ifelse(str_detect(사이트, "[배준영|우상호]TV"), "유튜브", 사이트))
+  mutate(사이트 = ifelse(str_detect(사이트, "[배준영|우상호]TV"), "유튜브", 사이트)) %>% 
+  mutate(사이트 = ifelse(str_detect(사이트, "카카오톡?채널"), "카카오톡채널", 사이트))  
 
-SNS_tbl  %>% 
-  write_rds("data/SNS_tbl.rds")
+# congressman_sns_tbl %>% 
+#   filter(의원명 =="구자근")
+#   filter(str_detect(사이트, "은메달|세바시|청년의"))
+
+congressman_sns_tbl  %>% 
+  write_rds("data/congressman/congressman_sns_tbl.rds")
 ```
 
-```{r sns-stat}
-SNS_tbl  %>% 
-  count(사이트, sort =TRUE) %>% 
-  mutate(pcnt = n /295)
-```
 
-- 유튜브: https://www.yuichiotsuka.com/youtube-data-extract-r/
+## SNS 요약표 {#sns-summary-table}
 
-
-```{r sns-stat-gt}
+```{r sns-summary-table}
 library(gt)
 
-SNS_stat_gt <- SNS_tbl %>% 
+congressman_sns_tbl  <- 
+  read_rds("data/congressman/congressman_sns_tbl.rds")
+
+SNS_stat_gt <- congressman_sns_tbl %>% 
   count(사이트, sort =TRUE, name = "의원수") %>% 
   mutate(비율 = 의원수 /295) %>% 
   gt() %>% 
@@ -383,7 +459,5 @@ SNS_stat_gt <- SNS_tbl %>%
     ) 
 
 SNS_stat_gt
-
-# SNS_stat_gt %>% 
-#   gtsave(filename = "SNS_stat_gt.png", path = "fig")
 ```
+
