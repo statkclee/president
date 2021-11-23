@@ -308,8 +308,8 @@ sido_age_gt <- mois_tbl %>%
 
 sido_age_gt
 
-sido_age_gt %>% 
-  gtsave(filename = "sido_age_gt.png", path = "fig")
+# sido_age_gt %>% 
+#   gtsave(filename = "sido_age_gt.png", path = "fig")
 ```
 
 # 시각화 {#demographic-viz}
