@@ -38,3 +38,4 @@ subtitle: 대통령 선거 2022년
 1. [인구통계 - 2030 중심으로](president-demographic.html)
     - [시도별 인구통계 - 2030 중심으로](president-demographic-sido.html)
 1. [제21대 국회의원](president-congressman.html) : [마스터](president-congressman-master.html)
+1. [Birds-Eye View](president-birds-eye-view.html)
