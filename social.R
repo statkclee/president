@@ -147,3 +147,78 @@ reticulate::repl_python()
 # 
 # trend_naver_g
 
+# 2. (구글) 연관검색어 ----------------------------------------------------
+
+## 2.1. 데이터 ------------------------------------------------------------
+
+ysy <- snsdata::get_related_search_candidate("윤석열")
+ljm <- snsdata::get_related_search_candidate("이재명")
+acs <- snsdata::get_related_search_candidate("안철수")
+
+related_google_tbl <- bind_rows(acs, ljm, ysy)
+
+related_google_tbl %>%
+  write_rds(glue::glue("data/social/related_google_tbl_{Sys.Date() %>% str_remove_all(., '-')}.rds"))
+
+## 2.2. 시각화 ------------------------------------------------------------
+
+related_google_tbl <- read_rds(glue::glue("data/social/related_google_tbl_{Sys.Date() %>% str_remove_all(., '-')}.rds"))
+
+library(tidygraph)
+library(ggraph)
+library(patchwork)
+library(ggforce)
+
+convert_from_wide_to_nw <- function(rawdata) {
+  
+  lvl_one_tbl <- rawdata %>%
+    select(from = hubo, to = lvl_01) %>%
+    distinct(.)
+  
+  lvl_two_tbl <- rawdata %>%
+    select(from = lvl_01, to = lvl_02)
+  
+  nw_tbl <- bind_rows(lvl_one_tbl, lvl_two_tbl)
+  
+  nw_tbl
+}
+
+
+draw_related_keywords <- function(hubo_name) {
+  
+  network_viz_tbl <-  convert_from_wide_to_nw(related_google_tbl %>% filter(hubo == hubo_name))
+  
+  network_viz_tbl %>%
+    as_tbl_graph(directed=FALSE) %>%
+    activate(nodes) %>%
+    mutate(eigen = centrality_eigen(),
+           group = group_infomap()) %>%
+    mutate(관심사항 = ifelse(str_detect(name, "윤석열 안철수 단일화"), 1, 0 ) ) %>%   
+    ggraph(layout='nicely') +
+      geom_edge_link(color='gray50', alpha=.2) +
+      geom_node_point(aes(color=factor(group), size=eigen)) +
+      geom_node_text(aes(label=name), size=3, repel=TRUE) +
+      theme_minimal() +
+      theme_graph(base_family = "NanumBarunPen") +
+      ggtitle(glue::glue("{hubo_name} : 구글 검색 연관검색어")) +
+      theme(legend.position = "none",
+            plot.title=element_text(size=16, face="bold", family = "NanumBarunpen"),
+            plot.subtitle=element_text(face="bold", size=13, colour="grey10", family = "NanumBarunpen")) +
+      geom_mark_hull(aes(x = x, y = y, fill = "red", filter = 관심사항 == 1,
+                         label = "윤안 단일화",
+                         con.colour = "black",
+                         label.buffer = unit(100, 'mm') ))
+}
+
+
+ljm_g <- draw_related_keywords("이재명")
+ysy_g <- draw_related_keywords("윤석열")
+acs_g <- draw_related_keywords("안철수")
+
+ljm_g  + ysy_g + acs_g
+
+
+
+
+
+

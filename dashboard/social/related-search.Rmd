@@ -1,0 +1,112 @@
+연관검색어
+=================================================================================================
+
+
+Column {.tabset .tabset-fade}
+-------------------------------------------------------------------------------
+
+### 이재명
+
+```{r related-search-ljm}
+
+related_google_tbl <- read_rds(glue::glue("data/social/related_google_tbl_{Sys.Date() %>% str_remove_all(., '-')}.rds"))
+
+draw_related_keywords_ljm <- function(hubo_name = "이재명") {
+  
+  network_viz_tbl <-  convert_from_wide_to_nw(related_google_tbl %>% filter(hubo == hubo_name))
+  
+  network_viz_tbl %>%
+    as_tbl_graph(directed=FALSE) %>%
+    activate(nodes) %>%
+    mutate(eigen = centrality_eigen(),
+           group = group_infomap()) %>%
+    ggraph(layout='nicely') +
+      geom_edge_link(color='gray50', alpha=.2) +
+      geom_node_point(aes(color=factor(group), size=eigen)) +
+      geom_node_text(aes(label=name), size=3, repel=TRUE) +
+      theme_minimal() +
+      theme_graph(base_family = "NanumBarunPen") +
+      ggtitle(glue::glue("{hubo_name} : 구글 검색 연관검색어")) +
+      theme(legend.position = "none",
+            plot.title=element_text(size=16, face="bold", family = "NanumBarunpen"),
+            plot.subtitle=element_text(face="bold", size=13, colour="grey10", family = "NanumBarunpen")) 
+}
+
+# related_search_ljm_g <- draw_related_keywords_ljm("이재명")
+# ggplotly(related_search_ljm_g)
+draw_related_keywords_ljm("이재명")
+
+```
+
+
+### 윤석열
+
+```{r related-search-ysy}
+
+draw_related_keywords_ysy <- function(hubo_name =  "윤석열") {
+  
+  network_viz_tbl <-  convert_from_wide_to_nw(related_google_tbl %>% filter(hubo == hubo_name))
+  
+  network_viz_tbl %>%
+    as_tbl_graph(directed=FALSE) %>%
+    activate(nodes) %>%
+    mutate(eigen = centrality_eigen(),
+           group = group_infomap()) %>%
+    mutate(관심사항 = ifelse(str_detect(name, "윤석열 안철수"), 1, 0 ) ) %>%   
+    ggraph(layout='nicely') +
+      geom_edge_link(color='gray50', alpha=.2) +
+      geom_node_point(aes(color=factor(group), size=eigen)) +
+      geom_node_text(aes(label=name), size=3, repel=TRUE) +
+      theme_minimal() +
+      theme_graph(base_family = "NanumBarunPen") +
+      ggtitle(glue::glue("{hubo_name} : 구글 검색 연관검색어")) +
+      theme(legend.position = "none",
+            plot.title=element_text(size=16, face="bold", family = "NanumBarunpen"),
+            plot.subtitle=element_text(face="bold", size=13, colour="grey10", family = "NanumBarunpen")) +
+      geom_mark_hull(aes(x = x, y = y, fill = "red", filter = 관심사항 == 1,
+                         label = "윤안 단일화",
+                         con.colour = "black",
+                         label.buffer = unit(100, 'mm') ))
+}
+
+# related_search_ysy_g <- draw_related_keywords_ysy("윤석열")
+# ggplotly(related_search_ysy_g)
+draw_related_keywords_ysy("윤석열")
+
+```
+
+### 안철수
+
+```{r related-search-acs}
+
+draw_related_keywords_acs <- function(hubo_name =  "안철수") {
+  
+  network_viz_tbl <-  convert_from_wide_to_nw(related_google_tbl %>% filter(hubo == hubo_name))
+  
+  network_viz_tbl %>%
+    as_tbl_graph(directed=FALSE) %>%
+    activate(nodes) %>%
+    mutate(eigen = centrality_eigen(),
+           group = group_infomap()) %>%
+    mutate(관심사항 = ifelse(str_detect(name, "단일화"), 1, 0 ) ) %>%   
+    ggraph(layout='nicely') +
+      geom_edge_link(color='gray50', alpha=.2) +
+      geom_node_point(aes(color=factor(group), size=eigen)) +
+      geom_node_text(aes(label=name), size=3, repel=TRUE) +
+      theme_minimal() +
+      theme_graph(base_family = "NanumBarunPen") +
+      ggtitle(glue::glue("{hubo_name} : 구글 검색 연관검색어")) +
+      theme(legend.position = "none",
+            plot.title=element_text(size=16, face="bold", family = "NanumBarunpen"),
+            plot.subtitle=element_text(face="bold", size=13, colour="grey10", family = "NanumBarunpen")) +
+      geom_mark_hull(aes(x = x, y = y, fill = "red", filter = 관심사항 == 1,
+                         label = "윤안 단일화",
+                         con.colour = "black",
+                         label.buffer = unit(100, 'mm') ))
+}
+
+# related_search_acs_g <- draw_related_keywords_acs("안철수")
+# ggplotly(related_search_acs_g)
+draw_related_keywords_acs("안철수")
+
+```
