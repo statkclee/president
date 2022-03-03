@@ -259,7 +259,7 @@ youtube_g <- yt_stat %>%
                                "동영상: {video_id}\n",
                                "게시일: {format(게시일, '%m월% %d일')}") )) +
     geom_point(size = 0.5) +
-    geom_smooth(se = FALSE, method = "loess", span = 0.75) +
+    geom_smooth(aes(group = 후보명, color = 후보명), se = FALSE, method = "loess", span = 0.75) +
     scale_x_date(date_labels = "%m월%d") +
     scale_y_sqrt(labels = scales::comma) +
     theme_bw(base_family = "NanumBarenPen") +
@@ -283,6 +283,51 @@ youtube_g <- yt_stat %>%
 ggplotly(youtube_g, tooltip = "text")
 
 
+# 4. 썸트렌드 -----------------------------------------------
+## 4.1. 언급량 ----------------------------------------------
+library(readxl)
+library(lubridate)
 
+get_some_words_data <- function() {
+  ## 1.1 이재명.................................  
+  
+  lee_words <- read_excel("data/social/some/20220302/[썸트렌드] 이재명_언급량_220101-220302.xlsx", sheet = "언급량", skip = 13)
+  
+  lee_wom <- lee_words %>% 
+    select(-합계) %>% 
+    mutate(날짜 = ymd(날짜)) %>% 
+    pivot_longer(-날짜, names_to = "구분", values_to = "언급횟수") %>% 
+    mutate(후보 = "이재명")
+  
+  ## 1.2 윤석열.................................
+  yoon_words <- read_excel("data/social/some/20220302/[썸트렌드] 윤석열_언급량_220101-220302.xlsx", sheet = "언급량", skip = 13)
+  
+  yoon_wom <- yoon_words %>% 
+    select(-합계) %>% 
+    mutate(날짜 = ymd(날짜)) %>% 
+    pivot_longer(-날짜, names_to = "구분", values_to = "언급횟수") %>% 
+    mutate(후보 = "윤석열")
+  
+  ## 1.3. 안철수.................................
+  ahn_words <- read_excel("data/social/some/20220302/[썸트렌드] 안철수_언급량_220101-220302.xlsx", sheet = "언급량", skip = 13)
+  
+  ahn_wom <- ahn_words %>% 
+    select(-합계) %>% 
+    mutate(날짜 = ymd(날짜)) %>% 
+    pivot_longer(-날짜, names_to = "구분", values_to = "언급횟수") %>% 
+    mutate(후보 = "안철수")
+  
+  ## 1.4. 세후보 결합
+  three_wom <- bind_rows(lee_wom, yoon_wom) %>% 
+    bind_rows(ahn_wom)
+  
+  three_wom
+}
+
+
+wom_raw <- get_some_data()
+
+wom_raw %>% 
+  write_rds(glue::glue("data/social/wom_raw_{Sys.Date() %>% str_remove_all('-')}.rds"))
 
 
