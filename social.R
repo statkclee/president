@@ -284,11 +284,11 @@ ggplotly(youtube_g, tooltip = "text")
 
 
 # 4. 썸트렌드 -----------------------------------------------
-## 4.1. 언급량 ----------------------------------------------
+## 4.1. 데이터: SNS 언급량 ----------------------------------------------
 library(readxl)
 library(lubridate)
 
-get_some_words_data <- function() {
+get_some_wom_data <- function() {
   ## 1.1 이재명.................................  
   
   lee_words <- read_excel("data/social/some/20220302/[썸트렌드] 이재명_언급량_220101-220302.xlsx", sheet = "언급량", skip = 13)
@@ -325,9 +325,185 @@ get_some_words_data <- function() {
 }
 
 
-wom_raw <- get_some_data()
+wom_raw <- get_some_wom_data()
 
 wom_raw %>% 
   write_rds(glue::glue("data/social/wom_raw_{Sys.Date() %>% str_remove_all('-')}.rds"))
+
+
+## 4.2. 데이터: 유튜브 언급량 ----------------------------------------------
+
+"data/"
+
+get_some_youtube_data <- function() {
+  ## 2.1. 이재명 -------------------------
+  lee_youtube_raw <- read_excel("data/social/some/20220302/[썸트렌드] 이재명 컨텐츠조회수추이_220101-220302.xlsx", sheet = "전체 탐색량", skip = 13)
+  
+  lee_youtube <- lee_youtube_raw %>% 
+    select(-전체) %>% 
+    mutate(날짜 = ymd(날짜)) %>% 
+    pivot_longer(-날짜, names_to = "구분", values_to = "언급횟수") %>% 
+    mutate(후보 = "이재명")
+  
+  ## 2.2. 윤석열 -------------------------
+  yoon_youtube_raw <- read_excel("data/social/some/20220302/[썸트렌드] 윤석열 컨텐츠조회수추이_220101-220302.xlsx", sheet = "전체 탐색량", skip = 13)
+  
+  yoon_youtube <- yoon_youtube_raw %>% 
+    select(-전체) %>% 
+    mutate(날짜 = ymd(날짜)) %>% 
+    pivot_longer(-날짜, names_to = "구분", values_to = "언급횟수") %>% 
+    mutate(후보 = "윤석열")
+  
+  ## 2.3. 이재명 -------------------------
+  ahn_youtube_raw <- read_excel("data/social/some/20220302/[썸트렌드] 안철수 컨텐츠조회수추이_220101-220302.xlsx", sheet = "전체 탐색량", skip = 13)
+  
+  ahn_youtube <- ahn_youtube_raw %>% 
+    select(-전체) %>% 
+    mutate(날짜 = ymd(날짜)) %>% 
+    pivot_longer(-날짜, names_to = "구분", values_to = "언급횟수") %>% 
+    mutate(후보 = "안철수")
+  
+  
+  ## 2.4. 세후보 결합
+  three_youtube <- bind_rows(lee_youtube, yoon_youtube) %>% 
+    bind_rows(ahn_youtube) 
+  
+  three_youtube
+}
+
+youtube_raw <- get_some_youtube_data()
+
+youtube_raw %>% 
+  write_rds(glue::glue("data/social/youtube_raw_{Sys.Date() %>% str_remove_all('-')}.rds"))
+
+
+## 4.2 시각화 ------------------
+wom_raw  <-  
+  read_rds(glue::glue("data/social/wom_raw_{Sys.Date() %>% str_remove_all('-')}.rds"))
+
+wom_g <- wom_raw %>% 
+  mutate(구분 = factor(구분, levels = c("뉴스", "블로그", "커뮤니티", "유튜브", "인스타그램", "트위터"))) %>% 
+  ggplot(aes(x = 날짜, y = 언급횟수, color = 후보, group = 후보)) +
+  geom_line() +
+  geom_point(size = 0.7) +
+  facet_wrap(~구분, scale= "free_y") +
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_date(date_labels = "%y년%m월") +
+  theme_bw(base_family = "NanumBarunPen") +
+  theme(legend.position = "top",
+        legend.title=element_text(size=19), 
+        legend.text=element_text(size=13),
+        strip.text.x = element_text(size = rel(1.3), colour = "black", face="bold"),
+        axis.text.y = element_text(size = rel(1.7), colour = "gray35", face="bold", 
+                                   margin = margin(t = 0, r = 0, b = 0, l = 00)),
+        axis.text.x = element_text(size = rel(1.3), colour = "black",  face="bold"),
+        strip.background=element_rect(fill="gray95"),
+        plot.title=element_text(size=25, face="bold", family = "NanumBarunpen"),
+        plot.subtitle=element_text(face="bold", size=17, colour="grey10", family = "NanumBarunpen"))  +
+  labs(x = "",
+       y = "언급횟수/조회수",
+       title = "대통령선거 SNS 트래픽",
+       subtitle = glue::glue("조사일자: 2022-01-01 ~ {wom_raw %>% filter(날짜 == max(날짜)) %>% pull(날짜)}"),
+       caption = "데이터 출처: 썸트렌드") +
+  scale_color_manual(values = c("이재명" = "blue", 
+                                "윤석열" = "red", 
+                                "안철수" = "#DE5020" ))  
+
+ggplotly(wom_g)
+
+
+# 5. 감성분석 -----------------------------------------------
+## 5.1. 소셜 SNS 감성 데이터 ---------------------------------------
+
+get_some_social_emotion_data <- function(channel = "커뮤니티") {
+
+  ## 1.1 이재명 -------------------------
+  lee_emotion <- read_excel("data/social/some/20220302/[썸트렌드] 이재명_긍부정 추이(건수)_220101-220302.xlsx", sheet = channel, skip = 13)
+  
+  lee_emo <- lee_emotion %>% 
+    mutate(날짜 = ymd(날짜)) %>% 
+    pivot_longer(-날짜, names_to = "구분", values_to = "긍부정횟수") %>% 
+    mutate(후보 = "이재명") %>% 
+    mutate(채널 = channel)
+  
+  ## 1.2 윤석열 -------------------------
+  yoon_emotion <- read_excel("data/social/some/20220302/[썸트렌드] 윤석열_긍부정 추이(건수)_220101-220302.xlsx", sheet = channel, skip = 13)
+  
+  yoon_emo <- yoon_emotion %>% 
+    mutate(날짜 = ymd(날짜)) %>% 
+    pivot_longer(-날짜, names_to = "구분", values_to = "긍부정횟수") %>% 
+    mutate(후보 = "윤석열") %>% 
+    mutate(채널 = channel)
+  
+  ## 1.3. 안철수 -------------------------
+  ahn_emotion <- read_excel("data/social/some/20220302/[썸트렌드] 안철수_긍부정 추이(건수)_220101-220302.xlsx", sheet = channel, skip = 13)
+  
+  ahn_emo <- ahn_emotion %>% 
+    mutate(날짜 = ymd(날짜)) %>% 
+    pivot_longer(-날짜, names_to = "구분", values_to = "긍부정횟수") %>% 
+    mutate(후보 = "안철수") %>% 
+    mutate(채널 = channel)
+  
+  ## 1.4. 세후보 결합
+  three_emo <- bind_rows(lee_emo, yoon_emo) %>% 
+    bind_rows(ahn_emo) %>% 
+    mutate(구분 = str_remove_all(구분, "\\s?건수"))
+  
+  three_emo
+}
+
+emotion_social_raw <- tibble(채널 = c("커뮤니티", "인스타", "블로그", "뉴스", "트위터")) %>% 
+  mutate(data = map(채널, get_some_social_emotion_data)) %>% 
+  select(-채널) %>% 
+  unnest(data)
+
+emotion_social_raw %>% 
+  write_rds(glue::glue("data/social/emotion_social_raw_{Sys.Date() %>% str_remove_all('-')}.rds"))
+
+
+emotion_social_raw
+
+## 5.2. 유튜브 감성 데이터 ---------------------------------------
+
+get_some_youtube_emotion_data <- function() {
+  
+  ## 2.1. 이재명 -------------------------
+  lee_youtube_emo_raw <- read_excel("data/social/some/20220302/[썸트렌드] 이재명 유튜브감성추이_220101-220302.xlsx", sheet = "일자별 감성 추이", skip = 13)
+  
+  lee_youtube_emo <- lee_youtube_emo_raw %>% 
+    mutate(날짜 = ymd(날짜)) %>% 
+    pivot_longer(-날짜, names_to = "구분", values_to = "긍부정횟수") %>% 
+    mutate(후보 = "이재명") %>% 
+    mutate(채널 = "유튜브")
+  
+  ## 2.2. 윤석열 -------------------------
+  yoon_youtube_emo_raw <- read_excel("data/social/some/20220302/[썸트렌드] 윤석열 유튜브감성추이_220101-220302.xlsx", sheet = "일자별 감성 추이", skip = 13)
+  
+  yoon_youtube_emo <- yoon_youtube_emo_raw %>% 
+    mutate(날짜 = ymd(날짜)) %>% 
+    pivot_longer(-날짜, names_to = "구분", values_to = "긍부정횟수") %>% 
+    mutate(후보 = "윤석열") %>% 
+    mutate(채널 = "유튜브")
+  
+  ## 2.3. 안철수 -------------------------
+  ahn_youtube_emo_raw <- read_excel("data/social/some/20220302/[썸트렌드] 안철수 유튜브감성추이_220101-220302.xlsx", sheet = "일자별 감성 추이", skip = 13)
+  
+  ahn_youtube_emo <- ahn_youtube_emo_raw %>% 
+    mutate(날짜 = ymd(날짜)) %>% 
+    pivot_longer(-날짜, names_to = "구분", values_to = "긍부정횟수") %>% 
+    mutate(후보 = "안철수") %>% 
+    mutate(채널 = "유튜브")
+  
+  ## 2.4. 세후보 결합
+  three_youtube_emo <- bind_rows(lee_youtube_emo, yoon_youtube_emo) %>% 
+    bind_rows(ahn_youtube_emo)
+  
+  three_youtube_emo
+}
+
+emotion_youtube_raw <- get_some_youtube_emotion_data()
+
+emotion_youtube_raw %>% 
+  write_rds(glue::glue("data/social/emotion_youtube_raw_{Sys.Date() %>% str_remove_all('-')}.rds"))
 
 

@@ -49,8 +49,6 @@ convert_from_wide_to_nw <- function(rawdata) {
   nw_tbl
 }
 
-
-
 ```
 
 
@@ -65,48 +63,9 @@ convert_from_wide_to_nw <- function(rawdata) {
 ```{r child="dashboard/social/youtube-hubo.Rmd", encoding="UTF-8"}
 ```
 
-
-소셜 SNS
-=================================================================================================
-
-
-Column {.tabset .tabset-fade}
--------------------------------------------------------------------------------
-
-### 조회수
-
-```{r youtube-view}
-wom_raw  <-  
-  read_rds(glue::glue("data/social/wom_raw_{Sys.Date() %>% str_remove_all('-')}.rds"))
-
-wom_g <- wom_raw %>% 
-  mutate(구분 = factor(구분, levels = c("뉴스", "블로그", "커뮤니티", "유튜브", "인스타그램", "트위터"))) %>% 
-  ggplot(aes(x = 날짜, y = 언급횟수, color = 후보, group = 후보)) +
-  geom_line() +
-  geom_point(size = 0.7) +
-  facet_wrap(~구분, scale= "free_y") +
-  scale_y_continuous(labels = scales::comma) +
-  scale_x_date(date_labels = "%y년%m월") +
-  theme_bw(base_family = "NanumBarunPen") +
-  theme(legend.position = "top",
-        legend.title=element_text(size=19), 
-        legend.text=element_text(size=13),
-        strip.text.x = element_text(size = rel(1.3), colour = "black", face="bold"),
-        axis.text.y = element_text(size = rel(1.7), colour = "gray35", face="bold", 
-                                   margin = margin(t = 0, r = 0, b = 0, l = 00)),
-        axis.text.x = element_text(size = rel(1.3), colour = "black",  face="bold"),
-        strip.background=element_rect(fill="gray95"),
-        plot.title=element_text(size=25, face="bold", family = "NanumBarunpen"),
-        plot.subtitle=element_text(face="bold", size=17, colour="grey10", family = "NanumBarunpen"))  +
-  labs(x = "",
-       y = "언급횟수/조회수",
-       title = "대통령선거 SNS 트래픽",
-       subtitle = glue::glue("조사일자: 2022-01-01 ~ {wom_raw %>% filter(날짜 == max(날짜)) %>% pull(날짜)}"),
-       caption = "데이터 출처: 썸트렌드") +
-  scale_color_manual(values = c("이재명" = "blue", 
-                                "윤석열" = "red", 
-                                "안철수" = "#DE5020" ))  
-
-ggplotly(wom_g)
-
+```{r child="dashboard/social/social-SNS.Rmd", encoding="UTF-8"}
 ```
+
+```{r child="dashboard/social/social-emotion.Rmd", encoding="UTF-8"}
+```
+
