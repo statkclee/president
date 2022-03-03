@@ -218,6 +218,70 @@ acs_g <- draw_related_keywords("안철수")
 ljm_g  + ysy_g + acs_g
 
 
+# 3. 유튜브 ----------------------------------------------------
+## 3.1. 데이터 ------------------------------------------------------------
+library(tuber)
+
+yt_oauth(app_id = Sys.getenv("yt_client_id"),
+         app_secret = Sys.getenv("yt_secret"),
+         token = "")
+
+candidate_video_raw <- snsdata::candidates %>%
+  filter(후보명 %in% c("이재명", "윤석열", "안철수", "심상정")) %>%
+  mutate(data = map2(후보명, channel_id, snsdata::get_candidate_video_stat, video_date = "20220101"))
+
+candidate_video_raw %>%
+  write_rds(glue::glue("data/social_youtube_raw_{Sys.Date() %>% str_remove_all('-')}.rds"))
+
+## 3.2. 시각화 -------------------------------------------------
+
+candidate_video_raw <-
+  read_rds(glue::glue("data/social_youtube_raw_{Sys.Date() %>% str_remove_all('-')}.rds"))
+
+yt_stat <- candidate_video_raw %>%
+  select(data) %>%
+  unnest(data)
+
+yt_data_date <- yt_stat %>%
+  mutate(게시일 = as.Date(publishedAt)) %>%
+  filter(게시일 == max(게시일)) %>%
+  pull(게시일) %>% unique()
+
+youtube_g <- yt_stat %>%
+  mutate(게시일 = as.Date(publishedAt)) %>%
+  pivot_longer(조회수:댓글수) %>%
+  mutate(value = as.numeric(value)) %>%
+  mutate(후보명 = factor(후보명, levels = c("이재명", "윤석열", "안철수", "심상정"))) %>%
+  mutate(name = factor(name, levels = c("조회수", "좋아요수", "댓글수"))) %>% 
+  ggplot(aes(x=게시일, y= value, color = 후보명,
+             text = glue::glue("후보명: {후보명}\n",
+                               "댓글/조회/좋아요: {scales::comma(value, accuracy=1)}\n",
+                               "동영상: {video_id}\n",
+                               "게시일: {format(게시일, '%m월% %d일')}") )) +
+    geom_point(size = 0.5) +
+    geom_smooth(se = FALSE, method = "loess", span = 0.75) +
+    scale_x_date(date_labels = "%m월%d") +
+    scale_y_sqrt(labels = scales::comma) +
+    theme_bw(base_family = "NanumBarenPen") +
+    scale_color_manual(values=c("blue", "red", "#EA5505", "yellow")) +
+    labs(x        = "",
+         y        = "",
+         title    = "대선 후보 유튜브 활동성 통계",
+         subtitle = glue::glue("시점: 2021년 12월 01일 ~ {format(naverdata_date, '%Y년 %m월 %d일')}")) +
+    facet_wrap(~name, scales = "free_y") +
+    theme_bw(base_family = "NanumBarunPen") +
+    theme(legend.position = "top",
+          legend.title=element_text(size=13),
+          legend.text=element_text(size=11),
+          strip.text.x = element_text(size = rel(1.2), colour = "black", family = "NanumMyeongjo", face="bold"),
+          axis.text.y = element_text(size = rel(1.0), colour = "gray35", family = "NanumBarunpen", face="bold"),
+          axis.text.x = element_text(size = rel(1.0), colour = "black", family = "NanumBarunpen", face="bold"),
+          strip.background=element_rect(fill="gray95"),
+          plot.title=element_text(size=18, face="bold", family = "NanumBarunpen"),
+          plot.subtitle=element_text(face="bold", size=13, colour="grey10", family = "NanumBarunpen"))
+
+ggplotly(youtube_g, tooltip = "text")
+
 
 
 
