@@ -35,7 +35,7 @@ hubo_raw <- get_google_trends()
 Sys.setlocale("LC_ALL", "Korean")
 
 hubo_raw %>%
-  write_rds(glue::glue('data/social/google_trends_{Sys.Date()}.rds'))
+  write_rds(glue::glue('data/social/google_trends_{Sys.Date() %>% str_remove_all(., "-")}.rds'))
 
 ### 1.1.2. 구글 트렌드 시각화 ----------------------
 

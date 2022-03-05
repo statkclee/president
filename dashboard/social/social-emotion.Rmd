@@ -9,8 +9,11 @@ Column {.tabset .tabset-fade}
 
 ```{r emotion-news}
 
+# emotion_social_raw <- 
+#   read_rds(glue::glue("data/social/emotion_social_raw_{Sys.Date() %>% str_remove_all('-')}.rds"))
+
 emotion_social_raw <- 
-  read_rds(glue::glue("data/social/emotion_social_raw_{Sys.Date() %>% str_remove_all('-')}.rds"))
+  read_rds(glue::glue("data/social/emotion_social_raw_20220303.rds"))
 
 
 emotion_news_g <- emotion_social_raw %>% 
@@ -161,8 +164,11 @@ ggplotly(emotion_twitter_g)
 
 ```{r emotion-youtube}
 
+# emotion_youtube_raw <- 
+#   read_rds(glue::glue("data/social/emotion_youtube_raw_{Sys.Date() %>% str_remove_all('-')}.rds"))
+
 emotion_youtube_raw <- 
-  read_rds(glue::glue("data/social/emotion_youtube_raw_{Sys.Date() %>% str_remove_all('-')}.rds"))
+  read_rds(glue::glue("data/social/emotion_youtube_raw_20220303.rds"))
 
 
 emotion_youtube_g <- emotion_youtube_raw %>% 

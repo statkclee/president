@@ -8,8 +8,11 @@ Column {.tabset .tabset-fade}
 ### 뉴스
 
 ```{r social-news}
+# wom_raw  <-  
+#   read_rds(glue::glue("data/social/wom_raw_{Sys.Date() %>% str_remove_all('-')}.rds"))
+
 wom_raw  <-  
-  read_rds(glue::glue("data/social/wom_raw_{Sys.Date() %>% str_remove_all('-')}.rds"))
+  read_rds(glue::glue("data/social/wom_raw_20220303.rds"))
 
 wom_news_g <- wom_raw %>% 
   filter(구분 == "뉴스") %>% 
@@ -209,8 +212,12 @@ ggplotly(wom_twitter_g, tooltip = "text")
 
 ```{r yt-view}
 
+# youtube_raw <- 
+#   read_rds(glue::glue("data/social/youtube_raw_{Sys.Date() %>% str_remove_all('-')}.rds"))
+
 youtube_raw <- 
-  read_rds(glue::glue("data/social/youtube_raw_{Sys.Date() %>% str_remove_all('-')}.rds"))
+  read_rds(glue::glue("data/social/youtube_raw_20220303.rds"))
+
 
 
 yt_view_g <- youtube_raw %>% 

@@ -9,8 +9,11 @@ Column {.tabset .tabset-fade}
 
 ```{r youtube-view}
 
+# candidate_video_raw <-
+#   read_rds(glue::glue("data/social_youtube_raw_{Sys.Date() %>% str_remove_all('-')}.rds"))
 candidate_video_raw <-
-  read_rds(glue::glue("data/social_youtube_raw_{Sys.Date() %>% str_remove_all('-')}.rds"))
+  read_rds(glue::glue("data/social_youtube_raw_20220303.rds"))
+
 
 yt_stat <- candidate_video_raw %>%
   select(data) %>%

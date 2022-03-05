@@ -1,3 +1,8 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
 검색어 추세
 =================================================================================================
 
@@ -13,7 +18,7 @@ Column {.tabset .tabset-fade}
 ### 구글 트렌드 시각화 ------------------------------
 
 hubo_raw <-
-  read_rds(glue::glue('data/social/google_trends_{Sys.Date()}.rds'))
+  read_rds(glue::glue('data/social/google_trends_{Sys.Date() %>% str_remove_all(., "-")}.rds'))
 
 data_date <- hubo_raw$interest_over_time %>%
   mutate(date = lubridate::ymd(date)) %>%
