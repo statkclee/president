@@ -70,7 +70,7 @@ ggplotly(google_trends_g)
 ### 네이버 검색어 트렌드
 
 ```{r naver-trends}
-naver_json <- jsonlite::read_json("data/social/naver_20220303.json")
+naver_json <- jsonlite::read_json("data/social/naver_20220305.json")
 
 naver_tbl <- naver_json$results %>%
   enframe() %>%
