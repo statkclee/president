@@ -1,3 +1,8 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
 소셜 SNS 감성
 =================================================================================================
 
@@ -13,7 +18,7 @@ Column {.tabset .tabset-fade}
 #   read_rds(glue::glue("data/social/emotion_social_raw_{Sys.Date() %>% str_remove_all('-')}.rds"))
 
 emotion_social_raw <- 
-  read_rds(glue::glue("data/social/emotion_social_raw_20220303.rds"))
+  read_rds(glue::glue("data/social/emotion_social_raw_20220306.rds"))
 
 
 emotion_news_g <- emotion_social_raw %>% 

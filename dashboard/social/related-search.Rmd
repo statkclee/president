@@ -1,3 +1,8 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
 연관검색어
 =================================================================================================
 
@@ -11,7 +16,7 @@ Column {.tabset .tabset-fade}
 
 # related_google_tbl <- read_rds(glue::glue("data/social/related_google_tbl_{Sys.Date() %>% str_remove_all(., '-')}.rds"))
 
-related_google_tbl <- read_rds(glue::glue("data/social/related_google_tbl_20220305.rds"))
+related_google_tbl <- read_rds(glue::glue("data/social/related_google_tbl_20220306.rds"))
 
 draw_related_keywords_ljm <- function(hubo_name = "이재명") {
   
@@ -54,7 +59,7 @@ draw_related_keywords_ysy <- function(hubo_name =  "윤석열") {
     activate(nodes) %>%
     mutate(eigen = centrality_eigen(),
            group = group_infomap()) %>%
-    mutate(관심사항 = ifelse(str_detect(name, "윤석열 안철수"), 1, 0 ) ) %>%   
+    mutate(관심사항 = ifelse(str_detect(name, "윤석열 지지율"), 1, 0 ) ) %>%   
     ggraph(layout='nicely') +
       geom_edge_link(color='gray50', alpha=.2) +
       geom_node_point(aes(color=factor(group), size=eigen)) +
@@ -66,7 +71,7 @@ draw_related_keywords_ysy <- function(hubo_name =  "윤석열") {
             plot.title=element_text(size=16, face="bold", family = "NanumBarunpen"),
             plot.subtitle=element_text(face="bold", size=13, colour="grey10", family = "NanumBarunpen")) +
       geom_mark_hull(aes(x = x, y = y, fill = "red", filter = 관심사항 == 1,
-                         label = "윤안 단일화",
+                         label = "윤석열 지지율",
                          con.colour = "black",
                          label.buffer = unit(100, 'mm') ))
 }
@@ -90,7 +95,8 @@ draw_related_keywords_acs <- function(hubo_name =  "안철수") {
     activate(nodes) %>%
     mutate(eigen = centrality_eigen(),
            group = group_infomap()) %>%
-    mutate(관심사항 = ifelse(str_detect(name, "단일화"), 1, 0 ) ) %>%   
+    mutate(관심사항 = ifelse(str_detect(name, "안철수 단일화"), 1, 0 ) ) %>%
+    mutate(관심사항2 = ifelse(str_detect(name, "안철수 윤석열"), 1, 0 ) ) %>%   
     ggraph(layout='nicely') +
       geom_edge_link(color='gray50', alpha=.2) +
       geom_node_point(aes(color=factor(group), size=eigen)) +
@@ -102,9 +108,13 @@ draw_related_keywords_acs <- function(hubo_name =  "안철수") {
             plot.title=element_text(size=16, face="bold", family = "NanumBarunpen"),
             plot.subtitle=element_text(face="bold", size=13, colour="grey10", family = "NanumBarunpen")) +
       geom_mark_hull(aes(x = x, y = y, fill = "red", filter = 관심사항 == 1,
-                         label = "윤안 단일화",
+                         label = "안철수 단일화",
                          con.colour = "black",
-                         label.buffer = unit(100, 'mm') ))
+                         label.buffer = unit(100, 'mm') )) +
+      geom_mark_hull(aes(x = x, y = y, fill = "red", filter = 관심사항2 == 1,
+                         label = "안철수 윤석열",
+                         con.colour = "black",
+                         label.buffer = unit(100, 'mm') ))    
 }
 
 # related_search_acs_g <- draw_related_keywords_acs("안철수")

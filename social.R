@@ -5,6 +5,7 @@ library(httr)
 library(rvest)
 library(extrafont)
 loadfonts()
+library(jsonlite)
 
 # 1. 검색 트렌드 --------------------------------
 ## 1.1. 구글 ------------------------------------
@@ -91,6 +92,37 @@ hubo_raw %>%
 
 Sys.setenv(RETICULATE_PYTHON="C:/Users/statkclee/anaconda3/python.exe")
 reticulate::repl_python()
+
+# [Not working]
+
+naver_trends_url <-  'https://openapi.naver.com/v1/datalab/search'
+
+#alternatively
+naver_trends_body <- toJSON("{
+  'naver': [
+    {'startDate': '2022-01-01', 
+     'endDate': '2022-03-05', 
+     'timeUnit':'date', 
+     'keywordGroups':[{'groupName':'이재명', 'keywords':['이재명']},
+                      {'groupName':'윤석열', 'keywords':['윤석열']},
+                      {'groupName':'안철수', 'keywords':['안철수']},
+                      {'groupName':'심상정', 'keywords':['심상정']}], 
+     'device':''} 
+    }")
+
+trends_resp <- POST(naver_trends_url,
+                   encode = 'json', 
+                   add_headers('X-Naver-Client-Id' = 'mdoqRNQJ2yFdket16CMb',
+                                            'X-Naver-Client-Secret' = "aK6X1cAVWa",
+                                            'Content-Type' = 'application/json'),
+                   body = naver_trends_body)
+
+
+
+trends_json <- content(trends_resp)
+
+
+
 
 # newsletter/pynaver_package.py
 
@@ -231,7 +263,7 @@ candidate_video_raw <- snsdata::candidates %>%
   mutate(data = map2(후보명, channel_id, snsdata::get_candidate_video_stat, video_date = "20220101"))
 
 candidate_video_raw %>%
-  write_rds(glue::glue("data/social_youtube_raw_{Sys.Date() %>% str_remove_all('-')}.rds"))
+  write_rds(glue::glue("data/social/social_youtube_raw_{Sys.Date() %>% str_remove_all('-')}.rds"))
 
 ## 3.2. 시각화 -------------------------------------------------
 
@@ -291,7 +323,7 @@ library(lubridate)
 get_some_wom_data <- function() {
   ## 1.1 이재명.................................  
   
-  lee_words <- read_excel("data/social/some/20220302/[썸트렌드] 이재명_언급량_220101-220302.xlsx", sheet = "언급량", skip = 13)
+  lee_words <- read_excel("data/social/some/20220306/[썸트렌드] 이재명_언급량_220101-220305.xlsx", sheet = "언급량", skip = 13)
   
   lee_wom <- lee_words %>% 
     select(-합계) %>% 
@@ -300,7 +332,7 @@ get_some_wom_data <- function() {
     mutate(후보 = "이재명")
   
   ## 1.2 윤석열.................................
-  yoon_words <- read_excel("data/social/some/20220302/[썸트렌드] 윤석열_언급량_220101-220302.xlsx", sheet = "언급량", skip = 13)
+  yoon_words <- read_excel("data/social/some/20220306/[썸트렌드] 윤석열_언급량_220101-220305.xlsx", sheet = "언급량", skip = 13)
   
   yoon_wom <- yoon_words %>% 
     select(-합계) %>% 
@@ -309,7 +341,7 @@ get_some_wom_data <- function() {
     mutate(후보 = "윤석열")
   
   ## 1.3. 안철수.................................
-  ahn_words <- read_excel("data/social/some/20220302/[썸트렌드] 안철수_언급량_220101-220302.xlsx", sheet = "언급량", skip = 13)
+  ahn_words <- read_excel("data/social/some/20220306/[썸트렌드] 안철수_언급량_220101-220305.xlsx", sheet = "언급량", skip = 13)
   
   ahn_wom <- ahn_words %>% 
     select(-합계) %>% 
@@ -337,7 +369,7 @@ wom_raw %>%
 
 get_some_youtube_data <- function() {
   ## 2.1. 이재명 -------------------------
-  lee_youtube_raw <- read_excel("data/social/some/20220302/[썸트렌드] 이재명 컨텐츠조회수추이_220101-220302.xlsx", sheet = "전체 탐색량", skip = 13)
+  lee_youtube_raw <- read_excel("data/social/some/20220306/[썸트렌드] 이재명 컨텐츠조회수추이_220101-220305.xlsx", sheet = "전체 탐색량", skip = 13)
   
   lee_youtube <- lee_youtube_raw %>% 
     select(-전체) %>% 
@@ -346,7 +378,7 @@ get_some_youtube_data <- function() {
     mutate(후보 = "이재명")
   
   ## 2.2. 윤석열 -------------------------
-  yoon_youtube_raw <- read_excel("data/social/some/20220302/[썸트렌드] 윤석열 컨텐츠조회수추이_220101-220302.xlsx", sheet = "전체 탐색량", skip = 13)
+  yoon_youtube_raw <- read_excel("data/social/some/20220306/[썸트렌드] 윤석열 컨텐츠조회수추이_220101-220305.xlsx", sheet = "전체 탐색량", skip = 13)
   
   yoon_youtube <- yoon_youtube_raw %>% 
     select(-전체) %>% 
@@ -355,7 +387,7 @@ get_some_youtube_data <- function() {
     mutate(후보 = "윤석열")
   
   ## 2.3. 이재명 -------------------------
-  ahn_youtube_raw <- read_excel("data/social/some/20220302/[썸트렌드] 안철수 컨텐츠조회수추이_220101-220302.xlsx", sheet = "전체 탐색량", skip = 13)
+  ahn_youtube_raw <- read_excel("data/social/some/20220306/[썸트렌드] 안철수 컨텐츠조회수추이_220101-220305.xlsx", sheet = "전체 탐색량", skip = 13)
   
   ahn_youtube <- ahn_youtube_raw %>% 
     select(-전체) %>% 
@@ -418,7 +450,7 @@ ggplotly(wom_g)
 get_some_social_emotion_data <- function(channel = "커뮤니티") {
 
   ## 1.1 이재명 -------------------------
-  lee_emotion <- read_excel("data/social/some/20220302/[썸트렌드] 이재명_긍부정 추이(건수)_220101-220302.xlsx", sheet = channel, skip = 13)
+  lee_emotion <- read_excel("data/social/some/20220306/[썸트렌드] 이재명_긍부정 추이(건수)_220101-220305.xlsx", sheet = channel, skip = 13)
   
   lee_emo <- lee_emotion %>% 
     mutate(날짜 = ymd(날짜)) %>% 
@@ -427,7 +459,7 @@ get_some_social_emotion_data <- function(channel = "커뮤니티") {
     mutate(채널 = channel)
   
   ## 1.2 윤석열 -------------------------
-  yoon_emotion <- read_excel("data/social/some/20220302/[썸트렌드] 윤석열_긍부정 추이(건수)_220101-220302.xlsx", sheet = channel, skip = 13)
+  yoon_emotion <- read_excel("data/social/some/20220306/[썸트렌드] 윤석열_긍부정 추이(건수)_220101-220305.xlsx", sheet = channel, skip = 13)
   
   yoon_emo <- yoon_emotion %>% 
     mutate(날짜 = ymd(날짜)) %>% 
@@ -436,7 +468,7 @@ get_some_social_emotion_data <- function(channel = "커뮤니티") {
     mutate(채널 = channel)
   
   ## 1.3. 안철수 -------------------------
-  ahn_emotion <- read_excel("data/social/some/20220302/[썸트렌드] 안철수_긍부정 추이(건수)_220101-220302.xlsx", sheet = channel, skip = 13)
+  ahn_emotion <- read_excel("data/social/some/20220306/[썸트렌드] 안철수_긍부정 추이(건수)_220101-220305.xlsx", sheet = channel, skip = 13)
   
   ahn_emo <- ahn_emotion %>% 
     mutate(날짜 = ymd(날짜)) %>% 
@@ -468,7 +500,7 @@ emotion_social_raw
 get_some_youtube_emotion_data <- function() {
   
   ## 2.1. 이재명 -------------------------
-  lee_youtube_emo_raw <- read_excel("data/social/some/20220302/[썸트렌드] 이재명 유튜브감성추이_220101-220302.xlsx", sheet = "일자별 감성 추이", skip = 13)
+  lee_youtube_emo_raw <- read_excel("data/social/some/20220306/[썸트렌드] 이재명 유튜브감성추이_220101-220305.xlsx", sheet = "일자별 감성 추이", skip = 13)
   
   lee_youtube_emo <- lee_youtube_emo_raw %>% 
     mutate(날짜 = ymd(날짜)) %>% 
@@ -477,7 +509,7 @@ get_some_youtube_emotion_data <- function() {
     mutate(채널 = "유튜브")
   
   ## 2.2. 윤석열 -------------------------
-  yoon_youtube_emo_raw <- read_excel("data/social/some/20220302/[썸트렌드] 윤석열 유튜브감성추이_220101-220302.xlsx", sheet = "일자별 감성 추이", skip = 13)
+  yoon_youtube_emo_raw <- read_excel("data/social/some/20220306/[썸트렌드] 윤석열 유튜브감성추이_220101-220305.xlsx", sheet = "일자별 감성 추이", skip = 13)
   
   yoon_youtube_emo <- yoon_youtube_emo_raw %>% 
     mutate(날짜 = ymd(날짜)) %>% 
@@ -486,7 +518,7 @@ get_some_youtube_emotion_data <- function() {
     mutate(채널 = "유튜브")
   
   ## 2.3. 안철수 -------------------------
-  ahn_youtube_emo_raw <- read_excel("data/social/some/20220302/[썸트렌드] 안철수 유튜브감성추이_220101-220302.xlsx", sheet = "일자별 감성 추이", skip = 13)
+  ahn_youtube_emo_raw <- read_excel("data/social/some/20220306/[썸트렌드] 안철수 유튜브감성추이_220101-220305.xlsx", sheet = "일자별 감성 추이", skip = 13)
   
   ahn_youtube_emo <- ahn_youtube_emo_raw %>% 
     mutate(날짜 = ymd(날짜)) %>% 
@@ -505,5 +537,23 @@ emotion_youtube_raw <- get_some_youtube_emotion_data()
 
 emotion_youtube_raw %>% 
   write_rds(glue::glue("data/social/emotion_youtube_raw_{Sys.Date() %>% str_remove_all('-')}.rds"))
+
+
+
+# fix  --------------------------------------------------------------------
+
+
+
+time_span <- glue::glue("2022-01-01 {Sys.Date()-1}") %>% as.character(.)
+
+hubo_raw <- gtrends(keyword = c("이재명", "윤석열", "안철수", "심상정"),
+                    geo = "KR",
+                    hl = "ko-KR",
+                    time = time_span,
+                    low_search_volume = FALSE,
+                    cookie_url = "http://trends.google.com/Cookies/NID",
+                    tz = 0,
+                    # tz = "Asia/Seoul", # 540, "Asia/Seoul", GMT+9, 9(시간)*60(분)
+                    gprop = "web")
 
 

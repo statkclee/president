@@ -1,3 +1,8 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
 후보채널 유튜브
 =================================================================================================
 
@@ -12,8 +17,7 @@ Column {.tabset .tabset-fade}
 # candidate_video_raw <-
 #   read_rds(glue::glue("data/social_youtube_raw_{Sys.Date() %>% str_remove_all('-')}.rds"))
 candidate_video_raw <-
-  read_rds(glue::glue("data/social_youtube_raw_20220303.rds"))
-
+  read_rds(glue::glue("data/social/social_youtube_raw_20220306.rds"))
 
 yt_stat <- candidate_video_raw %>%
   select(data) %>%
@@ -32,7 +36,7 @@ youtube_view_g <- yt_stat %>%
   filter(name == "조회수") %>% 
   ggplot(aes(x=게시일, y= value, color = 후보명,
              text = glue::glue("후보명: {후보명}\n",
-                               "댓글/조회/좋아요: {scales::comma(value, accuracy=1)}\n",
+                               "조회수: {scales::comma(value, accuracy=1)}\n",
                                "동영상: {video_id}\n",
                                "게시일: {format(게시일, '%m월% %d일')}") )) +
     geom_point(size = 0.5) +
@@ -44,7 +48,7 @@ youtube_view_g <- yt_stat %>%
     labs(x        = "",
          y        = "",
          title    = "대선 후보 유튜브 활동성 통계",
-         subtitle = glue::glue("시점: 2021년 12월 01일 ~ {format(naverdata_date, '%Y년 %m월 %d일')}")) +
+         subtitle = glue::glue("시점: 2022년 01월 01일 ~ {format(yt_data_date, '%Y년 %m월 %d일')}")) +
     theme_bw(base_family = "NanumBarunPen") +
     theme(legend.position = "top",
           legend.title=element_text(size=13),
@@ -74,7 +78,7 @@ youtube_like_g <- yt_stat %>%
   filter(name == "좋아요수") %>% 
   ggplot(aes(x=게시일, y= value, color = 후보명,
              text = glue::glue("후보명: {후보명}\n",
-                               "댓글/조회/좋아요: {scales::comma(value, accuracy=1)}\n",
+                               "좋아요수: {scales::comma(value, accuracy=1)}\n",
                                "동영상: {video_id}\n",
                                "게시일: {format(게시일, '%m월% %d일')}") )) +
     geom_point(size = 0.5) +
@@ -86,7 +90,7 @@ youtube_like_g <- yt_stat %>%
     labs(x        = "",
          y        = "",
          title    = "대선 후보 유튜브 활동성 통계",
-         subtitle = glue::glue("시점: 2021년 12월 01일 ~ {format(naverdata_date, '%Y년 %m월 %d일')}")) +
+         subtitle = glue::glue("시점: 2022년 01월 01일 ~ {format(yt_data_date, '%Y년 %m월 %d일')}")) +
     theme_bw(base_family = "NanumBarunPen") +
     theme(legend.position = "top",
           legend.title=element_text(size=13),
@@ -113,7 +117,7 @@ youtube_comment_g <- yt_stat %>%
   filter(name == "댓글수") %>% 
   ggplot(aes(x=게시일, y= value, color = 후보명,
              text = glue::glue("후보명: {후보명}\n",
-                               "댓글/조회/좋아요: {scales::comma(value, accuracy=1)}\n",
+                               "댓글수: {scales::comma(value, accuracy=1)}\n",
                                "동영상: {video_id}\n",
                                "게시일: {format(게시일, '%m월% %d일')}") )) +
     geom_point(size = 0.5) +
@@ -125,7 +129,7 @@ youtube_comment_g <- yt_stat %>%
     labs(x        = "",
          y        = "",
          title    = "대선 후보 유튜브 활동성 통계",
-         subtitle = glue::glue("시점: 2021년 12월 01일 ~ {format(naverdata_date, '%Y년 %m월 %d일')}")) +
+         subtitle = glue::glue("시점: 2022년 01월 01일 ~ {format(yt_data_date, '%Y년 %m월 %d일')}")) +
     theme_bw(base_family = "NanumBarunPen") +
     theme(legend.position = "top",
           legend.title=element_text(size=13),
