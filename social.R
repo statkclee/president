@@ -93,37 +93,6 @@ hubo_raw %>%
 Sys.setenv(RETICULATE_PYTHON="C:/Users/statkclee/anaconda3/python.exe")
 reticulate::repl_python()
 
-# [Not working]
-
-naver_trends_url <-  'https://openapi.naver.com/v1/datalab/search'
-
-#alternatively
-naver_trends_body <- toJSON("{
-  'naver': [
-    {'startDate': '2022-01-01', 
-     'endDate': '2022-03-05', 
-     'timeUnit':'date', 
-     'keywordGroups':[{'groupName':'이재명', 'keywords':['이재명']},
-                      {'groupName':'윤석열', 'keywords':['윤석열']},
-                      {'groupName':'안철수', 'keywords':['안철수']},
-                      {'groupName':'심상정', 'keywords':['심상정']}], 
-     'device':''} 
-    }")
-
-trends_resp <- POST(naver_trends_url,
-                   encode = 'json', 
-                   add_headers('X-Naver-Client-Id' = 'mdoqRNQJ2yFdket16CMb',
-                                            'X-Naver-Client-Secret' = "aK6X1cAVWa",
-                                            'Content-Type' = 'application/json'),
-                   body = naver_trends_body)
-
-
-
-trends_json <- content(trends_resp)
-
-
-
-
 # newsletter/pynaver_package.py
 
 ### 1.2.2. 시각화 ----------------------
