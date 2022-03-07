@@ -15,7 +15,7 @@ Column {.tabset .tabset-fade}
 ### 후보 - 다자구도
 
 
-![](fig/survey_multi.png)
+![](fig/MBC_candidate_multi_g.png)
 
 ```{r multi-graph, out.width="100%", eval = FALSE}
 candidate_raw <- 
@@ -114,7 +114,7 @@ candidate_multi_g
 
 ### 후보 - 양자구도
 
-![](fig/survey_dual.png)
+![](fig/MBC_candidate_dual_g.png)
 
 ```{r dual-graph, eval = FALSE}
 
