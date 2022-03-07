@@ -3,6 +3,7 @@ output: html_document
 editor_options: 
   chunk_output_type: console
 ---
+
 후보채널 유튜브
 =================================================================================================
 
@@ -17,7 +18,7 @@ Column {.tabset .tabset-fade}
 # candidate_video_raw <-
 #   read_rds(glue::glue("data/social_youtube_raw_{Sys.Date() %>% str_remove_all('-')}.rds"))
 candidate_video_raw <-
-  read_rds(glue::glue("data/social/social_youtube_raw_20220306.rds"))
+  read_rds(glue::glue("data/social/social_youtube_raw_20220307.rds"))
 
 yt_stat <- candidate_video_raw %>%
   select(data) %>%
@@ -39,7 +40,7 @@ youtube_view_g <- yt_stat %>%
                                "조회수: {scales::comma(value, accuracy=1)}\n",
                                "동영상: {video_id}\n",
                                "게시일: {format(게시일, '%m월% %d일')}") )) +
-    geom_point(size = 0.5) +
+    geom_jitter(size = 0.5) +
     geom_smooth(aes(group = 후보명, color = 후보명), se = FALSE, method = "loess", span = 0.75) +
     scale_x_date(date_labels = "%m월%d") +
     scale_y_sqrt(labels = scales::comma) +
@@ -81,7 +82,7 @@ youtube_like_g <- yt_stat %>%
                                "좋아요수: {scales::comma(value, accuracy=1)}\n",
                                "동영상: {video_id}\n",
                                "게시일: {format(게시일, '%m월% %d일')}") )) +
-    geom_point(size = 0.5) +
+    geom_jitter(size = 0.5) +
     geom_smooth(aes(group = 후보명, color = 후보명), se = FALSE, method = "loess", span = 0.75) +
     scale_x_date(date_labels = "%m월%d") +
     scale_y_sqrt(labels = scales::comma) +
@@ -120,7 +121,7 @@ youtube_comment_g <- yt_stat %>%
                                "댓글수: {scales::comma(value, accuracy=1)}\n",
                                "동영상: {video_id}\n",
                                "게시일: {format(게시일, '%m월% %d일')}") )) +
-    geom_point(size = 0.5) +
+    geom_jitter(size = 0.5) +
     geom_smooth(aes(group = 후보명, color = 후보명), se = FALSE, method = "loess", span = 0.75) +
     scale_x_date(date_labels = "%m월%d") +
     scale_y_sqrt(labels = scales::comma) +

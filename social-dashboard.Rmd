@@ -55,6 +55,9 @@ convert_from_wide_to_nw <- function(rawdata) {
 
 
 
+```{r child="dashboard/social/survey.Rmd", encoding="UTF-8"}
+```
+
 
 ```{r child="dashboard/social/trends.Rmd", encoding="UTF-8"}
 ```
@@ -67,8 +70,10 @@ convert_from_wide_to_nw <- function(rawdata) {
 ```{r child="dashboard/social/youtube-hubo.Rmd", encoding="UTF-8"}
 ```
 
+
 ```{r child="dashboard/social/social-SNS.Rmd", encoding="UTF-8"}
 ```
+
 
 ```{r child="dashboard/social/social-emotion.Rmd", encoding="UTF-8"}
 ```

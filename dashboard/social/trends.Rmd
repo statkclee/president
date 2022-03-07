@@ -18,7 +18,7 @@ Column {.tabset .tabset-fade}
 ### 구글 트렌드 시각화 ------------------------------
 
 hubo_raw <-
-  read_rds(glue::glue('data/social/google_trends_20220306.rds'))
+  read_rds(glue::glue('data/social/google_trends_20220307.rds'))
 
 data_date <- hubo_raw$interest_over_time %>%
   mutate(date = lubridate::ymd(date)) %>%
@@ -70,7 +70,7 @@ ggplotly(google_trends_g)
 ### 네이버 검색어 트렌드
 
 ```{r naver-trends}
-naver_json <- jsonlite::read_json("data/social/naver_20220306.json")
+naver_json <- jsonlite::read_json("data/social/naver_20220307.json")
 
 naver_tbl <- naver_json$results %>%
   enframe() %>%

@@ -12,7 +12,7 @@ Column {.tabset .tabset-fade}
 #   read_rds(glue::glue("data/social/wom_raw_{Sys.Date() %>% str_remove_all('-')}.rds"))
 
 wom_raw  <-  
-  read_rds(glue::glue("data/social/wom_raw_20220306.rds"))
+  read_rds(glue::glue("data/social/wom_raw_20220307.rds"))
 
 wom_news_g <- wom_raw %>% 
   filter(구분 == "뉴스") %>% 
@@ -216,7 +216,7 @@ ggplotly(wom_twitter_g, tooltip = "text")
 #   read_rds(glue::glue("data/social/youtube_raw_{Sys.Date() %>% str_remove_all('-')}.rds"))
 
 youtube_raw <- 
-  read_rds(glue::glue("data/social/youtube_raw_20220306.rds"))
+  read_rds(glue::glue("data/social/youtube_raw_20220307.rds"))
 
 
 
