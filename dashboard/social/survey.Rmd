@@ -12,7 +12,7 @@ editor_options:
 Column {.tabset .tabset-fade}
 -------------------------------------------------------------------------------
 
-### 다자구도
+### 후보 - 다자구도
 
 
 ![](fig/survey_multi.png)
@@ -112,7 +112,7 @@ candidate_multi_g
 
 ```
 
-### 양자구도
+### 후보 - 양자구도
 
 ![](fig/survey_dual.png)
 
@@ -203,4 +203,13 @@ candidate_dual_g
 
 
 ```
+
+### 정당지지율
+
+![](fig/MBC_party_g.png)
+
+### 대통령 국정수행평가
+
+![](fig/MBC_president_g.png)
+
 
