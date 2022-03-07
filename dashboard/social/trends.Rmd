@@ -59,9 +59,9 @@ google_trends_g <- hubo_raw$interest_over_time %>%
     geom_vline(xintercept = Sys.Date(), linetype="dashed", color = "black") +
     geom_vline(xintercept = as.Date("2022-03-09"), linetype="dashed", color = "black") +
     annotate("text", x = Sys.Date()-1.5, y = 99, label= glue::glue("현재:\n{format(Sys.Date(), '%m월%d일')}"),
-             colour="black", size = 5, family = "NanumBarunpen") +
-    annotate("text", x = as.Date("2022-03-09")-1.5, y = 99, label="선거일:\n 3월 9일", colour="black",
-             size = 5, family = "NanumBarunpen")
+             colour="black", size = 5, family = "NanumBarunpen")
+    # annotate("text", x = as.Date("2022-03-09")-1.5, y = 99, label="선거일:\n 3월 9일", colour="black",
+    #          size = 5, family = "NanumBarunpen")
 
 ggplotly(google_trends_g)
 
@@ -114,9 +114,9 @@ trend_naver_g <- naver_tbl %>%
     geom_vline(xintercept = Sys.Date(), linetype="dashed", color = "black") +
     geom_vline(xintercept = as.Date("2022-03-09"), linetype="dashed", color = "black") +
     annotate("text", x = Sys.Date()-1, y = 99, label= glue::glue("현재:\n{format(Sys.Date(), '%m월%d일')}"),
-             colour="black", size = 5, family = "NanumBarunpen") +
-    annotate("text", x = as.Date("2022-03-09")-1, y = 99, label="선거일:\n3월 9일",
-             colour="black", size = 5, family = "NanumBarunpen")
+             colour="black", size = 5, family = "NanumBarunpen") 
+    # annotate("text", x = as.Date("2022-03-09")-1, y = 99, label="선거일:\n3월 9일",
+    #          colour="black", size = 5, family = "NanumBarunpen")
 
 ggplotly(trend_naver_g)
 ```
