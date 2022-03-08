@@ -16,7 +16,7 @@ Column {.tabset .tabset-fade}
 
 # related_google_tbl <- read_rds(glue::glue("data/social/related_google_tbl_{Sys.Date() %>% str_remove_all(., '-')}.rds"))
 
-related_google_tbl <- read_rds(glue::glue("data/social/related_google_tbl_20220307.rds"))
+related_google_tbl <- read_rds(glue::glue("data/social/related_google_tbl_20220308.rds"))
 
 draw_related_keywords_ljm <- function(hubo_name = "이재명") {
   

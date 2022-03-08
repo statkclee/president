@@ -18,9 +18,10 @@ Column {.tabset .tabset-fade}
 # candidate_video_raw <-
 #   read_rds(glue::glue("data/social_youtube_raw_{Sys.Date() %>% str_remove_all('-')}.rds"))
 candidate_video_raw <-
-  read_rds(glue::glue("data/social/social_youtube_raw_20220307.rds"))
+  read_rds(glue::glue("data/social/social_youtube_raw_20220308.rds"))
 
 yt_stat <- candidate_video_raw %>%
+  filter(후보명 != "안철수") %>% 
   select(data) %>%
   unnest(data)
 
@@ -33,7 +34,7 @@ youtube_view_g <- yt_stat %>%
   mutate(게시일 = as.Date(publishedAt)) %>%
   pivot_longer(조회수:댓글수) %>%
   mutate(value = as.numeric(value)) %>%
-  mutate(후보명 = factor(후보명, levels = c("이재명", "윤석열", "안철수", "심상정"))) %>%
+  mutate(후보명 = factor(후보명, levels = c("이재명", "윤석열", "심상정"))) %>%
   filter(name == "조회수") %>% 
   ggplot(aes(x=게시일, y= value, color = 후보명,
              text = glue::glue("후보명: {후보명}\n",
@@ -45,7 +46,7 @@ youtube_view_g <- yt_stat %>%
     scale_x_date(date_labels = "%m월%d") +
     scale_y_sqrt(labels = scales::comma) +
     theme_bw(base_family = "NanumBarenPen") +
-    scale_color_manual(values=c("blue", "red", "#EA5505", "yellow")) +
+    scale_color_manual(values=c("blue", "red", "yellow")) +
     labs(x        = "",
          y        = "",
          title    = "대선 후보 유튜브 활동성 통계",
@@ -75,7 +76,7 @@ youtube_like_g <- yt_stat %>%
   mutate(게시일 = as.Date(publishedAt)) %>%
   pivot_longer(조회수:댓글수) %>%
   mutate(value = as.numeric(value)) %>%
-  mutate(후보명 = factor(후보명, levels = c("이재명", "윤석열", "안철수", "심상정"))) %>%
+  mutate(후보명 = factor(후보명, levels = c("이재명", "윤석열", "심상정"))) %>%
   filter(name == "좋아요수") %>% 
   ggplot(aes(x=게시일, y= value, color = 후보명,
              text = glue::glue("후보명: {후보명}\n",
@@ -87,7 +88,7 @@ youtube_like_g <- yt_stat %>%
     scale_x_date(date_labels = "%m월%d") +
     scale_y_sqrt(labels = scales::comma) +
     theme_bw(base_family = "NanumBarenPen") +
-    scale_color_manual(values=c("blue", "red", "#EA5505", "yellow")) +
+    scale_color_manual(values=c("blue", "red", "yellow")) +
     labs(x        = "",
          y        = "",
          title    = "대선 후보 유튜브 활동성 통계",
@@ -114,7 +115,7 @@ youtube_comment_g <- yt_stat %>%
   mutate(게시일 = as.Date(publishedAt)) %>%
   pivot_longer(조회수:댓글수) %>%
   mutate(value = as.numeric(value)) %>%
-  mutate(후보명 = factor(후보명, levels = c("이재명", "윤석열", "안철수", "심상정"))) %>%
+  mutate(후보명 = factor(후보명, levels = c("이재명", "윤석열", "심상정"))) %>%
   filter(name == "댓글수") %>% 
   ggplot(aes(x=게시일, y= value, color = 후보명,
              text = glue::glue("후보명: {후보명}\n",
@@ -126,7 +127,7 @@ youtube_comment_g <- yt_stat %>%
     scale_x_date(date_labels = "%m월%d") +
     scale_y_sqrt(labels = scales::comma) +
     theme_bw(base_family = "NanumBarenPen") +
-    scale_color_manual(values=c("blue", "red", "#EA5505", "yellow")) +
+    scale_color_manual(values=c("blue", "red", "yellow")) +
     labs(x        = "",
          y        = "",
          title    = "대선 후보 유튜브 활동성 통계",
