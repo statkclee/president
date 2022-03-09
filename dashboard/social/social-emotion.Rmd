@@ -18,7 +18,7 @@ Column {.tabset .tabset-fade}
 #   read_rds(glue::glue("data/social/emotion_social_raw_{Sys.Date() %>% str_remove_all('-')}.rds"))
 
 emotion_social_raw <- 
-  read_rds(glue::glue("data/social/emotion_social_raw_20220308.rds"))
+  read_rds(glue::glue("data/social/emotion_social_raw_20220309.rds"))
 
 
 emotion_news_g <- emotion_social_raw %>% 

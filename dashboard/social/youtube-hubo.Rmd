@@ -11,6 +11,23 @@ editor_options:
 Column {.tabset .tabset-fade}
 -------------------------------------------------------------------------------
 
+### 후보채널 통계
+
+<br>
+<br>
+
+
+![](fig/sb_youtube_stat_report_g.png)
+
+### 구독자 추세
+
+<br>
+<br>
+
+
+![](fig/sb_youtube_subs_g.png)
+
+
 ### 조회수
 
 ```{r youtube-view}
@@ -18,7 +35,7 @@ Column {.tabset .tabset-fade}
 # candidate_video_raw <-
 #   read_rds(glue::glue("data/social_youtube_raw_{Sys.Date() %>% str_remove_all('-')}.rds"))
 candidate_video_raw <-
-  read_rds(glue::glue("data/social/social_youtube_raw_20220308.rds"))
+  read_rds(glue::glue("data/social/social_youtube_raw_20220309.rds"))
 
 yt_stat <- candidate_video_raw %>%
   filter(후보명 != "안철수") %>% 

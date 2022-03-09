@@ -18,7 +18,7 @@ Column {.tabset .tabset-fade}
 ### 구글 트렌드 시각화 ------------------------------
 
 hubo_raw <-
-  read_rds(glue::glue('data/social/google_trends_20220308.rds'))
+  read_rds(glue::glue('data/social/google_trends_20220309.rds'))
 
 data_date <- hubo_raw$interest_over_time %>%
   mutate(date = lubridate::ymd(date)) %>%
@@ -70,7 +70,7 @@ ggplotly(google_trends_g)
 ### 네이버 검색어 트렌드
 
 ```{r naver-trends}
-naver_json <- jsonlite::read_json("data/social/naver_20220308.json")
+naver_json <- jsonlite::read_json("data/social/naver_20220309.json")
 
 naver_tbl <- naver_json$results %>%
   enframe() %>%
@@ -111,10 +111,10 @@ trend_naver_g <- naver_tbl %>%
          title = "네이버 검색어 트렌드 서비스",
          subtitle = glue::glue("지역: 대한민국, 시점: 2022년 12월 01일 ~ {format(naverdata_date, '%Y년 %m월 %d일')}"),
          caption = "데이터 출처: 네이버 검색어 트렌드 API")   +
-    geom_vline(xintercept = Sys.Date(), linetype="dashed", color = "black") +
-    geom_vline(xintercept = as.Date("2022-03-09"), linetype="dashed", color = "black") +
-    annotate("text", x = Sys.Date()-1, y = 99, label= glue::glue("현재:\n{format(Sys.Date(), '%m월%d일')}"),
-             colour="black", size = 5, family = "NanumBarunpen") 
+    geom_vline(xintercept = Sys.Date(), linetype="dashed", color = "black") 
+    # geom_vline(xintercept = as.Date("2022-03-09"), linetype="dashed", color = "black") +
+    # annotate("text", x = Sys.Date()-1, y = 99, label= glue::glue("현재:\n{format(Sys.Date(), '%m월%d일')}"),
+    #          colour="black", size = 5, family = "NanumBarunpen") 
     # annotate("text", x = as.Date("2022-03-09")-1, y = 99, label="선거일:\n3월 9일",
     #          colour="black", size = 5, family = "NanumBarunpen")
 
