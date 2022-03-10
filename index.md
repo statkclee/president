@@ -41,4 +41,5 @@ subtitle: 대통령 선거 2022년
 1. [Birds-Eye View](president-birds-eye-view.html)
 1. [여론조사 업체](president-house-effect.html)
 1. [소셜 여론조사](social-dashboard.html)
+1. [대선 시도 종합](vote-tilemap.html)
 
