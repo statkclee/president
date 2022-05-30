@@ -286,7 +286,7 @@ gg_raw %>%
 
 ## 표
 
-```{r}
+```{r, eval = FALSE}
 gg_raw_tbl <- gg_raw %>% 
   group_by(선거, 정당) %>% 
   summarise(득표수 = sum(득표수)) %>% 
@@ -295,7 +295,7 @@ gg_raw_tbl <- gg_raw %>%
 ```
 
 
-```{r}
+```{r, eval =FALSE}
 gg_raw_tbl %>% 
   mutate(text = glue::glue("{scales::comma(득표수)} / {scales::comma(합계)} = {scales::percent(득표율, 0.1)}")) %>% 
   select(선거, 정당, text) %>% 
@@ -305,7 +305,7 @@ gg_raw_tbl %>%
 
 ## 그래프
 
-```{r}
+```{r, eval = FALSE}
 gg_raw_tbl %>% 
   ggplot(aes(x = 선거, y = 득표율, color = 정당, group = 정당)) +
     geom_point() +
@@ -314,4 +314,48 @@ gg_raw_tbl %>%
 ```
 
 
+# echarts
+
+```{r}
+# https://www.infoworld.com/article/3607068/plot-in-r-with-echarts4r.html
+
+library(echarts4r)
+gg_raw %>%
+  group_by(선거) %>% 
+  summarise(득표수 = sum(득표수) ) %>% 
+  ungroup() %>% 
+  e_charts(x = 선거) %>% 
+  e_line(serie = 득표수)
+```
+
+# echarts 지도
+
+```{r}
+library(echarts4r)
+library(echarts4r.maps)
+
+e_charts() %>%
+  em_map("South_Korea") %>% 
+  e_map(map = "South_Korea") %>% 
+  e_visual_map()
+```
+
+# echarts globe
+
+```{r}
+library(echarts4r)
+library(echarts4r.assets)
+
+base <- e_charts() %>% # initialise
+  e_rm_axis("x") %>% # remove axis
+  e_rm_axis("y") 
+
+base %>% 
+  e_globe(
+    environment = ea_asset("starfield"),
+    base_texture = ea_asset("world night")
+  )
+
+
+```
 
