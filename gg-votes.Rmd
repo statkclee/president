@@ -343,19 +343,22 @@ e_charts() %>%
 # echarts globe
 
 ```{r}
-library(echarts4r)
 library(echarts4r.assets)
 
-base <- e_charts() %>% # initialise
-  e_rm_axis("x") %>% # remove axis
-  e_rm_axis("y") 
+airports <- read.csv(
+  paste0("https://raw.githubusercontent.com/plotly/datasets/",
+         "master/2011_february_us_airport_traffic.csv")
+)
 
-base %>% 
+airports |> 
+  e_charts(long) |> 
   e_globe(
     environment = ea_asset("starfield"),
-    base_texture = ea_asset("world night")
-  )
-
+    base_texture = ea_asset("world"), 
+    globeOuterRadius = 100
+  ) |> 
+  e_scatter_3d(lat, cnt, coord_system = "globe", blendMode = 'lighter') |> 
+  e_visual_map(inRange = list(symbolSize = c(1, 10)))
 
 ```
 
