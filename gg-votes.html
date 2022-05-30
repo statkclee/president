@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="generator" content="pandoc">
+    <title>Software Carpentry: 제8회 지방선거</title>
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap-theme.css" />
+    <link rel="stylesheet" type="text/css" href="css/swc.css" />
+    <link rel="alternate" type="application/rss+xml" title="Software Carpentry Blog" href="http://software-carpentry.org/feed.xml"/>
+    <meta charset="UTF-8" />
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="https://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    
+    
+    <!--
+    <div id="google_translate_element"></div><script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({pageLanguage: 'ko', includedLanguages: 'en', layout: google.translate.TranslateElement.InlineLayout.SIMPLE}, 'google_translate_element');
+    }
+    </script><script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    -->
+            
+  </head>
+  <body class="lesson">
+    <div class="container card">
+      <div class="banner">
+        <a href="http://software-carpentry.org" title="Software Carpentry">
+          <img alt="Software Carpentry banner" src="img/software-carpentry-banner.png" />
+        </a>
+      </div>
+      <article>
+      <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+                    <a href="index.html"><h1 class="title">제8회 지방선거</h1></a>
+          <h2 class="subtitle">경기지사</h2>
+          <h1 id="president-tilemap_sigungu">데이터</h1>
+<h2 id="대선">대선</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="kw">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true"></a><span class="co">## 2012년 대선</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true"></a>gg_<span class="dv">2012</span>_raw &lt;-<span class="st"> </span>krvote<span class="op">::</span>election_<span class="dv">20121219</span><span class="op">$</span>득표율 <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true"></a><span class="st">  </span><span class="kw">filter</span>(<span class="kw">str_detect</span>(시도명, <span class="st">&quot;경기&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true"></a><span class="st">  </span><span class="kw">select</span>(<span class="op">-</span>선거인수, <span class="op">-</span><span class="st"> </span>투표수) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true"></a><span class="st">  </span><span class="kw">pivot_longer</span>(박근혜<span class="op">:</span>김순자, <span class="dt">names_to =</span> <span class="st">&quot;후보&quot;</span>, <span class="dt">values_to =</span> <span class="st">&quot;득표수&quot;</span>)  <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true"></a><span class="st">  </span><span class="kw">mutate</span>(정당 =<span class="st"> </span><span class="kw">case_when</span>(<span class="kw">str_detect</span>(후보, <span class="st">&quot;박근혜&quot;</span>) <span class="op">~</span><span class="st"> &quot;국민의힘&quot;</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true"></a>                          <span class="kw">str_detect</span>(후보, <span class="st">&quot;문재인&quot;</span>) <span class="op">~</span><span class="st"> &quot;민주당&quot;</span>,</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true"></a>                          <span class="ot">TRUE</span> <span class="op">~</span><span class="st"> &quot;그외정당&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true"></a><span class="st">  </span><span class="kw">group_by</span>(시도명, 구시군명, 정당) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true"></a><span class="st">  </span><span class="kw">summarise</span>( 득표수 =<span class="st"> </span><span class="kw">sum</span>(득표수, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true"></a><span class="st">  </span><span class="kw">mutate</span>(선거 =<span class="st"> &quot;2012년&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true"></a><span class="st">  </span><span class="kw">ungroup</span>()</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true"></a><span class="co">## 2017년 대선</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true"></a>gg_<span class="dv">2017</span>_raw &lt;-<span class="st"> </span>krvote<span class="op">::</span>election_<span class="dv">20170509</span><span class="op">$</span>득표율 <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true"></a><span class="st">  </span><span class="kw">filter</span>(<span class="kw">str_detect</span>(시도명, <span class="st">&quot;경기&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true"></a><span class="st">  </span><span class="kw">select</span>(<span class="op">-</span>선거인수, <span class="op">-</span><span class="st"> </span>투표수) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true"></a><span class="st">  </span><span class="kw">pivot_longer</span>(문재인<span class="op">:</span>김민찬, <span class="dt">names_to =</span> <span class="st">&quot;후보&quot;</span>, <span class="dt">values_to =</span> <span class="st">&quot;득표수&quot;</span>)  <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true"></a><span class="st">  </span><span class="kw">mutate</span>(정당 =<span class="st"> </span><span class="kw">case_when</span>(<span class="kw">str_detect</span>(후보, <span class="st">&quot;홍준표&quot;</span>) <span class="op">~</span><span class="st"> &quot;국민의힘&quot;</span>,</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true"></a>                          <span class="kw">str_detect</span>(후보, <span class="st">&quot;안철수&quot;</span>) <span class="op">~</span><span class="st"> &quot;국민의힘&quot;</span>,</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true"></a>                          <span class="kw">str_detect</span>(후보, <span class="st">&quot;유승민&quot;</span>) <span class="op">~</span><span class="st"> &quot;국민의힘&quot;</span>,</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true"></a>                          <span class="kw">str_detect</span>(후보, <span class="st">&quot;문재인&quot;</span>) <span class="op">~</span><span class="st"> &quot;민주당&quot;</span>,</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true"></a>                          <span class="ot">TRUE</span> <span class="op">~</span><span class="st"> &quot;그외정당&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true"></a><span class="st">  </span><span class="kw">group_by</span>(시도명, 구시군명, 정당) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true"></a><span class="st">  </span><span class="kw">summarise</span>( 득표수 =<span class="st"> </span><span class="kw">sum</span>(득표수, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true"></a><span class="st">  </span><span class="kw">mutate</span>(선거 =<span class="st"> &quot;2017년&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true"></a><span class="st">  </span><span class="kw">ungroup</span>()</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true"></a><span class="co">## 2017년 대선</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true"></a>gg_<span class="dv">2022</span>_raw_excel &lt;-<span class="st"> </span>readxl<span class="op">::</span><span class="kw">read_excel</span>(<span class="st">&quot;data/2022년_개표결과_대통령선거_전체.xlsx&quot;</span>) </span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true"></a></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true"></a>gg_<span class="dv">2022</span>_raw &lt;-<span class="st"> </span>gg_<span class="dv">2022</span>_raw_excel <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true"></a><span class="st">  </span><span class="kw">filter</span>(<span class="kw">str_detect</span>(시도, <span class="st">&quot;경기&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true"></a><span class="st">  </span><span class="kw">mutate</span>(읍면동명 =<span class="st"> </span><span class="kw">ifelse</span>(<span class="kw">is.na</span>(읍면동명), 구시군, 읍면동명),</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true"></a>         투표구명 =<span class="st"> </span><span class="kw">ifelse</span>(<span class="kw">is.na</span>(투표구명), 읍면동명, 투표구명)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true"></a><span class="st">  </span><span class="kw">filter</span>(<span class="op">!</span><span class="kw">str_detect</span>(구시군, <span class="st">&quot;합계&quot;</span>),</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true"></a>         <span class="op">!</span><span class="kw">str_detect</span>(읍면동명, <span class="st">&quot;합계&quot;</span>),</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true"></a>         <span class="op">!</span><span class="kw">str_detect</span>(투표구명, <span class="st">&quot;소계&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true"></a><span class="st">  </span>janitor<span class="op">::</span><span class="kw">clean_names</span>(<span class="dt">ascii =</span> <span class="ot">FALSE</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true"></a><span class="st">  </span><span class="kw">select</span>(<span class="op">-</span>선거인수, <span class="op">-</span><span class="st"> </span>투표수, <span class="op">-</span>무효투표수, <span class="op">-</span>기권수) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true"></a><span class="st">  </span><span class="kw">pivot_longer</span>(더불어민주당_이재명<span class="op">:</span>한류연합당_김민찬, <span class="dt">names_to =</span> <span class="st">&quot;후보&quot;</span>, <span class="dt">values_to =</span> <span class="st">&quot;득표수&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true"></a><span class="st">  </span><span class="kw">separate</span>(후보, <span class="dt">into =</span> <span class="kw">c</span>(<span class="st">&quot;정당&quot;</span>, <span class="st">&quot;후보&quot;</span>), <span class="dt">sep =</span> <span class="st">&quot;_&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true"></a><span class="st">  </span><span class="kw">mutate</span>(득표수 =<span class="st"> </span><span class="kw">parse_number</span>(득표수),</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true"></a>         계     =<span class="st"> </span><span class="kw">parse_number</span>(계)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true"></a><span class="st">  </span><span class="kw">mutate</span>(정당 =<span class="st"> </span><span class="kw">case_when</span>(<span class="kw">str_detect</span>(후보, <span class="st">&quot;이재명&quot;</span>) <span class="op">~</span><span class="st"> &quot;민주당&quot;</span>,</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true"></a>                          <span class="kw">str_detect</span>(후보, <span class="st">&quot;윤석열&quot;</span>) <span class="op">~</span><span class="st"> &quot;국민의힘&quot;</span>,</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true"></a>                          <span class="ot">TRUE</span> <span class="op">~</span><span class="st"> &quot;그외정당&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true"></a><span class="st">  </span><span class="kw">rename</span>(시도명 =<span class="st"> </span>시도, </span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true"></a>         구시군명 =<span class="st"> </span>구시군) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true"></a><span class="st">  </span><span class="kw">group_by</span>(시도명, 구시군명, 정당) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true"></a><span class="st">  </span><span class="kw">summarise</span>( 득표수 =<span class="st"> </span><span class="kw">sum</span>(득표수, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true"></a><span class="st">  </span><span class="kw">mutate</span>(선거 =<span class="st"> &quot;2022년&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true"></a><span class="st">  </span><span class="kw">ungroup</span>()</span></code></pre></div>
+<pre><code>Error: &lt;text&gt;:4:42: unexpected &#39;&lt;&#39;
+3: ## 2012&lt;U+B144&gt; &lt;U+B300&gt;&lt;U+C120&gt;
+4: gg_2012_raw &lt;- krvote::election_20121219$&lt;
+                                            ^</code></pre>
+<h2 id="총선">총선</h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a><span class="co">## 2016년 총선 -----------------------</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true"></a>gg_<span class="dv">2016</span>_raw &lt;-<span class="st"> </span>krvote<span class="op">::</span>general_<span class="dv">2016</span> <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true"></a><span class="st">  </span><span class="kw">filter</span>(시도 <span class="op">==</span><span class="st"> &quot;경기&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true"></a><span class="st">  </span><span class="kw">unnest</span>(data) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true"></a><span class="st">  </span><span class="kw">mutate</span>(구시군명 =<span class="st"> </span><span class="kw">case_when</span>(</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;고양시&quot;</span>) <span class="op">~</span><span class="st"> &quot;고양시&quot;</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;부천시&quot;</span>) <span class="op">~</span><span class="st"> &quot;부천시&quot;</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;성남시&quot;</span>) <span class="op">~</span><span class="st"> &quot;성남시&quot;</span>,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;수원시&quot;</span>) <span class="op">~</span><span class="st"> &quot;수원시&quot;</span>,</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;안산시&quot;</span>) <span class="op">~</span><span class="st"> &quot;안산시&quot;</span>,</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;안양시&quot;</span>) <span class="op">~</span><span class="st"> &quot;안양시&quot;</span>,</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;용인시&quot;</span>) <span class="op">~</span><span class="st"> &quot;용인시&quot;</span>,</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;광명시&quot;</span>) <span class="op">~</span><span class="st"> &quot;광명시&quot;</span>,</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;광주시&quot;</span>) <span class="op">~</span><span class="st"> &quot;광주시&quot;</span>,</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;군포시&quot;</span>) <span class="op">~</span><span class="st"> &quot;군포시&quot;</span>,</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;김포시&quot;</span>) <span class="op">~</span><span class="st"> &quot;김포시&quot;</span>,</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;남양주&quot;</span>) <span class="op">~</span><span class="st"> &quot;남양주&quot;</span>,</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;의정부&quot;</span>) <span class="op">~</span><span class="st"> &quot;의정부&quot;</span>,</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;화성시&quot;</span>) <span class="op">~</span><span class="st"> &quot;화성시&quot;</span>,</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;파주시&quot;</span>) <span class="op">~</span><span class="st"> &quot;파주시&quot;</span>,</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;평택시&quot;</span>) <span class="op">~</span><span class="st"> &quot;평택시&quot;</span>,</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;시흥시&quot;</span>) <span class="op">~</span><span class="st"> &quot;시흥시&quot;</span>,</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true"></a>                        <span class="ot">TRUE</span> <span class="op">~</span><span class="st"> </span>선거구))  <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true"></a><span class="st">  </span><span class="kw">group_by</span>(구시군명, 구분) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true"></a><span class="st">  </span><span class="kw">summarise</span>(득표수 =<span class="st"> </span><span class="kw">sum</span>(사람수)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true"></a><span class="st">  </span><span class="kw">ungroup</span>() </span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true"></a></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true"></a></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true"></a>gg_<span class="dv">2016</span>_dat &lt;-<span class="st"> </span>gg_<span class="dv">2016</span>_raw <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true"></a><span class="st">  </span><span class="kw">filter</span>( <span class="kw">str_detect</span>(구분, <span class="st">&quot;국민의당|노동당|녹색당|더불어민주당|무소속|민중연합당|새누리당|정의당&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true"></a><span class="st">  </span><span class="kw">separate</span>(구분, <span class="dt">into =</span> <span class="kw">c</span>(<span class="st">&quot;정당&quot;</span>, <span class="st">&quot;후보&quot;</span>), <span class="dt">sep =</span> <span class="st">&quot; &quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true"></a><span class="st">  </span><span class="kw">group_by</span>(구시군명, 정당) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true"></a><span class="st">  </span><span class="kw">summarise</span>(득표수 =<span class="st"> </span><span class="kw">sum</span>(득표수, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true"></a><span class="st">  </span><span class="co"># left_join( gg_2016_raw %&gt;% filter(구분 == &quot;계&quot;) %&gt;% rename(합계 = 득표수)) %&gt;% </span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true"></a><span class="st">  </span><span class="kw">ungroup</span>() <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true"></a><span class="st">  </span><span class="kw">mutate</span>(선거 =<span class="st"> &quot;2016년&quot;</span>)</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true"></a></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true"></a><span class="co">## 2020년 총선 -----------------------</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true"></a>gg_<span class="dv">2020</span>_raw &lt;-<span class="st"> </span>krvote<span class="op">::</span>general_<span class="dv">2020</span> <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true"></a><span class="st">  </span><span class="kw">filter</span>(시도 <span class="op">==</span><span class="st"> &quot;경기&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true"></a><span class="st">  </span><span class="kw">unnest</span>(data) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true"></a><span class="st">  </span><span class="kw">mutate</span>(구시군명 =<span class="st"> </span><span class="kw">case_when</span>(</span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;고양시&quot;</span>) <span class="op">~</span><span class="st"> &quot;고양시&quot;</span>,</span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;부천시&quot;</span>) <span class="op">~</span><span class="st"> &quot;부천시&quot;</span>,</span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;성남시&quot;</span>) <span class="op">~</span><span class="st"> &quot;성남시&quot;</span>,</span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;수원시&quot;</span>) <span class="op">~</span><span class="st"> &quot;수원시&quot;</span>,</span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;안산시&quot;</span>) <span class="op">~</span><span class="st"> &quot;안산시&quot;</span>,</span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;안양시&quot;</span>) <span class="op">~</span><span class="st"> &quot;안양시&quot;</span>,</span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;용인시&quot;</span>) <span class="op">~</span><span class="st"> &quot;용인시&quot;</span>,</span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;광명시&quot;</span>) <span class="op">~</span><span class="st"> &quot;광명시&quot;</span>,</span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;광주시&quot;</span>) <span class="op">~</span><span class="st"> &quot;광주시&quot;</span>,</span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;군포시&quot;</span>) <span class="op">~</span><span class="st"> &quot;군포시&quot;</span>,</span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;김포시&quot;</span>) <span class="op">~</span><span class="st"> &quot;김포시&quot;</span>,</span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;남양주&quot;</span>) <span class="op">~</span><span class="st"> &quot;남양주&quot;</span>,</span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;의정부&quot;</span>) <span class="op">~</span><span class="st"> &quot;의정부&quot;</span>,</span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;화성시&quot;</span>) <span class="op">~</span><span class="st"> &quot;화성시&quot;</span>,</span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;파주시&quot;</span>) <span class="op">~</span><span class="st"> &quot;파주시&quot;</span>,</span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;평택시&quot;</span>) <span class="op">~</span><span class="st"> &quot;평택시&quot;</span>,</span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true"></a>                        <span class="kw">str_detect</span>(선거구, <span class="st">&quot;시흥시&quot;</span>) <span class="op">~</span><span class="st"> &quot;시흥시&quot;</span>,</span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true"></a>                        <span class="ot">TRUE</span> <span class="op">~</span><span class="st"> </span>선거구))  <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true"></a><span class="st">  </span><span class="kw">group_by</span>(구시군명, 구분) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true"></a><span class="st">  </span><span class="kw">summarise</span>(득표수 =<span class="st"> </span><span class="kw">sum</span>(사람수)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true"></a><span class="st">  </span><span class="kw">ungroup</span>()</span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true"></a></span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true"></a>gg_<span class="dv">2020</span>_dat &lt;-<span class="st"> </span>gg_<span class="dv">2020</span>_raw <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb3-66"><a href="#cb3-66" aria-hidden="true"></a><span class="st">  </span><span class="kw">filter</span>( <span class="kw">str_detect</span>(구분, <span class="st">&quot;국가혁명배당금당|기독자유통일당|기본소득당|더불어민주당|무소속|미래통합당|민생당|민중당|우리공화당|정의당|친박신당&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb3-67"><a href="#cb3-67" aria-hidden="true"></a><span class="st">  </span><span class="kw">separate</span>(구분, <span class="dt">into =</span> <span class="kw">c</span>(<span class="st">&quot;정당&quot;</span>, <span class="st">&quot;후보&quot;</span>), <span class="dt">sep =</span> <span class="st">&quot; &quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb3-68"><a href="#cb3-68" aria-hidden="true"></a><span class="st">  </span><span class="kw">group_by</span>(구시군명, 정당) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb3-69"><a href="#cb3-69" aria-hidden="true"></a><span class="st">  </span><span class="kw">summarise</span>(득표수 =<span class="st"> </span><span class="kw">sum</span>(득표수, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb3-70"><a href="#cb3-70" aria-hidden="true"></a><span class="st">  </span><span class="co"># left_join( gg_2020_raw %&gt;% filter(구분 == &quot;계&quot;) %&gt;% rename(합계 = 득표수)) %&gt;% </span></span>
+<span id="cb3-71"><a href="#cb3-71" aria-hidden="true"></a><span class="st">  </span><span class="kw">ungroup</span>() <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb3-72"><a href="#cb3-72" aria-hidden="true"></a><span class="st">  </span><span class="kw">mutate</span>(선거 =<span class="st"> &quot;2020년&quot;</span>)</span></code></pre></div>
+<pre><code>Error: &lt;text&gt;:3:10: unexpected &#39;&lt;&#39;
+2: gg_2016_raw &lt;- krvote::general_2016 %&gt;% 
+3:   filter(&lt;
+            ^</code></pre>
+<h2 id="지선">지선</h2>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true"></a></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true"></a><span class="co">## 2014년 지방선거</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true"></a>clean_df &lt;-<span class="st"> </span><span class="cf">function</span>(raw_df) {</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true"></a>  clean_df &lt;-<span class="st"> </span>raw_df <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true"></a><span class="st">    </span><span class="kw">pivot_longer</span>(선거인수<span class="op">:</span>기권수)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true"></a>  <span class="kw">return</span>(clean_df)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true"></a>}</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true"></a>gg_<span class="dv">2014</span>_raw &lt;-<span class="st"> </span>krvote<span class="op">::</span>local_sgg_<span class="dv">20140604</span><span class="op">$</span>경기도 <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">clean_data =</span> <span class="kw">map</span>(data, clean_df) )</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true"></a>gg_<span class="dv">2014</span>_total &lt;-<span class="st"> </span>gg_<span class="dv">2014</span>_raw <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true"></a><span class="st">  </span><span class="kw">select</span>(<span class="op">-</span>data) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true"></a><span class="st">  </span><span class="kw">unnest</span>(clean_data) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true"></a><span class="st">  </span><span class="kw">separate</span>(name, <span class="dt">into =</span> <span class="kw">c</span>(<span class="st">&quot;정당&quot;</span>, <span class="st">&quot;후보&quot;</span>), <span class="dt">sep =</span> <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true"></a><span class="st">  </span><span class="kw">filter</span>(정당 <span class="op">==</span><span class="st"> &quot;계&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true"></a><span class="st">  </span><span class="kw">group_by</span>(시도명, 구시군) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true"></a><span class="st">  </span><span class="kw">summarise</span>(합계 =<span class="st"> </span><span class="kw">sum</span>(value)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true"></a><span class="st">  </span><span class="kw">ungroup</span>()</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true"></a></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true"></a>gg_<span class="dv">2014</span>_dat &lt;-<span class="st"> </span>gg_<span class="dv">2014</span>_raw <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true"></a><span class="st">  </span><span class="kw">select</span>(<span class="op">-</span>data) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true"></a><span class="st">  </span><span class="kw">unnest</span>(clean_data) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true"></a><span class="st">  </span><span class="kw">separate</span>(name, <span class="dt">into =</span> <span class="kw">c</span>(<span class="st">&quot;정당&quot;</span>, <span class="st">&quot;후보&quot;</span>), <span class="dt">sep =</span> <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true"></a><span class="st">  </span><span class="kw">filter</span>(<span class="kw">str_detect</span>(정당, <span class="st">&quot;녹색당|무소속|새누리당|새정치당|새정치민주연합|정의당|통합진보당&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true"></a><span class="st">  </span><span class="kw">group_by</span>(시도명, 구시군, 정당) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true"></a><span class="st">  </span><span class="kw">summarise</span>(득표수 =<span class="st"> </span><span class="kw">sum</span>(value)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true"></a><span class="st">  </span><span class="kw">ungroup</span>() <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true"></a><span class="st">  </span><span class="co"># left_join( gg_2014_total ) %&gt;% </span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true"></a><span class="st">  </span><span class="kw">mutate</span>(선거 =<span class="st"> &quot;2014년&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true"></a><span class="st">  </span><span class="kw">select</span>(선거, 구시군명 =<span class="st"> </span>구시군, 정당, 득표수)</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true"></a></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true"></a></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true"></a><span class="co">## 2018년 지방선거</span></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true"></a></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true"></a>gg_<span class="dv">2018</span>_raw &lt;-<span class="st"> </span>krvote<span class="op">::</span>local_sgg_<span class="dv">20180613</span> <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true"></a><span class="st">  </span><span class="kw">filter</span>(시도 <span class="op">==</span><span class="st"> &quot;경기도&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">clean_data =</span> <span class="kw">map</span>(data, clean_df) ) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true"></a><span class="st">  </span><span class="kw">select</span>(<span class="op">-</span>data) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true"></a><span class="st">  </span><span class="kw">unnest</span>(clean_data) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true"></a><span class="st">  </span><span class="kw">separate</span>(name, <span class="dt">into =</span> <span class="kw">c</span>(<span class="st">&quot;정당&quot;</span>, <span class="st">&quot;후보&quot;</span>), <span class="dt">sep =</span> <span class="st">&quot;_&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true"></a><span class="st">  </span><span class="kw">mutate</span>(구시군명 =<span class="st"> </span><span class="kw">case_when</span>(</span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true"></a>                      <span class="kw">str_detect</span>(구시군명, <span class="st">&quot;고양시&quot;</span>) <span class="op">~</span><span class="st"> &quot;고양시&quot;</span>,</span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true"></a>                      <span class="kw">str_detect</span>(구시군명, <span class="st">&quot;부천시&quot;</span>) <span class="op">~</span><span class="st"> &quot;부천시&quot;</span>,</span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true"></a>                      <span class="kw">str_detect</span>(구시군명, <span class="st">&quot;성남시&quot;</span>) <span class="op">~</span><span class="st"> &quot;성남시&quot;</span>,</span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true"></a>                      <span class="kw">str_detect</span>(구시군명, <span class="st">&quot;수원시&quot;</span>) <span class="op">~</span><span class="st"> &quot;수원시&quot;</span>,</span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true"></a>                      <span class="kw">str_detect</span>(구시군명, <span class="st">&quot;안산시&quot;</span>) <span class="op">~</span><span class="st"> &quot;안산시&quot;</span>,</span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true"></a>                      <span class="kw">str_detect</span>(구시군명, <span class="st">&quot;안양시&quot;</span>) <span class="op">~</span><span class="st"> &quot;안양시&quot;</span>,</span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true"></a>                      <span class="kw">str_detect</span>(구시군명, <span class="st">&quot;용인시&quot;</span>) <span class="op">~</span><span class="st"> &quot;용인시&quot;</span>,</span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true"></a>                      <span class="kw">str_detect</span>(구시군명, <span class="st">&quot;광명시&quot;</span>) <span class="op">~</span><span class="st"> &quot;광명시&quot;</span>,</span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true"></a>                      <span class="kw">str_detect</span>(구시군명, <span class="st">&quot;광주시&quot;</span>) <span class="op">~</span><span class="st"> &quot;광주시&quot;</span>,</span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true"></a>                      <span class="kw">str_detect</span>(구시군명, <span class="st">&quot;군포시&quot;</span>) <span class="op">~</span><span class="st"> &quot;군포시&quot;</span>,</span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true"></a>                      <span class="kw">str_detect</span>(구시군명, <span class="st">&quot;김포시&quot;</span>) <span class="op">~</span><span class="st"> &quot;김포시&quot;</span>,</span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true"></a>                      <span class="kw">str_detect</span>(구시군명, <span class="st">&quot;남양주&quot;</span>) <span class="op">~</span><span class="st"> &quot;남양주&quot;</span>,</span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true"></a>                      <span class="kw">str_detect</span>(구시군명, <span class="st">&quot;의정부&quot;</span>) <span class="op">~</span><span class="st"> &quot;의정부&quot;</span>,</span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true"></a>                      <span class="kw">str_detect</span>(구시군명, <span class="st">&quot;화성시&quot;</span>) <span class="op">~</span><span class="st"> &quot;화성시&quot;</span>,</span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true"></a>                      <span class="kw">str_detect</span>(구시군명, <span class="st">&quot;파주시&quot;</span>) <span class="op">~</span><span class="st"> &quot;파주시&quot;</span>,</span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true"></a>                      <span class="kw">str_detect</span>(구시군명, <span class="st">&quot;평택시&quot;</span>) <span class="op">~</span><span class="st"> &quot;평택시&quot;</span>,</span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true"></a>                      <span class="kw">str_detect</span>(구시군명, <span class="st">&quot;시흥시&quot;</span>) <span class="op">~</span><span class="st"> &quot;시흥시&quot;</span>,</span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true"></a>                      <span class="ot">TRUE</span> <span class="op">~</span><span class="st"> </span>구시군명))  </span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true"></a>  </span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true"></a>gg_<span class="dv">2018</span>_total &lt;-<span class="st"> </span>gg_<span class="dv">2018</span>_raw <span class="op">%&gt;%</span><span class="st">   </span></span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true"></a><span class="st">  </span><span class="kw">filter</span>(정당 <span class="op">==</span><span class="st"> &quot;계&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true"></a><span class="st">  </span><span class="kw">group_by</span>(시도명, 구시군명) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true"></a><span class="st">  </span><span class="kw">summarise</span>(합계 =<span class="st"> </span><span class="kw">sum</span>(value)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true"></a><span class="st">  </span><span class="kw">ungroup</span>()</span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true"></a></span>
+<span id="cb5-69"><a href="#cb5-69" aria-hidden="true"></a>gg_<span class="dv">2018</span>_dat &lt;-<span class="st"> </span>gg_<span class="dv">2018</span>_raw <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-70"><a href="#cb5-70" aria-hidden="true"></a><span class="st">  </span><span class="kw">filter</span>(<span class="kw">str_detect</span>(정당, <span class="st">&quot;대한애국당|더불어민주당|무소속|민주평화당|민중당|바른미래당|자유한국당|정의당&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-71"><a href="#cb5-71" aria-hidden="true"></a><span class="st">  </span><span class="kw">group_by</span>(시도명, 구시군명, 정당) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-72"><a href="#cb5-72" aria-hidden="true"></a><span class="st">  </span><span class="kw">summarise</span>(득표수 =<span class="st"> </span><span class="kw">sum</span>(value)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-73"><a href="#cb5-73" aria-hidden="true"></a><span class="st">  </span><span class="kw">ungroup</span>() <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-74"><a href="#cb5-74" aria-hidden="true"></a><span class="st">  </span><span class="co"># left_join( gg_2018_total )</span></span>
+<span id="cb5-75"><a href="#cb5-75" aria-hidden="true"></a><span class="st">  </span><span class="kw">mutate</span>(선거 =<span class="st"> &quot;2018년&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-76"><a href="#cb5-76" aria-hidden="true"></a><span class="st">  </span><span class="kw">select</span>(선거, 구시군명, 정당, 득표수)</span></code></pre></div>
+<pre><code>Error: &lt;text&gt;:6:18: unexpected &#39;&lt;&#39;
+5:   clean_df &lt;- raw_df %&gt;% 
+6:     pivot_longer(&lt;
+                    ^</code></pre>
+<h2 id="종합">* 종합</h2>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true"></a><span class="co">## 데이터 결합</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true"></a>gg_raw &lt;-<span class="st"> </span><span class="kw">bind_rows</span>(gg_<span class="dv">2012</span>_raw, gg_<span class="dv">2017</span>_raw) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true"></a><span class="st">  </span><span class="kw">bind_rows</span>(gg_<span class="dv">2022</span>_raw) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true"></a><span class="st">  </span><span class="kw">select</span>(선거, 구시군명, 정당, 득표수) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true"></a><span class="st">  </span><span class="kw">bind_rows</span>(gg_<span class="dv">2020</span>_dat) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true"></a><span class="st">  </span><span class="kw">bind_rows</span>(gg_<span class="dv">2016</span>_dat) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true"></a><span class="st">  </span><span class="kw">bind_rows</span>(gg_<span class="dv">2014</span>_dat) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true"></a><span class="st">  </span><span class="kw">bind_rows</span>(gg_<span class="dv">2018</span>_dat)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true"></a>gg_raw <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true"></a><span class="st">  </span><span class="kw">write_rds</span>(<span class="st">&quot;data/gg_raw.rds&quot;</span>)</span></code></pre></div>
+<pre><code>Error: &lt;text&gt;:5:10: unexpected &#39;&lt;&#39;
+4:   bind_rows(gg_2022_raw) %&gt;% 
+5:   select(&lt;
+            ^</code></pre>
+<h1 id="시각화">시각화</h1>
+<h2 id="표">표</h2>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true"></a>gg_raw_tbl &lt;-<span class="st"> </span>gg_raw <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true"></a><span class="st">  </span><span class="kw">group_by</span>(선거, 정당) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true"></a><span class="st">  </span><span class="kw">summarise</span>(득표수 =<span class="st"> </span><span class="kw">sum</span>(득표수)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true"></a><span class="st">  </span><span class="kw">ungroup</span>() <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true"></a><span class="st">  </span><span class="kw">mutate</span>(득표율 =<span class="st"> </span>득표수 <span class="op">/</span><span class="st"> </span>합계) </span></code></pre></div>
+<pre><code>Error: &lt;text&gt;:2:12: unexpected &#39;&lt;&#39;
+1: gg_raw_tbl &lt;- gg_raw %&gt;% 
+2:   group_by(&lt;
+              ^</code></pre>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true"></a>gg_raw_tbl <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">text =</span> glue<span class="op">::</span><span class="kw">glue</span>(<span class="st">&quot;{scales::comma(득표수)} / {scales::comma(합계)} = {scales::percent(득표율, 0.1)}&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true"></a><span class="st">  </span><span class="kw">select</span>(선거, 정당, text) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true"></a><span class="st">  </span><span class="kw">pivot_wider</span>(<span class="dt">names_from =</span> 정당, <span class="dt">values_from =</span> text) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true"></a><span class="st">  </span><span class="kw">select</span>(선거, 민주당, 국민의힘, 그외정당)</span></code></pre></div>
+<pre><code>Error: &lt;text&gt;:3:10: unexpected &#39;&lt;&#39;
+2:   mutate(text = glue::glue(&quot;{scales::comma(&lt;U+B4DD&gt;&lt;U+D45C&gt;&lt;U+C218&gt;)} / {scales::comma(&lt;U+D569&gt;&lt;U+ACC4&gt;)} = {scales::percent(&lt;U+B4DD&gt;&lt;U+D45C&gt;&lt;U+C728&gt;, 0.1)}&quot;)) %&gt;% 
+3:   select(&lt;
+            ^</code></pre>
+<h2 id="그래프">그래프</h2>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true"></a>gg_raw_tbl <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true"></a><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> 선거, <span class="dt">y =</span> 득표율, <span class="dt">color =</span> 정당, <span class="dt">group =</span> 정당)) <span class="op">+</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true"></a><span class="st">    </span><span class="kw">geom_point</span>() <span class="op">+</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true"></a><span class="st">    </span><span class="kw">geom_line</span>()</span></code></pre></div>
+<pre><code>Error: &lt;text&gt;:2:18: unexpected &#39;&lt;&#39;
+1: gg_raw_tbl %&gt;% 
+2:   ggplot(aes(x = &lt;
+                    ^</code></pre>
+        </div>
+      </div>
+      </article>
+      <div class="footer">
+        <a class="label swc-blue-bg" href="http://software-carpentry.org">Software Carpentry</a>
+        <a class="label swc-blue-bg" href="https://github.com/swcarpentry/lesson-template">Source</a>
+        <a class="label swc-blue-bg" href="mailto:admin@software-carpentry.org">Contact</a>
+        <a class="label swc-blue-bg" href="LICENSE.html">License</a>
+      </div>
+    </div>
+    <!-- Javascript placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="css/bootstrap/bootstrap-js/bootstrap.js"></script>
+    <script src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+    
+      ga('create', 'UA-37305346-2', 'auto');
+      ga('send', 'pageview');
+    
+    </script>
+  </body>
+</html>
