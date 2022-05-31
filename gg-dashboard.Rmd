@@ -119,3 +119,4 @@ theme_election <- function(..., font = "MaruBuri") {
 ```{r child="dashboard/local/document.Rmd", encoding="UTF-8"}
 ```
 
+
