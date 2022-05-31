@@ -31,6 +31,7 @@ library(fs)
 library(glue)
 library(gt)
 library(plotly)
+library(ggrepel)
 
 library(tidygraph)
 library(ggraph)
@@ -106,21 +107,26 @@ theme_election <- function(..., font = "MaruBuri") {
 ```{r child="dashboard/local/history-sido.Rmd", encoding="UTF-8"}
 ```
 
-```{r child="dashboard/local/sigungu-casting.Rmd", encoding="UTF-8"}
+<!-- 시군구별 득표표 -->
+
+```{r child="dashboard/local/sigungu.Rmd", encoding="UTF-8"}
+```
+
+```{r child="dashboard/local/sigungu-rate.Rmd", encoding="UTF-8"}
 ```
 
 ```{r child="dashboard/local/sigungu-vote.Rmd", encoding="UTF-8"}
 ```
 
+<!-- 경기지사 여론조사와 빅데이터 -->
+
 ```{r child="dashboard/local/survey.Rmd", encoding="UTF-8"}
 ```
-
 
 ```{r child="dashboard/local/bigdata.Rmd", encoding="UTF-8"}
 ```
 
 ```{r child="dashboard/local/document.Rmd", encoding="UTF-8"}
 ```
-
 
 
