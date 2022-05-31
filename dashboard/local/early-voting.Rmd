@@ -1,0 +1,104 @@
+
+
+
+사전투표 {data-icon="fa-car-alt"}
+=====================================  
+
+
+Column {.tabset .tabset-fade}
+-------------------------------------------------------------------------------
+
+### 제7회 지선 (2018년)
+
+
+```{r early-voting}
+library(readxl)
+library(tidyverse)
+
+ev_first_raw <- read_excel("data/제7회_경기도_사전투표.xlsx", sheet =  "1일차", skip = 4)
+ev_second_raw <- read_excel("data/제7회_경기도_사전투표.xlsx", sheet =  "2일차", skip = 4)
+
+ev_first_tbl <- ev_first_raw %>% 
+  janitor::clean_names(ascii = FALSE) %>% 
+  filter(!is.na(x1)) %>% 
+  slice(2:n()) %>% 
+  select(-x2, -x8) %>% 
+  pivot_longer(cols = contains("시"), names_to = "시간", values_to = "투표수") %>% 
+  rename(구시군명 = x1) %>% 
+  mutate(투표수 = parse_number(투표수)) %>% 
+  mutate(구시군 = case_when(
+                    str_detect(구시군명, "고양시") ~ "고양시",
+                    str_detect(구시군명, "부천시") ~ "부천시",
+                    str_detect(구시군명, "성남시") ~ "성남시",
+                    str_detect(구시군명, "수원시") ~ "수원시",
+                    str_detect(구시군명, "안산시") ~ "안산시",
+                    str_detect(구시군명, "안양시") ~ "안양시",
+                    str_detect(구시군명, "용인시") ~ "용인시",
+                    str_detect(구시군명, "광명시") ~ "광명시",
+                    str_detect(구시군명, "광주시") ~ "광주시",
+                    str_detect(구시군명, "군포시") ~ "군포시",
+                    str_detect(구시군명, "김포시") ~ "김포시",
+                    str_detect(구시군명, "남양주") ~ "남양주",
+                    str_detect(구시군명, "의정부") ~ "의정부",
+                    str_detect(구시군명, "화성시") ~ "화성시",
+                    str_detect(구시군명, "파주시") ~ "파주시",
+                    str_detect(구시군명, "평택시") ~ "평택시",
+                    str_detect(구시군명, "시흥시") ~ "시흥시",
+                    TRUE ~ 구시군명)) %>% 
+  group_by(구시군, 시간) %>% 
+  summarise(투표수 = sum(투표수)) %>% 
+  ungroup() %>% 
+  mutate(시간 = parse_number(시간)) %>% 
+  mutate(시간 = str_pad(시간, width = 2, side = "left", pad = 0)) %>% 
+  arrange(구시군, 시간) %>% 
+  mutate(일차 = "1일") %>% 
+  select(일차, everything())
+
+
+ev_second_tbl <- ev_second_raw %>% 
+  janitor::clean_names(ascii = FALSE) %>% 
+  filter(!is.na(x1)) %>% 
+  slice(2:n()) %>% 
+  select(-x2, -x8) %>% 
+  pivot_longer(cols = contains("시"), names_to = "시간", values_to = "투표수") %>% 
+  rename(구시군명 = x1) %>% 
+  mutate(투표수 = parse_number(투표수)) %>% 
+  mutate(구시군 = case_when(
+                    str_detect(구시군명, "고양시") ~ "고양시",
+                    str_detect(구시군명, "부천시") ~ "부천시",
+                    str_detect(구시군명, "성남시") ~ "성남시",
+                    str_detect(구시군명, "수원시") ~ "수원시",
+                    str_detect(구시군명, "안산시") ~ "안산시",
+                    str_detect(구시군명, "안양시") ~ "안양시",
+                    str_detect(구시군명, "용인시") ~ "용인시",
+                    str_detect(구시군명, "광명시") ~ "광명시",
+                    str_detect(구시군명, "광주시") ~ "광주시",
+                    str_detect(구시군명, "군포시") ~ "군포시",
+                    str_detect(구시군명, "김포시") ~ "김포시",
+                    str_detect(구시군명, "남양주") ~ "남양주",
+                    str_detect(구시군명, "의정부") ~ "의정부",
+                    str_detect(구시군명, "화성시") ~ "화성시",
+                    str_detect(구시군명, "파주시") ~ "파주시",
+                    str_detect(구시군명, "평택시") ~ "평택시",
+                    str_detect(구시군명, "시흥시") ~ "시흥시",
+                    TRUE ~ 구시군명)) %>% 
+  group_by(구시군, 시간) %>% 
+  summarise(투표수 = sum(투표수)) %>% 
+  ungroup() %>% 
+  mutate(시간 = parse_number(시간)) %>% 
+  mutate(시간 = str_pad(시간, width = 2, side = "left", pad = 0)) %>% 
+  arrange(구시군, 시간) %>% 
+  mutate(일차 = "2일") %>% 
+  select(일차, everything())
+
+
+ev_2018_tbl <- bind_rows(ev_first_tbl, ev_second_tbl)
+
+ev_2018_tbl
+```
+
+```{r}
+
+ev_2018_tbl %>% 
+  ggplot()
+```

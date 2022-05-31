@@ -106,7 +106,7 @@ Column {data-width=800}
 ```{r}
 
 shared_gg %>% 
-  DT::datatable() %>% 
+  DT::datatable(options=list(columnDefs = list(list(visible=FALSE, targets=c("lon", "lat"))))) %>% 
   DT::formatRound("민주당", digits =0) %>% 
   DT::formatRound("국민의힘", digits =0) %>% 
   DT::formatRound("그외정당", digits =0) 
