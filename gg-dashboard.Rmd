@@ -109,6 +109,10 @@ theme_election <- function(..., font = "MaruBuri") {
 ```{r child="dashboard/local/sigungu-vote.Rmd", encoding="UTF-8"}
 ```
 
+```{r child="dashboard/local/survey.Rmd", encoding="UTF-8"}
+```
+
+
 ```{r child="dashboard/local/bigdata.Rmd", encoding="UTF-8"}
 ```
 

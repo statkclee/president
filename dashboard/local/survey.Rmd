@@ -1,0 +1,81 @@
+
+
+
+여론조사 {data-icon="fa-pencil-alt"}
+=====================================  
+
+
+Column {.tabset .tabset-fade}
+-------------------------------------------------------------------------------
+
+### 경기지사
+
+```{r survey-gg, eval = TRUE}
+library(tidyverse)
+library(readxl)
+library(httr)
+library(rvest)
+
+# MBC 데이터 다운로드 ------------------------------
+
+## 경기지사 ------------------------------
+# download.file(url = "http://poll-mbc.co.kr/data/region_data/GGPollData.js",
+#               destfile = glue::glue('data/MBC/gg_survey.js'))
+
+## 경기지사 --> 데이터프레임 -----------------
+
+json_data <- read_lines(glue::glue("data/MBC/gg_survey.js")) %>% 
+  str_remove_all(".*(?=\\[)") %>%
+  str_remove(";$") %>% 
+  write_lines(glue::glue("data/MBC/gg_survey.json"))
+
+survey_data <- jsonlite::fromJSON(glue::glue("data/MBC/gg_survey.json")) %>% 
+  as_tibble()
+
+# 데이터 전처리 -----------------------------
+
+survey_tbl <- survey_data %>% 
+  janitor::clean_names(ascii = FALSE) %>% 
+  pivot_longer(김동연:없음, names_to ="후보", values_to = "지지율") %>% 
+  select(-link) %>% 
+  mutate(조사방법 = case_when(ars == TRUE ~ "ARS",
+                              interview == TRUE ~ "전화면접")) %>% 
+  mutate(선정방법 = case_when(rdd == TRUE ~ "무작위",
+                              mnumber == TRUE ~ "가상번호")) %>% 
+  mutate(조사선정 = glue::glue("{조사방법}_{선정방법}")) %>%
+  mutate(조사선정 = factor(조사선정, 
+                           levels = c("전화면접_가상번호", "전화면접_무작위", 
+                                      "ARS_가상번호", "ARS_무작위"))) %>% 
+  mutate(후보 = factor(후보, levels = c("김동연", "김은혜", "강용석", "없음"))) %>% 
+  mutate(start = lubridate::ymd(start)) 
+
+survey_g <- survey_tbl %>%
+  ggplot(aes(x = start, y = 지지율, group = 후보, color = 후보)) +
+    geom_point(aes(text = glue::glue("- 후보: {후보}\n", 
+                                     "- 지지율: {지지율} %\n", 
+                                     "- 조사업체: {house}\n",
+                                     "- 응답율: {whole_response_rate} %")))  +
+    stat_smooth(method = 'loess', se = FALSE) +
+    facet_wrap(~조사선정)  +
+    scale_x_date(date_labels = "%m월%d일") +
+    theme_bw(base_family = "NanumBarunPen") +
+    theme(
+      text = element_text(family = "NanumGothic"),
+      plot.tag.position = c(0.85, .97),
+      legend.position = "top",
+      legend.title=element_text(size=15), 
+      legend.text=element_text(size=13),
+      strip.text.x = element_text(size = rel(1.3), colour = "black", family = "NanumMyeongjo", face="bold"),
+      axis.text.y = element_text(size = rel(1.5), colour = "gray35", family = "NanumBarunpen", face="bold"),
+      axis.text.x = element_text(size = rel(1.3), colour = "black", family = "NanumBarunpen", face="bold"),
+      strip.background=element_rect(fill="gray95"),
+      plot.title=element_text(size=25, face="bold", family = "NanumBarunpen"),
+      plot.subtitle=element_text(face="bold", size=13, colour="grey10", family = "NanumBarunpen"))  +
+  scale_color_manual(values = c("blue", "red", "black", "gray50")) +
+  labs(x="",
+       title = "제8회 지방선거 경기지사 여론조사",
+       caption = "데이터 출처: 중앙선거여론조사심의위원회, MBC 여론M" )
+
+plotly::ggplotly(survey_g, tooltip = "text")
+
+```
