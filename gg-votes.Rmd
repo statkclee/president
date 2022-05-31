@@ -49,10 +49,33 @@ gg_2012_raw <- krvote::election_20121219$득표율 %>%
   mutate(정당 = case_when(str_detect(후보, "박근혜") ~ "국민의힘",
                           str_detect(후보, "문재인") ~ "민주당",
                           TRUE ~ "그외정당")) %>% 
+  mutate(구시군명 = ifelse(str_detect(구시군명, "여주"), "여주시", 구시군명) ) %>% 
   group_by(시도명, 구시군명, 정당) %>% 
   summarise( 득표수 = sum(득표수, na.rm = TRUE)) %>% 
   mutate(선거 = "2012년") %>% 
-  ungroup()
+  ungroup() %>% 
+  mutate(구시군 = case_when(
+                        str_detect(구시군명, "고양시") ~ "고양시",
+                        str_detect(구시군명, "부천시") ~ "부천시",
+                        str_detect(구시군명, "성남시") ~ "성남시",
+                        str_detect(구시군명, "수원시") ~ "수원시",
+                        str_detect(구시군명, "안산시") ~ "안산시",
+                        str_detect(구시군명, "안양시") ~ "안양시",
+                        str_detect(구시군명, "용인시") ~ "용인시",
+                        str_detect(구시군명, "광명시") ~ "광명시",
+                        str_detect(구시군명, "광주시") ~ "광주시",
+                        str_detect(구시군명, "군포시") ~ "군포시",
+                        str_detect(구시군명, "김포시") ~ "김포시",
+                        str_detect(구시군명, "남양주") ~ "남양주",
+                        str_detect(구시군명, "의정부") ~ "의정부",
+                        str_detect(구시군명, "화성시") ~ "화성시",
+                        str_detect(구시군명, "파주시") ~ "파주시",
+                        str_detect(구시군명, "평택시") ~ "평택시",
+                        str_detect(구시군명, "시흥시") ~ "시흥시",
+                        TRUE ~ 구시군명))  %>% 
+  select(선거, 시도명, 구시군명=구시군, 정당, 득표수)
+
+
 
 ## 2017년 대선
 gg_2017_raw <- krvote::election_20170509$득표율 %>% 
@@ -67,9 +90,30 @@ gg_2017_raw <- krvote::election_20170509$득표율 %>%
   group_by(시도명, 구시군명, 정당) %>% 
   summarise( 득표수 = sum(득표수, na.rm = TRUE)) %>% 
   mutate(선거 = "2017년") %>% 
-  ungroup()
+  ungroup() %>% 
+  mutate(구시군 = case_when(
+                        str_detect(구시군명, "고양시") ~ "고양시",
+                        str_detect(구시군명, "부천시") ~ "부천시",
+                        str_detect(구시군명, "성남시") ~ "성남시",
+                        str_detect(구시군명, "수원시") ~ "수원시",
+                        str_detect(구시군명, "안산시") ~ "안산시",
+                        str_detect(구시군명, "안양시") ~ "안양시",
+                        str_detect(구시군명, "용인시") ~ "용인시",
+                        str_detect(구시군명, "광명시") ~ "광명시",
+                        str_detect(구시군명, "광주시") ~ "광주시",
+                        str_detect(구시군명, "군포시") ~ "군포시",
+                        str_detect(구시군명, "김포시") ~ "김포시",
+                        str_detect(구시군명, "남양주") ~ "남양주",
+                        str_detect(구시군명, "의정부") ~ "의정부",
+                        str_detect(구시군명, "화성시") ~ "화성시",
+                        str_detect(구시군명, "파주시") ~ "파주시",
+                        str_detect(구시군명, "평택시") ~ "평택시",
+                        str_detect(구시군명, "시흥시") ~ "시흥시",
+                        TRUE ~ 구시군명))  %>% 
+  select(선거, 시도명, 구시군명=구시군, 정당, 득표수)
+  
 
-## 2017년 대선
+## 2022년 대선
 gg_2022_raw_excel <- readxl::read_excel("data/2022년_개표결과_대통령선거_전체.xlsx") 
 
 gg_2022_raw <- gg_2022_raw_excel %>% 
@@ -93,7 +137,28 @@ gg_2022_raw <- gg_2022_raw_excel %>%
   group_by(시도명, 구시군명, 정당) %>% 
   summarise( 득표수 = sum(득표수, na.rm = TRUE)) %>% 
   mutate(선거 = "2022년") %>% 
-  ungroup()
+  ungroup() %>% 
+  mutate(구시군 = case_when(
+                        str_detect(구시군명, "고양시") ~ "고양시",
+                        str_detect(구시군명, "부천시") ~ "부천시",
+                        str_detect(구시군명, "성남시") ~ "성남시",
+                        str_detect(구시군명, "수원시") ~ "수원시",
+                        str_detect(구시군명, "안산시") ~ "안산시",
+                        str_detect(구시군명, "안양시") ~ "안양시",
+                        str_detect(구시군명, "용인시") ~ "용인시",
+                        str_detect(구시군명, "광명시") ~ "광명시",
+                        str_detect(구시군명, "광주시") ~ "광주시",
+                        str_detect(구시군명, "군포시") ~ "군포시",
+                        str_detect(구시군명, "김포시") ~ "김포시",
+                        str_detect(구시군명, "남양주") ~ "남양주",
+                        str_detect(구시군명, "의정부") ~ "의정부",
+                        str_detect(구시군명, "화성시") ~ "화성시",
+                        str_detect(구시군명, "파주시") ~ "파주시",
+                        str_detect(구시군명, "평택시") ~ "평택시",
+                        str_detect(구시군명, "시흥시") ~ "시흥시",
+                        TRUE ~ 구시군명))  %>% 
+  select(선거, 시도명, 구시군명=구시군, 정당, 득표수)
+  
 
 
 
@@ -133,6 +198,10 @@ gg_2016_raw <- krvote::general_2016 %>%
 gg_2016_dat <- gg_2016_raw %>% 
   filter( str_detect(구분, "국민의당|노동당|녹색당|더불어민주당|무소속|민중연합당|새누리당|정의당")) %>% 
   separate(구분, into = c("정당", "후보"), sep = " ") %>% 
+  mutate(정당 = case_when(str_detect(정당, "민주당") ~ "민주당",
+                          str_detect(정당, "새누리당") ~ "국민의힘",
+                          str_detect(정당, "국민의당") ~ "국민의힘",
+                          TRUE ~ "그외정당")) %>%   
   group_by(구시군명, 정당) %>% 
   summarise(득표수 = sum(득표수, na.rm = TRUE)) %>% 
   # left_join( gg_2016_raw %>% filter(구분 == "계") %>% rename(합계 = 득표수)) %>% 
@@ -167,8 +236,14 @@ gg_2020_raw <- krvote::general_2020 %>%
   ungroup()
 
 gg_2020_dat <- gg_2020_raw %>% 
+  separate(구시군명, into = c("선거구", "구시군명"), sep = "_") %>% 
+  mutate(구시군명 = ifelse(is.na(구시군명), 선거구, 구시군명)) %>% 
   filter( str_detect(구분, "국가혁명배당금당|기독자유통일당|기본소득당|더불어민주당|무소속|미래통합당|민생당|민중당|우리공화당|정의당|친박신당")) %>% 
   separate(구분, into = c("정당", "후보"), sep = " ") %>% 
+  mutate(정당 = case_when(str_detect(정당, "민주당") ~ "민주당",
+                          str_detect(정당, "새누리당") ~ "국민의힘",
+                          str_detect(정당, "국민의당") ~ "국민의힘",
+                          TRUE ~ "그외정당")) %>%   
   group_by(구시군명, 정당) %>% 
   summarise(득표수 = sum(득표수, na.rm = TRUE)) %>% 
   # left_join( gg_2020_raw %>% filter(구분 == "계") %>% rename(합계 = 득표수)) %>% 
@@ -202,17 +277,40 @@ gg_2014_total <- gg_2014_raw %>%
   summarise(합계 = sum(value)) %>% 
   ungroup()
 
-gg_2014_dat <- gg_2014_raw %>% 
+gg_2014_dat <- gg_2014_raw %>%
   select(-data) %>% 
   unnest(clean_data) %>% 
   separate(name, into = c("정당", "후보"), sep = "\n") %>% 
-  filter(str_detect(정당, "녹색당|무소속|새누리당|새정치당|새정치민주연합|정의당|통합진보당")) %>% 
-  group_by(시도명, 구시군, 정당) %>% 
+  filter(str_detect(정당, "녹색당|무소속|새누리당|새정치당|새정치민주연합|정의당|통합진보당")) %>%
+  # filter(!is.na(후보)) %>% 
+  mutate(정당 = case_when(str_detect(정당, "민주연합") ~ "민주당",
+                          str_detect(정당, "새누리당") ~ "국민의힘",
+                          TRUE ~ "그외정당")) %>%   
+  mutate(구시군명 = case_when(
+                        str_detect(구시군, "고양시") ~ "고양시",
+                        str_detect(구시군, "부천시") ~ "부천시",
+                        str_detect(구시군, "성남시") ~ "성남시",
+                        str_detect(구시군, "수원시") ~ "수원시",
+                        str_detect(구시군, "안산시") ~ "안산시",
+                        str_detect(구시군, "안양시") ~ "안양시",
+                        str_detect(구시군, "용인시") ~ "용인시",
+                        str_detect(구시군, "광명시") ~ "광명시",
+                        str_detect(구시군, "광주시") ~ "광주시",
+                        str_detect(구시군, "군포시") ~ "군포시",
+                        str_detect(구시군, "김포시") ~ "김포시",
+                        str_detect(구시군, "남양주") ~ "남양주",
+                        str_detect(구시군, "의정부") ~ "의정부",
+                        str_detect(구시군, "화성시") ~ "화성시",
+                        str_detect(구시군, "파주시") ~ "파주시",
+                        str_detect(구시군, "평택시") ~ "평택시",
+                        str_detect(구시군, "시흥시") ~ "시흥시",
+                        TRUE ~ 구시군))  %>% 
+  group_by(시도명, 구시군명, 정당) %>% 
   summarise(득표수 = sum(value)) %>% 
   ungroup() %>% 
   # left_join( gg_2014_total ) %>% 
   mutate(선거 = "2014년") %>% 
-  select(선거, 구시군명 = 구시군, 정당, 득표수)
+  select(선거, 구시군명, 정당, 득표수)
 
 
 ## 2018년 지방선거
@@ -223,7 +321,7 @@ gg_2018_raw <- krvote::local_sgg_20180613 %>%
   select(-data) %>% 
   unnest(clean_data) %>% 
   separate(name, into = c("정당", "후보"), sep = "_") %>% 
-  mutate(구시군명 = case_when(
+  mutate(구시군 = case_when(
                       str_detect(구시군명, "고양시") ~ "고양시",
                       str_detect(구시군명, "부천시") ~ "부천시",
                       str_detect(구시군명, "성남시") ~ "성남시",
@@ -242,7 +340,8 @@ gg_2018_raw <- krvote::local_sgg_20180613 %>%
                       str_detect(구시군명, "평택시") ~ "평택시",
                       str_detect(구시군명, "시흥시") ~ "시흥시",
                       TRUE ~ 구시군명))  
-  
+
+
 gg_2018_total <- gg_2018_raw %>%   
   filter(정당 == "계") %>% 
   group_by(시도명, 구시군명) %>% 
@@ -251,12 +350,16 @@ gg_2018_total <- gg_2018_raw %>%
 
 gg_2018_dat <- gg_2018_raw %>% 
   filter(str_detect(정당, "대한애국당|더불어민주당|무소속|민주평화당|민중당|바른미래당|자유한국당|정의당")) %>% 
-  group_by(시도명, 구시군명, 정당) %>% 
+  mutate(정당 = case_when(str_detect(정당, "민주당") ~ "민주당",
+                          str_detect(정당, "자유한국당") ~ "국민의힘",
+                          str_detect(정당, "바른미래당") ~ "국민의힘",
+                          TRUE ~ "그외정당")) %>%   
+  group_by(시도명, 구시군, 정당) %>% 
   summarise(득표수 = sum(value)) %>% 
   ungroup() %>% 
   # left_join( gg_2018_total )
   mutate(선거 = "2018년") %>% 
-  select(선거, 구시군명, 정당, 득표수)
+  select(선거, 구시군명=구시군, 정당, 득표수)
 
 
 
@@ -359,6 +462,26 @@ airports |>
   ) |> 
   e_scatter_3d(lat, cnt, coord_system = "globe", blendMode = 'lighter') |> 
   e_visual_map(inRange = list(symbolSize = c(1, 10)))
+
+```
+
+
+# crosstalk
+
+```{r}
+gg_raw <- read_rds("data/gg_raw.rds")
+
+gg_raw %>% 
+  filter(구시군명 == "가평군") %>% 
+  mutate(정당 = factor(정당, levels = c("민주당", "국민의힘", "그외정당"))) %>% 
+  ggplot(aes(x = 선거, y = 득표수, color = 정당, group = 정당)) +
+    geom_line() +
+    geom_point() +
+    scale_color_manual(values = c("blue", "red", "gray70"))
+
+
+  
+  
 
 ```
 

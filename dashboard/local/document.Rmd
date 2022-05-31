@@ -1,0 +1,50 @@
+
+
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+선거 다큐멘터리
+=================================================================================================
+
+
+Column {.tabset .tabset-fade}
+-------------------------------------------------------------------------------
+
+### Concept Map
+
+
+<br>
+<br>
+
+
+![](fig/pansei-overview.jpg)
+
+### YTN 선거 다큐멘터리 1부
+
+<br>
+
+- 출처
+    - YTN: [[YTN 특집] 여론의 진실과 함정, 선거여론조사 - 1부, 2022년 03월 05일 오후 09시 23분](https://www.ytn.co.kr/replay/view.php?idx=20&key=202203052123056480)
+    - 유튜브: [[YTN 특집] 여론의 진실과 함정, 선거여론조사 - 1부](https://youtu.be/y7DNXwAy3mw)
+
+<br>
+
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/y7DNXwAy3mw" title="YTN 특집: 여론의 진실과 함정, 선거여론조사 - 1부" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+
+
+### YTN 선거 다큐멘터리 2부
+
+<br>
+
+- 출처 
+    - YTN: [[YTN 특집] 여론의 진실과 함정, 선거여론조사 - 2부, 2022년 03월 06일 오후 09시 22분](https://www.ytn.co.kr/replay/view.php?idx=20&key=202203062122214151)
+    - 유튜브: [[YTN 특집] 여론의 진실과 함정, 선거여론조사 - 2부](https://youtu.be/TgNmc1E-2yM)
+
+<br>
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/TgNmc1E-2yM" title="YTN 특집: 여론의 진실과 함정, 선거여론조사 - 2부" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
