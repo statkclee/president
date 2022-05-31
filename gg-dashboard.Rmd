@@ -40,97 +40,18 @@ library(ggforce)
 ```
 
 
-<!-- ```{r child="dashboard/local/world.Rmd", encoding="UTF-8"} -->
-<!-- ``` -->
-
-
-<!-- ```{r child="dashboard/local/document.Rmd", encoding="UTF-8"} -->
-<!-- ``` -->
-
-
-구시군 득표 {data-icon="ion-stats-bars"}
-=====================================  
-
-Column {data-width=200}
--------------------------------------
-
-### 구시군
-
-
-```{r crosstalk-cs}
-# https://nicar.r-journalism.com/docs/crosstalk-flexdashboard-leaflet-datatable/
-  
-library(crosstalk)
-library(leaflet)
-library(DT)
-library(d3scatter)
-
-gg_raw <- read_rds("data/gg_raw.rds")
-
-
-shared_gg <- SharedData$new(gg_raw)
-
-filter_checkbox(
-  id = "선거",
-  label = "선거",
-  sharedData = shared_gg,
-  group = ~선거
-)
-
-filter_select(
-  id = "구시군명",
-  label = "구시군명",
-  sharedData = shared_gg,
-  group = ~구시군명
-)
-
-filter_checkbox(
-  id = "정당",
-  label = "정당",
-  sharedData = shared_gg,
-  group = ~정당
-)
-
-filter_slider(
-  id = "득표수",
-  label = "득표수",
-  sharedData = shared_gg,
-  column = "득표수",
-  step = 1000,
-  round = TRUE,
-  sep = "",
-  min = 0,
-  ticks = FALSE
-)
-
+```{r child="dashboard/local/world.Rmd", encoding="UTF-8"}
 ```
 
 
-Column {data-width=800}
--------------------------------------
-
-### 표
-
-```{r}
-
-shared_gg %>% 
-  DT::datatable() %>% 
-  DT::formatRound("득표수", digits =0)
+```{r child="dashboard/local/sigungu-vote.Rmd", encoding="UTF-8"}
 ```
 
 
-### 지도
-
-
-```{r}
-
-shared_gg %>% 
-  leaflet() %>% 
-  addTiles() %>% 
-  setView(  lng=127.063, lat=37.513, zoom = 8) # korea, zoom 6
-
-
+```{r child="dashboard/local/document.Rmd", encoding="UTF-8"}
 ```
+
+
 
 
 
