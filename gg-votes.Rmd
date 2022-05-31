@@ -480,8 +480,5 @@ gg_raw %>%
     scale_color_manual(values = c("blue", "red", "gray70"))
 
 
-  
-  
-
 ```
 
