@@ -43,6 +43,9 @@ library(ggforce)
 ```{r child="dashboard/local/world.Rmd", encoding="UTF-8"}
 ```
 
+```{r child="dashboard/local/history-sido.Rmd", encoding="UTF-8"}
+```
+
 
 ```{r child="dashboard/local/sigungu-vote.Rmd", encoding="UTF-8"}
 ```
@@ -50,9 +53,6 @@ library(ggforce)
 
 ```{r child="dashboard/local/document.Rmd", encoding="UTF-8"}
 ```
-
-
-
 
 
 
