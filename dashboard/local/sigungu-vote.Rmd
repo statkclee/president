@@ -1,6 +1,6 @@
 
 
-구시군 득표 {data-icon="ion-stats-bars"}
+득표수 {data-icon="ion-stats-bars"}
 =====================================  
 
 Column {data-width=200}

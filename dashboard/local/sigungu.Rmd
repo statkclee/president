@@ -1,6 +1,6 @@
 
 
-득표 {data-icon="ion-stats-bars"}
+구시군별 득표(율) {data-icon="ion-stats-bars"}
 =====================================  
 
 Column {data-width=200}

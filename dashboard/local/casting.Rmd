@@ -1,0 +1,63 @@
+
+
+투표율 {data-icon="ion-stats-bars"}
+=====================================  
+
+
+Column {data-width=200}
+-------------------------------------
+
+### 구시군
+
+```{r crosstalk-cs, echo=FALSE, message=FALSE}
+# https://nicar.r-journalism.com/docs/crosstalk-flexdashboard-leaflet-datatable/
+
+library(tidyverse)
+library(crosstalk)
+library(leaflet)
+library(DT)
+library(d3scatter)
+library(sf)
+
+gg_casting_raw <- 
+  read_rds("data/gg_casting_raw.rds")
+
+
+
+
+shared_sgg_casting_gg <- SharedData$new(gg_casting_raw)
+
+filter_select(
+  id = "구시군명",
+  label = "구시군명",
+  sharedData = shared_sgg_casting_gg,
+  group = ~구시군명,
+  multiple = TRUE
+)
+
+```
+
+
+Column {data-width=800}
+-------------------------------------
+
+### 그래프
+
+```{r sgg-comparison-casting}
+library(RColorBrewer)
+dark2 <- colorRampPalette(brewer.pal('Dark2', n=9))
+
+plotly::ggplotly(
+  shared_sgg_casting_gg %>% 
+    ggplot(aes(x = 선거, y = 투표율, group= 구시군명, color=구시군명)) +
+      geom_line() +
+      geom_point(size = 3) +
+      labs(title = "역대 선거 투표율",
+           x="",
+           y="투표율(%)") +
+      scale_y_continuous(labels = scales::percent) +
+      theme_election() +
+      geom_text(aes(label=glue::glue("{scales::percent(투표율, 0.1)}")), vjust=3.0 )
+    ) 
+
+```

@@ -101,10 +101,16 @@ theme_election <- function(..., font = "MaruBuri") {
 ```
 
 
+
 ```{r child="dashboard/local/world.Rmd", encoding="UTF-8"}
 ```
 
 ```{r child="dashboard/local/history-sido.Rmd", encoding="UTF-8"}
+```
+
+<!-- 투표율 -->
+
+```{r child="dashboard/local/casting.Rmd", encoding="UTF-8"}
 ```
 
 <!-- 시군구별 득표표 -->

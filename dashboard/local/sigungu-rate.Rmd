@@ -1,5 +1,5 @@
 
-구시군 득표율(%) {data-icon="ion-stats-bars"}
+득표율(%) {data-icon="ion-stats-bars"}
 =====================================  
 
 Column {data-width=200}
