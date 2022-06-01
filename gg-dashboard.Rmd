@@ -113,6 +113,11 @@ theme_election <- function(..., font = "MaruBuri") {
 ```{r child="dashboard/local/casting.Rmd", encoding="UTF-8"}
 ```
 
+<!-- 사전투표율 -->
+
+```{r child="dashboard/local/early-voting.Rmd", encoding="UTF-8"}
+```
+
 <!-- 시군구별 득표표 -->
 
 ```{r child="dashboard/local/sigungu.Rmd", encoding="UTF-8"}
