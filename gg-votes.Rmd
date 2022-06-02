@@ -241,7 +241,7 @@ gg_2020_dat <- gg_2020_raw %>%
   filter( str_detect(구분, "국가혁명배당금당|기독자유통일당|기본소득당|더불어민주당|무소속|미래통합당|민생당|민중당|우리공화당|정의당|친박신당")) %>% 
   separate(구분, into = c("정당", "후보"), sep = " ") %>% 
   mutate(정당 = case_when(str_detect(정당, "민주당") ~ "민주당",
-                          str_detect(정당, "새누리당") ~ "국민의힘",
+                          str_detect(정당, "미래통합") ~ "국민의힘",
                           str_detect(정당, "국민의당") ~ "국민의힘",
                           TRUE ~ "그외정당")) %>%   
   group_by(구시군명, 정당) %>% 
@@ -379,8 +379,16 @@ gg_raw <- bind_rows(gg_2012_raw, gg_2017_raw) %>%
   bind_rows(gg_2014_dat) %>% 
   bind_rows(gg_2018_dat)
 
-gg_raw %>% 
-  write_rds("data/gg_raw.rds")
+gg_sgg_raw <- gg_raw %>% 
+  group_by(선거, 구시군명, 정당) %>% 
+  summarise(득표수 = sum(득표수)) %>% 
+  ungroup()
+
+gg_sgg_raw <- krvote::clean_varnames(gg_sgg_raw)
+
+
+gg_sgg_raw %>% 
+  write_rds("data/gg_sgg_raw.rds")
 
 ```
 

@@ -1,0 +1,458 @@
+
+
+
+역대 시도 선거 {data-icon="icon-dashboard"}
+=====================================  
+
+
+Column {.tabset .tabset-fade}
+-------------------------------------------------------------------------------
+
+### [종합](http://www.ohmynews.com/NWS_Web/View/at_pg_w.aspx?CNTN_CD=A0002820588)
+
+
+![](fig/local-birds-eye-view.jpeg){width=100%}
+
+
+### '22년 대선
+
+![](fig/sido_tilemap_20_g.png){width=100%}
+
+### '20년 총선
+
+```{r sido-tilemap-2020-general, eval = FALSE}
+sido_code_old <- tribble(~"시도코드", ~"시도명", ~"시도",
+                         '1100', "서울특별시", "서울",
+                         '2600', "부산광역시", "부산",
+                         '2700', "대구광역시", "대구",
+                         '2800', "인천광역시", "인천",
+                         '2900', "광주광역시", "광주",
+                         '3000', "대전광역시", "대전",
+                         '3100', "울산광역시", "울산",
+                         '5100', "세종특별자치시", "세종",
+                         '4100', "경기도", "경기",
+                         '4200', "강원도", "강원",
+                         '4300', "충청북도", "충북",
+                         '4400', "충청남도", "충남",
+                         '4500', "전라북도", "전북",
+                         '4600', "전라남도", "전남",
+                         '4700', "경상북도", "경북",
+                         '4800', "경상남도", "경남",
+                         '4900', "제주특별자치도", "제주")
+
+general_2020_data <- krvote::general_2020 %>% 
+  unnest(data) %>% 
+  group_by(시도, 구분) %>% 
+  summarise( 득표수 = sum(사람수)) %>% 
+  ungroup() %>% 
+  mutate(정당 = case_when( str_detect(구분, "더불어민주당") ~ "민주당_득표",
+                           str_detect(구분, "미래통합당") ~ "국민의힘_득표",
+                           str_detect(구분, "계") ~ "계",
+                           TRUE ~ "기타")) %>% 
+  filter(정당 != "기타") %>% 
+  group_by(시도, 정당) %>% 
+  summarise(득표수 = sum(득표수)) %>% 
+  ungroup() %>% 
+  pivot_wider(names_from = 정당, values_from = 득표수) %>% 
+  left_join(sido_code_old)  %>% 
+  select(시도명, 민주당_득표, 국민의힘_득표, 계)
+  
+general_2020_viz <- general_2020_data %>% 
+  mutate(민주당 = 민주당_득표/계,
+         국민의힘 = 국민의힘_득표/계) %>% 
+  mutate(차이 = 민주당 - 국민의힘)
+
+general_2020_viz %>% 
+  summarise(민주당=sum(민주당_득표),
+            국민의힘 = sum(국민의힘_득표),
+            계 = sum(계)) %>% 
+  mutate(민주당_비율 = 민주당/계,
+         국힘_비율 = 국민의힘/계)  
+
+library(sf)
+sido_tilemap <- st_read("data/tilemap_sido/sido_hex_map_raw.shp")
+
+sido_tilemap_2020_sf <- sido_tilemap %>% 
+  left_join(general_2020_viz, by = c("CTP_KOR_NM" = "시도명")) %>% 
+  left_join(nesdc::sido_code, by = c("CTP_KOR_NM" = "시도명") ) %>% 
+  mutate(label = glue::glue("{시도}\n{scales::percent(차이, accuracy =0.1)}"))
+
+sido_tilemap_2020_g <- sido_tilemap_2020_sf %>% 
+  ggplot() +
+    geom_sf(aes(geometry = geometry, fill = 차이)) +
+    theme_void(base_family = "NanumBarunpen") +
+    geom_sf_text(aes(geometry = geometry, label = label),
+                 size = 7,
+                 fun.geometry = function(x) st_centroid(x)) +
+    scale_fill_gradientn( colours = c("red", "white", "blue"), labels = scales::percent) +
+    labs(
+      title = "제21대 국회의원 시도별 득표율 차이",
+      subtitle = "득표율 차이: |민주당(49.9%) - 미래통합(41.5%)| = 8.4%",
+      fill = "득표율 차이(%)",
+      caption = "데이터출처: 중앙선거관리위원회 선거통계시스템"
+    ) +
+    theme(
+      text = element_text(family = "NanumBarunpen"),
+      plot.tag.position = c(0.85, .97),
+      legend.position = "right",
+      legend.title=element_text(size=15), 
+      legend.key.size = unit(1.5, 'cm'),
+      legend.text=element_text(size=13),
+      plot.title=element_text(size=25, face="bold", family = "NanumBarunpen"),
+      plot.subtitle=element_text(face="bold", size=17, colour="grey10", family = "NanumBarunpen"))   
+
+ragg::agg_png("fig/sido_tilemap_2020_g.png", width = 297, height = 210, units = "mm", res = 600, scaling = 0.85)
+sido_tilemap_2020_g
+dev.off()
+
+
+```
+
+![](fig/sido_tilemap_2020_g.png){width=100%}
+
+
+
+
+
+### '18년 지선
+
+
+```{r sido-tilemap-18-local, eval = FALSE}
+
+calculate_diff <- function(raw_data) {
+  sido_data <- raw_data %>% 
+    pivot_longer(선거인수:기권수) %>% 
+    separate(name, into = c("정당", "후보"), sep = "_") %>% 
+    mutate(후보 = ifelse(정당 == "계", 정당, 후보) ) %>% 
+    filter(!is.na(후보)) %>% 
+    select(-후보) %>% 
+    mutate(정당 = case_when(str_detect(정당, "더불어민주당") ~ "민주당_득표",
+                            str_detect(정당, "자유한국|바른미래") ~ "국민의힘_득표",
+                            TRUE ~ 정당)) %>% 
+    group_by(정당) %>% 
+    summarise(득표수 = sum(value)) %>% 
+    pivot_wider(names_from = 정당, values_from = 득표수)  %>% 
+    mutate(민주당 = 민주당_득표/계,
+           국민의힘 = 국민의힘_득표/계) %>% 
+    mutate(차이 = 민주당 - 국민의힘)  %>% 
+    select(민주당, 국민의힘, 차이, 민주당_득표, 국민의힘_득표, 계)
+}
+
+
+local_2018_data <- krvote::local_sido_20180613 %>% 
+  mutate(diff_data = map(data, safely(calculate_diff, otherwise = "error"))) %>% 
+  mutate(result = map(diff_data, "result") ) %>% 
+  select(시도명, result) %>% 
+  unnest(result)
+
+local_2018_data %>% 
+  summarise(민주당=sum(민주당_득표),
+            국민의힘 = sum(국민의힘_득표),
+            계 = sum(계)) %>% 
+  mutate(민주당_비율 = 민주당/계,
+         국힘_비율 = 국민의힘/계)
+ 
+
+library(sf)
+sido_tilemap <- st_read("data/tilemap_sido/sido_hex_map_raw.shp")
+
+sido_tilemap_2018_sf <- sido_tilemap %>% 
+  left_join(local_2018_data, by = c("CTP_KOR_NM" = "시도명")) %>% 
+  left_join(nesdc::sido_code, by = c("CTP_KOR_NM" = "시도명") ) %>% 
+  mutate(label = glue::glue("{시도}\n{scales::percent(차이, accuracy =0.1)}"))
+
+sido_tilemap_2018_g <- sido_tilemap_2018_sf %>% 
+  ggplot() +
+    geom_sf(aes(geometry = geometry, fill = 차이)) +
+    theme_void(base_family = "NanumBarunpen") +
+    geom_sf_text(aes(geometry = geometry, label = label),
+                 size = 7,
+                 fun.geometry = function(x) st_centroid(x)) +
+    scale_fill_gradientn( colours = c("red", "white", "blue"), labels = scales::percent) +
+    labs(
+      title = "제7회 지방선거 시도별 득표율 차이",
+      subtitle = "득표율 차이: |민주당(56.0%) - 자유한국+바른미래(38.7%)| = 17.3%",
+      fill = "득표율 차이(%)",
+      caption = "데이터출처: 중앙선거관리위원회 선거통계시스템"
+    ) +
+    theme(
+      text = element_text(family = "NanumBarunpen"),
+      plot.tag.position = c(0.85, .97),
+      legend.position = "right",
+      legend.title=element_text(size=15), 
+      legend.key.size = unit(1.5, 'cm'),
+      legend.text=element_text(size=13),
+      plot.title=element_text(size=25, face="bold", family = "NanumBarunpen"),
+      plot.subtitle=element_text(face="bold", size=17, colour="grey10", family = "NanumBarunpen"))   
+
+ragg::agg_png("fig/sido_tilemap_2018_g.png", width = 297, height = 210, units = "mm", res = 600, scaling = 0.85)
+sido_tilemap_2018_g
+dev.off()
+
+```
+
+![](fig/sido_tilemap_2018_g.png){width=100%}
+
+
+
+### '17년 대선
+
+
+```{r sido-tilemap-19-presid, eval = FALSE}
+# consluting --> 지선_판세_20220323.R
+
+
+nec_19_viz <- krvote::election_20170509$득표율 %>% 
+  mutate(국민의힘 = 홍준표 + 안철수 + 유승민) %>% 
+  group_by(시도명) %>% 
+  summarise(민주당 = sum(문재인),
+            국민의힘 = sum(국민의힘),
+            합계 = sum(계)) %>% 
+  mutate(민주당_지지율 = 민주당/합계,
+         국힘_지지율   = 국민의힘/합계) %>% 
+  mutate(차이 = 민주당_지지율 - 국힘_지지율) %>% 
+  select(시도명, 민주당=민주당_지지율, 국민의힘 = 국힘_지지율, 차이)
+
+library(sf)
+sido_tilemap <- st_read("data/tilemap_sido/sido_hex_map_raw.shp")
+
+sido_tilemap_19_sf <- sido_tilemap %>% 
+  left_join(nec_19_viz, by = c("CTP_KOR_NM" = "시도명")) %>% 
+  left_join(nesdc::sido_code, by = c("CTP_KOR_NM" = "시도명") ) %>% 
+  mutate(label = glue::glue("{시도}\n{scales::percent(차이, accuracy =0.1)}"))
+
+
+sido_tilemap_19_g <- sido_tilemap_19_sf %>% 
+  ggplot() +
+    geom_sf(aes(geometry = geometry, fill = 차이)) +
+    theme_void(base_family = "NanumBarunpen") +
+    geom_sf_text(aes(geometry = geometry, label = label),
+                 size = 7,
+                 fun.geometry = function(x) st_centroid(x)) +
+    scale_fill_gradientn( colours = c("red", "white", "blue"), labels = scales::percent) +
+    labs(
+      title = "제19대 대통령선거 시도별 득표율 차이",
+      subtitle = "득표율 차이: |문재인(41.08%) - 홍+안+유(52.2%)| =  11.12%",
+      fill = "득표율 차이(%)",
+      caption = "데이터출처: 중앙선거관리위원회 선거통계시스템"
+    ) +
+    theme(
+      text = element_text(family = "NanumBarunpen"),
+      plot.tag.position = c(0.85, .97),
+      legend.position = "right",
+      legend.title=element_text(size=15), 
+      legend.key.size = unit(1.5, 'cm'),
+      legend.text=element_text(size=13),
+      plot.title=element_text(size=25, face="bold", family = "NanumBarunpen"),
+      plot.subtitle=element_text(face="bold", size=17, colour="grey10", family = "NanumBarunpen"))   
+
+ragg::agg_png("fig/sido_tilemap_19_g.png", width = 297, height = 210, units = "mm", res = 600, scaling = 0.85)
+sido_tilemap_19_g
+dev.off()
+
+```
+
+![](fig/sido_tilemap_19_g.png){width=100%}
+
+### '16년 총선
+
+```{r sido-tilemap-2016-general, eval = FALSE}
+
+general_2016_data <- krvote::general_2016 %>% 
+  unnest(data) %>% 
+  group_by(시도, 구분) %>% 
+  summarise( 득표수 = sum(사람수)) %>% 
+  ungroup() %>% 
+  mutate(정당 = case_when( str_detect(구분, "더불어민주당") ~ "민주당_득표",
+                           str_detect(구분, "새누리당") ~ "국민의힘_득표",
+                           str_detect(구분, "계") ~ "계",
+                         TRUE ~ "기타")) %>% 
+  filter(정당 != "기타") %>% 
+  group_by(시도, 정당) %>% 
+  summarise(득표수 = sum(득표수)) %>% 
+  ungroup() %>% 
+  pivot_wider(names_from = 정당, values_from = 득표수) %>% 
+  left_join(sido_code_old)  %>% 
+  select(시도명, 민주당_득표, 국민의힘_득표, 계)
+  
+general_2016_viz <- general_2016_data %>% 
+  mutate(민주당 = 민주당_득표/계,
+         국민의힘 = 국민의힘_득표/계) %>% 
+  mutate(차이 = 민주당 - 국민의힘)
+
+general_2016_viz %>% 
+  summarise(민주당=sum(민주당_득표),
+            국민의힘 = sum(국민의힘_득표),
+            계 = sum(계)) %>% 
+  mutate(민주당_비율 = 민주당/계,
+         국힘_비율 = 국민의힘/계)  
+
+library(sf)
+sido_tilemap <- st_read("data/tilemap_sido/sido_hex_map_raw.shp")
+
+sido_tilemap_2016_sf <- sido_tilemap %>% 
+  left_join(general_2016_viz, by = c("CTP_KOR_NM" = "시도명")) %>% 
+  left_join(nesdc::sido_code, by = c("CTP_KOR_NM" = "시도명") ) %>% 
+  mutate(label = glue::glue("{시도}\n{scales::percent(차이, accuracy =0.1)}"))
+
+sido_tilemap_2016_g <- sido_tilemap_2016_sf %>% 
+  ggplot() +
+    geom_sf(aes(geometry = geometry, fill = 차이)) +
+    theme_void(base_family = "NanumBarunpen") +
+    geom_sf_text(aes(geometry = geometry, label = label),
+                 size = 7,
+                 fun.geometry = function(x) st_centroid(x)) +
+    scale_fill_gradientn( colours = c("red", "white", "blue"), labels = scales::percent) +
+    labs(
+      title = "제20대 국회의원 시도별 득표율 차이",
+      subtitle = "득표율 차이: |민주당(37.0%) - 미래통합(38.3%)| = 8.4%",
+      fill = "득표율 차이(%)",
+      caption = "데이터출처: 중앙선거관리위원회 선거통계시스템"
+    ) +
+    theme(
+      text = element_text(family = "NanumBarunpen"),
+      plot.tag.position = c(0.85, .97),
+      legend.position = "right",
+      legend.title=element_text(size=15), 
+      legend.key.size = unit(1.5, 'cm'),
+      legend.text=element_text(size=13),
+      plot.title=element_text(size=25, face="bold", family = "NanumBarunpen"),
+      plot.subtitle=element_text(face="bold", size=17, colour="grey10", family = "NanumBarunpen"))   
+
+ragg::agg_png("fig/sido_tilemap_2016_g.png", width = 297, height = 210, units = "mm", res = 600, scaling = 0.85)
+sido_tilemap_2016_g
+dev.off()
+
+```
+
+
+![](fig/sido_tilemap_2016_g.png){width=100%}
+
+### '14년 지선
+
+```{r sido-tilemap-2014-local, eval = FALSE}
+
+local_2014_data <- krvote::local_sido_20140604 %>% 
+  unnest(data) %>% 
+  group_by(시도, 정당) %>% 
+  summarise(득표수 = sum(득표수)) %>% 
+  mutate(정당 = case_when( str_detect(정당, "새정치민주연합") ~ "민주당_득표",
+                         str_detect(정당, "새누리당") ~ "국민의힘_득표",
+                           str_detect(정당, "계") ~ "계",                         
+                         TRUE ~ "기타")) %>% 
+  filter(정당 != "기타") %>% 
+  group_by(시도, 정당) %>% 
+  summarise(득표수 = sum(득표수)) %>% 
+  ungroup() %>% 
+  pivot_wider(names_from = 정당, values_from = 득표수, values_fill = 0) %>% 
+  left_join(sido_code_old)  %>% 
+  select(시도명, 민주당_득표, 국민의힘_득표, 계)
+  
+local_2014_viz <- local_2014_data %>% 
+  mutate(민주당 = 민주당_득표/계,
+         국민의힘 = 국민의힘_득표/계) %>% 
+  mutate(차이 = 민주당 - 국민의힘)
+
+local_2014_viz %>% 
+  summarise(민주당=sum(민주당_득표),
+            국민의힘 = sum(국민의힘_득표),
+            계 = sum(계)) %>% 
+  mutate(민주당_비율 = 민주당/계,
+         국힘_비율 = 국민의힘/계)  
+
+library(sf)
+sido_tilemap <- st_read("data/tilemap_sido/sido_hex_map_raw.shp")
+
+sido_tilemap_2014_sf <- sido_tilemap %>% 
+  left_join(local_2014_viz, by = c("CTP_KOR_NM" = "시도명")) %>% 
+  left_join(nesdc::sido_code, by = c("CTP_KOR_NM" = "시도명") ) %>% 
+  mutate(label = glue::glue("{시도}\n{scales::percent(차이, accuracy =0.1)}"))
+
+sido_tilemap_2014_g <- sido_tilemap_2014_sf %>% 
+  ggplot() +
+    geom_sf(aes(geometry = geometry, fill = 차이)) +
+    theme_void(base_family = "NanumBarunpen") +
+    geom_sf_text(aes(geometry = geometry, label = label),
+                 size = 7,
+                 fun.geometry = function(x) st_centroid(x)) +
+    scale_fill_gradientn( colours = c("red", "white", "blue"), labels = scales::percent) +
+    labs(
+      title = "제6회 지방선거 시도별 득표율 차이",
+      subtitle = "득표율 차이: |민주당(45.4%) - 새누리당(46.9%)| = 1.5%",
+      fill = "득표율 차이(%)",
+      caption = "데이터출처: 중앙선거관리위원회 선거통계시스템"
+    ) +
+    theme(
+      text = element_text(family = "NanumBarunpen"),
+      plot.tag.position = c(0.85, .97),
+      legend.position = "right",
+      legend.title=element_text(size=15), 
+      legend.key.size = unit(1.5, 'cm'),
+      legend.text=element_text(size=13),
+      plot.title=element_text(size=25, face="bold", family = "NanumBarunpen"),
+      plot.subtitle=element_text(face="bold", size=17, colour="grey10", family = "NanumBarunpen"))   
+
+ragg::agg_png("fig/sido_tilemap_2014_g.png", width = 297, height = 210, units = "mm", res = 600, scaling = 0.85)
+sido_tilemap_2014_g
+dev.off()
+  
+
+```
+
+![](fig/sido_tilemap_2014_g.png){width=100%}
+
+### '12년 대선
+
+```{r sido-tilemap-18-presid, eval = FALSE}
+nec_18_viz <- krvote::election_20121219$득표율 %>% 
+  group_by(시도명) %>% 
+  summarise(박근혜 = sum(박근혜),
+            문재인 = sum(문재인),
+            합계 = sum(계)) %>% 
+  mutate(박근혜_지지율 = 박근혜/합계,
+         문재인_지지율   = 문재인/합계) %>% 
+  mutate(차이 = 문재인_지지율 - 박근혜_지지율) %>% 
+  select(시도명, 박근혜=박근혜_지지율, 문재인 = 문재인_지지율, 차이)
+
+library(sf)
+sido_tilemap <- st_read("data/tilemap_sido/sido_hex_map_raw.shp")
+
+sido_tilemap_18_sf <- sido_tilemap %>% 
+  left_join(nec_18_viz, by = c("CTP_KOR_NM" = "시도명")) %>% 
+  left_join(nesdc::sido_code, by = c("CTP_KOR_NM" = "시도명") ) %>% 
+  mutate(label = glue::glue("{시도}\n{scales::percent(차이, accuracy =0.1)}"))
+
+
+sido_tilemap_18_g <- sido_tilemap_18_sf %>% 
+  ggplot() +
+    geom_sf(aes(geometry = geometry, fill = 차이)) +
+    theme_void(base_family = "NanumBarunpen") +
+    geom_sf_text(aes(geometry = geometry, label = label),
+                 size = 7,
+                 fun.geometry = function(x) st_centroid(x)) +
+    scale_fill_gradientn( colours = c("red", "white", "blue"), labels = scales::percent) +
+    labs(
+      title = "제18대 대통령선거 시도별 득표율 차이",
+      subtitle = "득표율 차이: |문재인(48.02%) - 박근혜(51.55%)| = 3.53%",
+      fill = "득표율 차이(%)",
+      caption = "데이터출처: 중앙선거관리위원회 선거통계시스템"
+    ) +
+    theme(
+      text = element_text(family = "NanumBarunpen"),
+      plot.tag.position = c(0.85, .97),
+      legend.position = "right",
+      legend.title=element_text(size=15), 
+      legend.key.size = unit(1.5, 'cm'),
+      legend.text=element_text(size=13),
+      plot.title=element_text(size=25, face="bold", family = "NanumBarunpen"),
+      plot.subtitle=element_text(face="bold", size=17, colour="grey10", family = "NanumBarunpen"))   
+
+ragg::agg_png("fig/sido_tilemap_18_g.png", width = 297, height = 210, units = "mm", res = 600, scaling = 0.85)
+sido_tilemap_18_g
+dev.off()
+
+```
+
+![](fig/sido_tilemap_18_g.png){width=100%}
+
+

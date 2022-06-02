@@ -42,3 +42,8 @@ data/210926_민주당 경선결과 현황표.xlsx
 
 # Bivariate Map 
 data/uv_temp.nc
+
+# 행정동 지도 - https://github.com/vuski/admdongkor
+data/map/HangJeongDong_ver20220401.geojson
+
+

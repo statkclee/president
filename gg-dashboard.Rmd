@@ -31,11 +31,70 @@ library(fs)
 library(glue)
 library(gt)
 library(plotly)
+library(ggrepel)
 
 library(tidygraph)
 library(ggraph)
 library(patchwork)
 library(ggforce)
+
+theme_election <- function(..., font = "MaruBuri") {
+  
+  theme_bw(base_family = font)  %+replace%
+    
+    theme(
+      
+      #grid elements
+      panel.grid.major.x = element_line(color='gray75'),
+      panel.grid.minor.x = element_blank(),
+      # axis.ticks = element_blank(),          #strip axis ticks
+      
+      #since theme_minimal() already strips axis lines, 
+      #we don't need to do that again
+      
+      #text elements
+      plot.title = element_text(             #title
+        family = font,            #set font family
+        size = 21,                #set font size
+        face = 'bold',            #bold typeface
+        hjust = 0,                #left align
+        vjust = 1),               #raise slightly
+      
+      plot.subtitle = element_text(          #subtitle
+        family = font,            #font family
+        hjust = 0,                #left align        
+        size = 15),               #font size
+      
+      plot.caption = element_text(           #caption
+        family = font,            #font family
+        size = 12,                 #font size
+        hjust = 1),               #right align
+      
+      axis.title = element_text(             #axis titles
+        family = font,            #font family
+        size = 15),               #font size
+      
+      axis.text.x = element_text(            #margin for axis text
+        margin=margin(5, b = 10),
+        size = rel(1.5),
+        family = font, face="bold"),
+      
+      axis.text.y = element_text(
+        size = rel(1.5),
+        colour = "gray35", 
+        family = font, face="bold"),
+      
+      strip.text.x = element_text(
+        size = rel(1.5), 
+        colour = "black", family = font, face="bold" ),
+      
+      strip.background = element_rect(fill="gray95"),
+      
+      legend.position = "top",
+      legend.title=element_text(size=17),
+      legend.text=element_text(size=15)
+    )
+}
 
 ```
 
@@ -43,96 +102,39 @@ library(ggforce)
 ```{r child="dashboard/local/world.Rmd", encoding="UTF-8"}
 ```
 
+```{r child="dashboard/local/history-sido.Rmd", encoding="UTF-8"}
+```
+
+<!-- 투표율 -->
+
+```{r child="dashboard/local/casting.Rmd", encoding="UTF-8"}
+```
+
+<!-- 사전투표율 -->
+
+```{r child="dashboard/local/early-voting.Rmd", encoding="UTF-8"}
+```
+
+<!-- 시군구별 득표표 -->
+
+```{r child="dashboard/local/sigungu.Rmd", encoding="UTF-8"}
+```
+
+```{r child="dashboard/local/sigungu-rate.Rmd", encoding="UTF-8"}
+```
+
+```{r child="dashboard/local/sigungu-vote.Rmd", encoding="UTF-8"}
+```
+
+<!-- 경기지사 여론조사와 빅데이터 -->
+
+```{r child="dashboard/local/survey.Rmd", encoding="UTF-8"}
+```
+
+```{r child="dashboard/local/bigdata.Rmd", encoding="UTF-8"}
+```
 
 ```{r child="dashboard/local/document.Rmd", encoding="UTF-8"}
 ```
-
-
-구시군 득표 {data-icon="ion-stats-bars"}
-=====================================  
-
-Column {data-width=200}
--------------------------------------
-
-### 구시군
-
-
-```{r crosstalk-cs}
-# https://nicar.r-journalism.com/docs/crosstalk-flexdashboard-leaflet-datatable/
-library(tidyverse)  
-library(crosstalk)
-library(leaflet)
-library(DT)
-library(d3scatter)
-
-gg_raw <- read_rds("data/gg_raw.rds")
-
-
-shared_gg <- SharedData$new(gg_raw)
-
-filter_checkbox(
-  id = "선거",
-  label = "선거",
-  sharedData = shared_gg,
-  group = ~선거
-)
-
-filter_select(
-  id = "구시군명",
-  label = "구시군명",
-  sharedData = shared_gg,
-  group = ~구시군명
-)
-
-filter_checkbox(
-  id = "정당",
-  label = "정당",
-  sharedData = shared_gg,
-  group = ~정당
-)
-
-filter_slider(
-  id = "득표수",
-  label = "득표수",
-  sharedData = shared_gg,
-  column = "득표수",
-  step = 1000,
-  round = TRUE,
-  sep = "",
-  min = 0,
-  ticks = FALSE
-)
-
-```
-
-
-Column {data-width=800}
--------------------------------------
-
-### 표
-
-```{r}
-
-shared_gg %>% 
-  DT::datatable() %>% 
-  DT::formatRound("득표수", digits =0)
-```
-
-
-### 지도
-
-
-```{r}
-
-shared_gg %>% 
-  leaflet() %>% 
-  addTiles() %>% 
-  setView(  lng=127.063, lat=37.513, zoom = 8) # korea, zoom 6
-
-
-```
-
-
-
 
 
