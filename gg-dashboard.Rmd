@@ -40,12 +40,12 @@ library(ggforce)
 ```
 
 
-<!-- ```{r child="dashboard/local/world.Rmd", encoding="UTF-8"} -->
-<!-- ``` -->
+```{r child="dashboard/local/world.Rmd", encoding="UTF-8"}
+```
 
 
-<!-- ```{r child="dashboard/local/document.Rmd", encoding="UTF-8"} -->
-<!-- ``` -->
+```{r child="dashboard/local/document.Rmd", encoding="UTF-8"}
+```
 
 
 구시군 득표 {data-icon="ion-stats-bars"}
@@ -59,7 +59,7 @@ Column {data-width=200}
 
 ```{r crosstalk-cs}
 # https://nicar.r-journalism.com/docs/crosstalk-flexdashboard-leaflet-datatable/
-  
+library(tidyverse)  
 library(crosstalk)
 library(leaflet)
 library(DT)
