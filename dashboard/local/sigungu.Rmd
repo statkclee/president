@@ -1,0 +1,65 @@
+
+
+구시군별 득표(율) {data-icon="ion-stats-bars"}
+=====================================  
+
+Column {data-width=200}
+-------------------------------------
+
+### 구시군
+
+```{r crosstalk-cs, echo=FALSE, message=FALSE}
+# https://nicar.r-journalism.com/docs/crosstalk-flexdashboard-leaflet-datatable/
+
+library(tidyverse)
+library(crosstalk)
+library(leaflet)
+library(DT)
+library(d3scatter)
+library(sf)
+
+gg_sgg_raw <- read_rds("data/gg_sgg_raw.rds")
+
+
+gg_sgg_rate <- gg_sgg_raw %>% 
+  group_by(선거, 구시군명) %>% 
+  mutate(득표율 = 득표수 / sum(득표수)) %>% 
+  select(-득표수) %>% 
+  ungroup() %>% 
+  mutate(정당 = factor(정당, levels = c("민주당", "국민의힘", "그외정당"))) 
+
+
+shared_sgg_rate_gg <- SharedData$new(gg_sgg_rate)
+
+filter_select(
+  id = "구시군명",
+  label = "구시군명",
+  sharedData = shared_sgg_rate_gg,
+  group = ~구시군명,
+  multiple = FALSE
+)
+
+```
+
+
+Column {data-width=800}
+-------------------------------------
+
+### 그래프
+
+```{r sgg-comparison}
+plotly::ggplotly(
+  shared_sgg_rate_gg %>% 
+    ggplot(aes(x = 선거, y = 득표율, group= 정당, color = 정당)) +
+      geom_line() +
+      geom_point() +
+      labs(title = "역대 선거 정당별 득표율",
+           x="",
+           y="득표율(%)") +
+      scale_y_continuous(labels = scales::percent) +
+      theme_election() +
+      scale_color_manual(values = c("blue", "red", "gray35"))  +
+      geom_text(aes(label=glue::glue("{scales::percent(득표율, 0.1)}")), vjust=3.0 )
+  ) 
+
+```

@@ -1,0 +1,151 @@
+---
+layout: page
+title: "대통령 선거 2022년"
+subtitle: "시군구 타일지도"
+author:
+- name: "이광춘"
+  affiliation: "[Tidyverse Korea](https://www.facebook.com/groups/tidyverse/)"
+date: "`r Sys.Date()`"
+tags: ["여론조사", "제20대", "대통령 선거", "후진국", "중진국", "선진국", "선거일정", "경선"]
+output:
+  html_document: 
+    include:
+      after_body: footer.html
+      before_body: header.html
+    toc: yes
+    toc_depth: 2
+    toc_float: true
+    highlight: tango
+    code_folding: hide
+    number_section: true
+    self_contained: true
+bibliography: bibliography_presid.bib
+csl: biomed-central.csl
+urlcolor: blue
+linkcolor: blue
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE,
+                      comment="", digits = 3, tidy = FALSE, prompt = FALSE, fig.align = 'center')
+library(tidyverse)
+library(rvest)
+library(lubridate)
+```
+
+# 데이터 {#president-tilemap_sigungu}
+
+## 선거 데이터 {#president-2022-sigungu}
+
+```{r president-data-2022}
+library(tidyverse)
+library(rvest)
+library(httr)
+
+presid_2022 <- krvotes::president_2022 %>% 
+  group_by(시도, 구시군명) %>% 
+  mutate(득표율 = 득표수 / sum(득표수)) %>% 
+  ungroup() %>% 
+  filter(후보 %in% c("이재명", "윤석열")) %>% 
+  select(-득표수) %>% 
+  pivot_wider(names_from = 후보, values_from = 득표율) %>% 
+  mutate(차이 = 이재명 - 윤석열)
+
+presid_2022
+
+```
+
+## 지도 데이터 {#president-2022-sigungu-map}
+
+```{r president-data-2022-map}
+library(sf)
+
+## 데이터프레임
+sigungu_sf_raw <- sf::st_read("data/map/SIG_202101/TL_SCCO_SIG.shp")
+
+sigungu_sf <- sigungu_sf_raw %>% 
+  mutate(SIG_KOR_NM = iconv(SIG_KOR_NM, from = "CP949", to = "UTF-8", toRaw = FALSE)) %>% 
+  dplyr::select(SIG_CD, SIG_KOR_NM) %>% 
+  # st_transform(to_crs) %>%
+  st_simplify(dTolerance = 1000, preserveTopology = TRUE)
+
+sigungu_tbl <- sigungu_sf  %>% st_drop_geometry() %>% 
+  as_tibble()
+
+## 지도 한글문제  -----------------
+
+sigungu_tilemap <- st_read("data/tilemap_sigungu/sigungu_tilemap.shp")
+
+sigungu_map_tilemap_raw <- sigungu_tilemap %>% 
+  select(-SIG_KOR_NM) %>% 
+  left_join(sigungu_tbl)
+
+
+## 시도코드 ---------------------
+
+tilemap_sido_code <- st_read("data/tilemap_sido/sido_hex_map_raw.shp") %>% 
+  st_drop_geometry() %>% 
+  mutate(CTPRVN_CD = ifelse( str_detect(CTP_KOR_NM, "제주"), 50, CTPRVN_CD))
+
+sigungu_map_tilemap <- sigungu_map_tilemap_raw %>% 
+  mutate(CTPRVN_CD = str_sub(SIG_CD, 1,2)) %>% 
+  left_join(tilemap_sido_code) %>% 
+  mutate(SIG_KOR_NM = str_remove(SIG_KOR_NM, "\\s")) %>% 
+  mutate(key = glue::glue("{CTP_KOR_NM}_{SIG_KOR_NM}"))
+
+## 데이터결합 --------------------
+sigungu_map_tilemap_sf <- sigungu_map_tilemap %>% 
+  left_join(presid_2022 %>% mutate(key = glue::glue("{시도명}_{구시군명}")))
+
+sigungu_map_tilemap_sf
+
+```
+
+
+# 시각화
+
+
+```{r tilemap-sigungu-ggplot, out.width="100%"}
+
+sigungu_map_tilemap_sf %>% 
+  mutate(구시군명 = case_when(str_detect(구시군명, "고양시") ~ str_remove(구시군명, "고양시"),
+                              str_detect(구시군명, "안양시") ~ str_remove(구시군명, "안양시"),
+                              str_detect(구시군명, "안산시") ~ str_remove(구시군명, "안산시"),
+                              str_detect(구시군명, "포항시") ~ str_remove(구시군명, "포항시"),
+                              str_detect(구시군명, "천안시") ~ str_remove(구시군명, "천안시"),
+                              str_detect(구시군명, "성남시") ~ str_remove(구시군명, "성남시"),
+                              str_detect(구시군명, "수원시") ~ str_remove(구시군명, "수원시"),
+                              str_detect(구시군명, "안양시") ~ str_remove(구시군명, "안양시"),
+                              str_detect(구시군명, "용인시") ~ str_remove(구시군명, "용인시"),
+                              str_detect(구시군명, "청주시") ~ str_remove(구시군명, "청주시"),
+                              str_detect(구시군명, "창원시") ~ str_remove(구시군명, "창원시"),
+                              TRUE ~ 구시군명) ) %>% 
+  # mutate(label = glue::glue("{}{}"))
+  ggplot() +
+    geom_sf(aes(geometry = geometry, fill = 차이)) +
+    theme_void(base_family = "NanumBarunpen") +
+    geom_sf_text(aes(geometry = geometry, label = 구시군명),
+                 size = 2,
+                 fun.geometry = function(x) st_centroid(x)) +
+    scale_fill_gradientn( colours = c("red", "white", "blue"), labels = scales::percent)  +
+    labs(
+      title = "제20대 대통령선거 구시군별 득표율 차이",
+      fill = "득표율 차이(%)",
+      caption = "데이터출처: 중앙선거관리위원회 선거통계시스템"
+    ) +
+    theme(
+      text = element_text(family = "NanumBarunpen"),
+      plot.tag.position = c(0.85, .97),
+      legend.position = "right",
+      legend.title=element_text(size=15), 
+      legend.key.size = unit(1.5, 'cm'),
+      legend.text=element_text(size=13),
+      plot.title=element_text(size=25, face="bold", family = "NanumBarunpen"),
+      plot.subtitle=element_text(face="bold", size=17, colour="grey10", family = "NanumBarunpen"))   
+
+
+```
+
+

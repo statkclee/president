@@ -1,0 +1,249 @@
+---
+layout: page
+title: "대통령 선거 2022년"
+subtitle: "민주당 후보 선거통계"
+author:
+- name: "이광춘"
+  affiliation: "[Tidyverse Korea](https://www.facebook.com/groups/tidyverse/)"
+date: "`r Sys.Date()`"
+tags: ["여론조사", "제20대", "대통령 선거", "후진국", "중진국", "선진국", "선거일정", "경선", "선거통계"]
+output:
+  html_document: 
+    include:
+      after_body: footer.html
+      before_body: header.html
+    toc: yes
+    toc_depth: 2
+    toc_float: true
+    highlight: tango
+    code_folding: hide
+    number_section: true
+    self_contained: true
+bibliography: bibliography_presid.bib
+csl: biomed-central.csl
+urlcolor: blue
+linkcolor: blue
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE,
+                      comment="", digits = 3, tidy = FALSE, prompt = FALSE, fig.align = 'center')
+library(tidyverse)
+library(rvest)
+library(lubridate)
+```
+
+# 제20대 대선 민주당 후보 {#minju-hubo}
+
+<https://ko.wikipedia.org/wiki/대한민국_제20대_대통령_선거_더불어민주당_후보_경선> 정보를 바탕으로 민주당 본경선 6명에 대한 기호를 새로 생성할 수 있다.
+
+```{r minju-hubo-rank}
+library(tidyverse)
+library(rvest)
+
+candidate_raw <- read_html("https://ko.wikipedia.org/wiki/대한민국_제20대_대통령_선거_더불어민주당_후보_경선") %>% 
+  html_node(xpath = '//*[@id="mw-content-text"]/div[1]/table[2]') %>% 
+  html_table()
+
+candidate_raw %>% 
+  janitor::clean_names(ascii = FALSE) %>% 
+  slice(2:n()) %>% 
+  set_names(c("기호", "후보", "생년", "경력", "비고")) %>% 
+  filter(str_detect(비고, "진출")) %>% 
+  mutate(기호 = 1:n())
+```
+
+
+# 후보 선거 통계 {.tabset}
+
+## 추미애 {#minju-ma}
+
+```{r minju-statistics-추미애}
+추미애 <- read_html("https://ko.wikipedia.org/wiki/추미애") %>% 
+  html_node(xpath = '//*[@id="mw-content-text"]/div[1]/table[4]') %>% 
+  html_table(fill = TRUE) 
+
+추미애 <- 추미애 %>% 
+  janitor::clean_names(ascii = FALSE) %>% 
+  filter(실시년도 !="") %>% 
+  select(실시년도, 선거, 대수, 직책, 선거구, 정당, 득표수, 득표율, 비고, na_2) %>% 
+  rename(순위 = 비고, 비고 = na_2)
+
+추미애 %>% 
+  DT::datatable()
+```
+
+
+## 이재명 {#minju-jm}
+
+```{r minju-statistics-이재명}
+이재명 <- read_html("https://ko.wikipedia.org/wiki/이재명") %>% 
+  html_node(xpath = '//*[@id="mw-content-text"]/div[1]/table[2]') %>% 
+  html_table(fill = TRUE) 
+
+이재명 <- 이재명 %>% 
+  janitor::clean_names(ascii = FALSE) %>% 
+  filter(실시년도 !="") %>% 
+  select(실시년도, 선거, 대수, 직책, 선거구, 정당, 득표수, 득표율, 비고, na_2) %>% 
+  rename(순위 = 비고, 비고 = na_2)
+
+이재명 %>% 
+  DT::datatable()
+```
+
+## 정세균 {#minju-sk}
+
+```{r minju-statistics-정세균}
+정세균 <- read_html("https://ko.wikipedia.org/wiki/정세균") %>% 
+  html_node(xpath = '//*[@id="mw-content-text"]/div[1]/table[2]') %>% 
+  html_table(fill = TRUE) 
+
+정세균 <- 정세균 %>% 
+  janitor::clean_names(ascii = FALSE) %>% 
+  filter(실시년도 !="") %>% 
+  select(실시년도, 선거, 대수, 직책, 선거구, 정당, 득표수, 득표율, 비고, na_2) %>% 
+  rename(순위 = 비고, 비고 = na_2)
+
+정세균 %>% 
+  DT::datatable()
+```
+
+## 이낙연 {#minju-ny}
+
+```{r minju-statistics}
+이낙연 <- read_html("https://ko.wikipedia.org/wiki/이낙연") %>% 
+  html_node(xpath = '//*[@id="mw-content-text"]/div[1]/table[3]') %>% 
+  html_table(fill = TRUE) 
+
+이낙연 <- 이낙연 %>% 
+  janitor::clean_names(ascii = FALSE) %>% 
+  filter(실시년도 !="") %>% 
+  select(실시년도, 선거, 대수, 직책, 선거구, 정당, 득표수, 득표율, 비고, na_2) %>% 
+  rename(순위 = 비고, 비고 = na_2)
+
+이낙연 %>% 
+  DT::datatable()
+```
+
+
+
+## 박용진 {#minju-yj}
+
+```{r minju-statistics-박용진}
+박용진 <- read_html("https://ko.wikipedia.org/wiki/박용진_(1971년)") %>% 
+  html_node(xpath = '//*[@id="mw-content-text"]/div[1]/table[3]') %>% 
+  html_table(fill = TRUE) 
+
+박용진 <- 박용진 %>% 
+  janitor::clean_names(ascii = FALSE) %>% 
+  filter(실시년도 !="") %>% 
+  select(실시년도, 선거, 대수, 직책, 선거구, 정당, 득표수, 득표율, 비고, na_2) %>% 
+  rename(순위 = 비고, 비고 = na_2)
+
+박용진 %>% 
+  DT::datatable()
+```
+
+## 김두관 {#minju-dk}
+
+```{r minju-statistics-김두관}
+김두관 <- read_html("https://ko.wikipedia.org/wiki/김두관") %>% 
+  html_node(xpath = '//*[@id="mw-content-text"]/div[1]/table[2]') %>% 
+  html_table(fill = TRUE) 
+
+김두관 <- 김두관 %>% 
+  janitor::clean_names(ascii = FALSE) %>% 
+  filter(실시년도 !="") %>% 
+  select(실시년도, 선거, 대수, 직책, 선거구, 정당, 득표수, 득표율, 비고, na_2) %>% 
+  rename(순위 = 비고, 비고 = na_2)
+
+김두관 %>% 
+  DT::datatable()
+```
+
+# 대한민국 인구 {#population}
+
+KOSIS <https://kosis.kr/statHtml/statHtml.do?orgId=101&tblId=DT_1B04006&conn_path=I2> 행정구역별 주민등록인구를 통해 현재 출생연도별 생존한 인구를 추산한다.
+
+```{r korea-population}
+library(extrafont)
+loadfonts()
+# population_raw <- read_html("https://ko.wikipedia.org/wiki/대한민국의_인구") %>% 
+#   html_node(xpath ='//*[@id="mw-content-text"]/div[1]/table[2]') %>% 
+#   html_table()
+# 
+# population_tbl <- population_raw %>% 
+#   janitor::clean_names(ascii = FALSE) %>% 
+#   as_tibble() %>% 
+#   select(연도 = 연도_년, 출생자 = 출생자수_명) %>% 
+#   mutate(출생자수 = parse_number(출생자))
+
+population_raw <- readxl::read_excel("data/행정구역_시군구_별_1세별_주민등록인구_20210718223814.xlsx") 
+
+population_tbl <- population_raw %>% 
+  slice(3:n()) %>% 
+  janitor::clean_names(ascii = FALSE) %>% 
+  set_names(c("행정구역", "연령", "인구수", "남", "녀")) %>% 
+  select(-행정구역) %>% 
+  mutate(연령 = parse_number(연령)) %>% 
+  mutate(출생년도 = 2020 - 연령,
+         인구수 = parse_number(인구수)) %>% 
+  select(출생년도, 인구수)
+
+population_bod_g <- population_tbl %>% 
+  ggplot(aes(x = 출생년도, y=인구수)) + 
+    geom_col(fill = "darkgray") +
+    theme_bw(base_family = "NanumGothic") +
+    scale_y_continuous(label = scales::comma, limits = c(0, 1200000)) +
+    labs(x = "",
+         title = "연도별 출생자수와 민주당 경선 후보 출생년도") +
+    geom_segment(aes(x = 1958, yend = 950000, y = 0, xend = 1958, colour = "segment"), color = "blue") +
+    annotate("text", x = 1958, y    = 1050000, label = "추미애", family = "NanumGothic") +
+    geom_segment(aes(x = 1964, yend = 1100000, y = 0, xend = 1964, colour = "segment"), color = "blue") +
+    annotate("text", x = 1964, y    = 1150000, label = "이재명", family = "NanumGothic") +
+    geom_segment(aes(x = 1950, yend = 500000, y = 0, xend = 1950, colour = "segment"), color = "blue") +
+    annotate("text", x = 1948, y    = 530000, label = "정세균", family = "NanumGothic") +
+    geom_segment(aes(x = 1952, yend = 600000, y = 0, xend = 1952, colour = "segment"), color = "blue") +
+    annotate("text", x = 1951, y    = 630000, label = "이낙연", family = "NanumGothic") +
+    geom_segment(aes(x = 1971, yend = 950000, y = 0, xend = 1971, colour = "segment"), color = "blue") +
+    annotate("text", x = 1971, y    = 970000, label = "박용진", family = "NanumGothic") +
+    geom_segment(aes(x = 1958, yend = 950000, y = 0, xend = 1958, colour = "segment"), color = "blue") +
+    annotate("text", x = 1958, y    = 1000000, label = "김두관", family = "NanumGothic")
+
+population_bod_g
+
+# ggplot2::ggsave("fig/population_bod.png")
+```
+
+
+# 선거 역경지수 {#election-adversity}
+
+선거에서 얼마나 이기고 졌는지 역경지수를 만들어보자.
+
+```{r election-win-loss}
+library(reactable)
+
+election_tbl <- 
+  bind_rows(추미애 %>% mutate(후보 = "추미애"), 
+            이재명 %>% mutate(후보 = "이재명")) %>% 
+  bind_rows(정세균 %>% mutate(후보 = "정세균")) %>% 
+  bind_rows(이낙연 %>% mutate(후보 = "이낙연")) %>% 
+  bind_rows(박용진 %>% mutate(후보 = "박용진")) %>% 
+  bind_rows(김두관 %>% mutate(후보 = "김두관")) %>% 
+  as_tibble()
+
+election_tbl %>% 
+  mutate(당락 = if_else(str_detect(순위, "1\\s?위"), "당선", "낙선")) %>% 
+  group_by(후보) %>% 
+  count(당락) %>% 
+  ungroup() %>% 
+  pivot_wider(names_from = 당락, values_from = n, values_fill = 0) %>% 
+  mutate(역경지수 = 낙선 / (낙선 + 당선) ) %>% 
+  arrange(-역경지수) %>% 
+  reactable::reactable(  columns = list(
+    역경지수 = colDef(format = colFormat(percent = TRUE, digits = 1))
+  ))
+```
+

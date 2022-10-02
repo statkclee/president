@@ -1,0 +1,47 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+데이터, 개발언어, 대쉬보드
+=================================================================================================
+
+
+Column {.tabset .tabset-fade}
+-------------------------------------------------------------------------------
+
+### 데이터
+
+
+<br>
+<br>
+
+- 선거여론조사 데이터
+    - [중앙선거여론조사심의위원회](https://www.nesdc.go.kr/)
+    - [MBC, 여론M 여론조사를 조사하다](http://poll-mbc.co.kr/)
+- 검색어 추세
+    - [구글 트렌드](https://trends.google.com/trends/?geo=KR)
+    - [네이버 검색어 트렌드](https://datalab.naver.com/keyword/trendSearch.naver)
+- [구글 연관검색어(Google Suggest)](http://aispiration.com/ingest-data/google-suggest.html)
+- 후보채널 유튜브
+    - [YouTube Data API](https://developers.google.com/youtube/v3/getting-started?hl=ko)
+- 후보채널 유튜브
+    - [YouTube Data API](https://developers.google.com/youtube/v3/getting-started?hl=ko)
+- 소셜 SNS
+    - 소셜분석/유튜브 센터: [썸트렌드: 뉴스, 블로그, 커뮤니티, 인스타그램, 트위터, (전체)유튜브](https://some.co.kr/)
+- 소셜 SNS 감성    
+    - 소셜분석/유튜브 센터 감성분석: [썸트렌드: 뉴스, 블로그, 커뮤니티, 인스타그램, 트위터, (전체)유튜브](https://some.co.kr/)
+    
+
+### 프로그래밍 언어
+
+
+![](fig/r-programming-language.jpg)
+
+
+### 대쉬보드
+
+![](fig/flexdashboard.png)
+
+

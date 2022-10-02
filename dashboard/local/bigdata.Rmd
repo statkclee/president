@@ -1,0 +1,215 @@
+
+
+
+
+빅데이터 {data-icon="fa-pencil-alt"}
+=====================================  
+
+
+Column {.tabset .tabset-fade}
+-------------------------------------------------------------------------------
+
+### 구글 트렌드
+
+```{r bigdata-trends, eval = TRUE}
+
+# 라이브러리 환경설정
+
+library(tidyverse)
+library(DBI)
+library(glue)
+library(here)
+library(janitor)
+library(gt)
+library(lubridate)
+library(RSQLite)
+library(scales)
+library(sf)
+library(gtrendsR)
+
+
+# 1. 구글 트렌드 데이터 크롤링 ------------------------------------
+
+# upto_date <- "2022-05-31"
+# 
+# # Sys.setenv(TZ = "Asia/Seoul")
+# 
+# Sys.setlocale("LC_ALL", "C")
+# 
+# time_span <- glue::glue("2022-03-31 {upto_date}") %>% as.character(.)
+# 
+# hubo_raw <- gtrends(keyword = c("김동연", "김은혜", "강용석"),
+#                     geo = "KR",
+#                     hl = "ko-KR",
+#                     time = time_span,
+#                     low_search_volume = TRUE,
+#                     cookie_url = "http://trends.google.com/Cookies/NID",
+#                     gprop = "web")
+# Sys.setlocale("LC_ALL", "Korean")
+#   
+# 
+# hubo_raw %>%
+#   write_rds(glue::glue('{here::here()}/data/google_trends_2022-05-31.rds'))
+
+# 2. 구글 트렌드 시각화 ------------------------------
+
+
+hubo_raw <- 
+  read_rds(glue::glue('{here::here()}/data/google_trends_2022-05-31.rds'))
+
+hubo_tbl <- hubo_raw$interest_over_time %>%
+  as_tibble() %>%
+  filter(str_detect(keyword, "김동연|김은혜|강용석")) %>%
+  mutate(
+    date = as.Date(date),
+    keyword = factor(keyword, levels = c("김동연", "김은혜", "강용석")),
+    hits = as.numeric(hits)) %>%
+    rename(후보 = keyword)
+
+hubo_google_g <- hubo_tbl %>%
+  filter(date != max(date)) %>% 
+  ggplot(aes(x = date, y = hits, color = 후보 )) +
+    geom_point(show.legend = FALSE, size = 3) +
+    scale_size_continuous(range = c(0.5, 1.5)) +
+    geom_line() +
+    scale_x_date(date_labels = "%m월%d일",
+                 breaks = seq(min(hubo_tbl$date),max(hubo_tbl$date),by="week")) +
+    scale_color_manual(values = c("blue", "red", "black"))  +
+    theme_election() +
+    labs(x = "",
+           y = "검색수(hits)",
+           title = "[Google Trends] 제8회 지방선거 - 경기지사",
+           subtitle = glue::glue("지역: 대한민국, 시점: 2022년 03월 31일 ~ {format(as.Date('2022-05-28'), '%Y년 %m월 %d일')}"),
+           caption = "데이터 출처: 구글 트렌드 API, gtrendsR 패키지") +
+    theme(legend.position = c(0.9, 0.85))
+
+plotly::ggplotly(hubo_google_g)
+
+
+# ggsave( "fig/gg_google_20220531_g.png", 
+#         hubo_google_g,
+#         device = ragg::agg_png, 
+#         width = 250, height = 176, units = "mm", res = 600) 
+```
+
+<!-- ![](fig/gg_google_20220531_g.png){width=100%} -->
+
+
+### 네이버 트렌드
+
+```{r bigdata-trends-naver, eval = TRUE}
+# election_report --> 01_trends_naver_script.R
+
+naver_json <- jsonlite::read_json( glue::glue("{here::here()}/data/naver_trends_2022-05-30.json") )
+
+naver_tbl <- naver_json$results %>%
+  enframe() %>%
+  mutate(keyword = map_chr(value, "title")) %>%
+  mutate(data = map(value, "data")) %>%
+  unnest(data) %>%
+  mutate(date = map_chr(data, "period"),
+         ratio = map_dbl(data, "ratio")) %>%
+  select(keyword, date, ratio) %>% 
+  mutate(date = lubridate::ymd(date),
+         keyword = factor(keyword, levels = c("김동연", "김은혜", "강용석"))) %>%
+  rename(후보 = keyword)
+  
+
+naver_trends_g <- naver_tbl %>%
+  ggplot(aes(x = date, y = ratio, color = 후보 )) +
+  geom_point(size = 3, show.legend = FALSE) +
+  geom_line() +
+  scale_x_date(date_labels = "%m월%d일",
+               breaks = seq(min(naver_tbl$date),max(naver_tbl$date),by="week")) +
+  theme_election() +
+  scale_color_manual(values = c("blue", "red", "black")) +
+  labs(x = "",
+       y = "검색수(hits)",
+       title = "[네이버 검색어 트렌드] 제8회 지방선거 - 경기도지사",
+       subtitle = glue::glue("네이버 검색어 트렌드 서비스, 지역: 대한민국, 시점: 2022년 04월 01일 ~ {format(as.Date('2022-05-30'), '%Y년 %m월 %d일')}"),
+       caption = "데이터 출처: 네이버 검색어 트렌드 API") +
+  theme(legend.position = c(0.9, 0.85))
+
+# naver_trends_g
+
+plotly::ggplotly(naver_trends_g)
+
+
+# ggsave( "fig/gg_naver_20220531_g.png", 
+#         naver_trends_g,
+#         device = ragg::agg_jpeg, 
+#         width = 297, height = 210, units = "mm", res = 600, scaling = 0.75) 
+```
+
+
+### 구글 연관검색어
+
+```{r google-related, eval = FALSE}
+library(httr)
+library(rvest)
+
+# dong_kim <- snsdata::get_related_search_candidate("김동연")
+# hey_kim <- snsdata::get_related_search_candidate("김은혜")
+# seok_kang <- snsdata::get_related_search_candidate("강용석")
+# 
+# related_google_tbl <- bind_rows(dong_kim, hey_kim, seok_kang)
+
+# related_google_tbl %>% 
+#   write_rds("data/related_google_tbl_20220531.rds")
+
+related_google_tbl <- read_rds("data/related_google_tbl_20220531.rds")
+
+
+library('tidygraph')
+library('ggraph')
+
+convert_from_wide_to_nw <- function(rawdata) {
+
+  lvl_one_tbl <- rawdata %>%
+    select(from = hubo, to = lvl_01) %>%
+    distinct(.)
+
+  lvl_two_tbl <- rawdata %>%
+    select(from = lvl_01, to = lvl_02)
+
+  nw_tbl <- bind_rows(lvl_one_tbl, lvl_two_tbl)
+
+  nw_tbl
+}
+
+draw_related_keywords <- function(hubo_name) {
+
+  network_viz_tbl <-  convert_from_wide_to_nw(related_google_tbl %>% filter(hubo == hubo_name))
+
+  network_viz_tbl %>%
+    as_tbl_graph(directed=FALSE) %>%
+    activate(nodes) %>%
+    mutate(eigen = centrality_eigen(),
+           group = group_infomap()) %>%
+    ggraph(layout='nicely') +
+    geom_edge_link(color='gray50', alpha=.2) +
+    geom_node_point(aes(color=factor(group), size=eigen)) +
+    geom_node_text(aes(label=name), size=3, repel=TRUE) +
+    theme_minimal() +
+    theme_graph(base_family = "NanumBarunPen") +
+    ggtitle(glue::glue("{hubo_name} : 구글 연관검색어")) +
+    theme(legend.position = "none",
+          plot.title=element_text(size=16, face="bold", family = "NanumBarunpen"),
+          plot.subtitle=element_text(face="bold", size=13, colour="grey10", family = "NanumBarunpen"))
+}
+
+library(patchwork)
+
+seok_kang_g <- draw_related_keywords("강용석")
+dong_kim_g <- draw_related_keywords("김동연")
+hey_kim_g <- draw_related_keywords("김은혜")
+
+ragg::agg_("fig/related_keywords_20220531.png", width = 297, height = 210,
+              units = "mm", res = 600)
+# seok_kang_g + dong_kim_g + hey_kim_g
+seok_kang_g | dong_kim_g | hey_kim_g
+dev.off()
+```
+
+![](fig/related_keywords_20220531.png){width=100%}
+

@@ -1,0 +1,157 @@
+
+
+사전투표 {data-icon="fa-car-alt"}
+=====================================  
+
+Column {data-width=200}
+-------------------------------------
+
+### 구시군
+
+
+```{r early-voting-dataset}
+
+library(crosstalk)
+library(leaflet)
+library(DT)
+library(d3scatter)
+library(sf)
+
+ev_president_2022 <- 
+  read_rds("data/사전투표/대통령선거_2022년.rds")
+
+ev_local_2022 <- 
+  read_rds("data/사전투표/지방선거_2022년.rds")
+
+ev_president_2022 <- ev_president_2022 %>% 
+  mutate(선거구분 = "대선 (2022)") %>% 
+  filter(시도명 == "경기도") %>% 
+  mutate(구시군 = case_when(
+    str_detect(구시군명, "고양시") ~ "고양시",
+    str_detect(구시군명, "부천시") ~ "부천시",
+    str_detect(구시군명, "성남시") ~ "성남시",
+    str_detect(구시군명, "수원시") ~ "수원시",
+    str_detect(구시군명, "안산시") ~ "안산시",
+    str_detect(구시군명, "안양시") ~ "안양시",
+    str_detect(구시군명, "용인시") ~ "용인시",
+    str_detect(구시군명, "광명시") ~ "광명시",
+    str_detect(구시군명, "광주시") ~ "광주시",
+    str_detect(구시군명, "군포시") ~ "군포시",
+    str_detect(구시군명, "김포시") ~ "김포시",
+    str_detect(구시군명, "남양주") ~ "남양주",
+    str_detect(구시군명, "의정부") ~ "의정부",
+    str_detect(구시군명, "화성시") ~ "화성시",
+    str_detect(구시군명, "파주시") ~ "파주시",
+    str_detect(구시군명, "평택시") ~ "평택시",
+    str_detect(구시군명, "시흥시") ~ "시흥시",
+    TRUE ~ 구시군명)) %>% 
+  select(-구시군명) %>% 
+  rename(구시군명 = 구시군)
+  
+
+ev_local_2022 <- ev_local_2022 %>% 
+  mutate(선거구분 = "지선 (2022)") %>% 
+  filter(시도명 == "경기도") %>% 
+  mutate(구시군 = case_when(
+    str_detect(구시군명, "고양시") ~ "고양시",
+    str_detect(구시군명, "부천시") ~ "부천시",
+    str_detect(구시군명, "성남시") ~ "성남시",
+    str_detect(구시군명, "수원시") ~ "수원시",
+    str_detect(구시군명, "안산시") ~ "안산시",
+    str_detect(구시군명, "안양시") ~ "안양시",
+    str_detect(구시군명, "용인시") ~ "용인시",
+    str_detect(구시군명, "광명시") ~ "광명시",
+    str_detect(구시군명, "광주시") ~ "광주시",
+    str_detect(구시군명, "군포시") ~ "군포시",
+    str_detect(구시군명, "김포시") ~ "김포시",
+    str_detect(구시군명, "남양주") ~ "남양주",
+    str_detect(구시군명, "의정부") ~ "의정부",
+    str_detect(구시군명, "화성시") ~ "화성시",
+    str_detect(구시군명, "파주시") ~ "파주시",
+    str_detect(구시군명, "평택시") ~ "평택시",
+    str_detect(구시군명, "시흥시") ~ "시흥시",
+    TRUE ~ 구시군명)) %>% 
+  select(-구시군명) %>% 
+  rename(구시군명 = 구시군)  
+
+ev_2018_tbl <- 
+  read_rds("data/사전투표/지방선거_2018년.rds")
+
+## 총계 -------------------
+ev_president_2022_total <- ev_president_2022 %>% 
+  group_by(선거구분, 시도명, 시간, 사전투표일) %>% 
+  summarise(선거인수 = sum(선거인수),
+                누적투표수 = sum(누적투표수)) %>% 
+  mutate(시간순서 = glue::glue("{사전투표일}-{시간}")) %>% 
+  arrange(시도명, 시간순서)  %>% 
+  mutate(사전투표율 = 누적투표수 / 선거인수) %>% 
+  mutate(구시군명 = "총계")
+
+ev_local_2022_total <- ev_local_2022 %>% 
+  group_by(선거구분, 시도명, 시간, 사전투표일) %>% 
+  summarise(선거인수 = sum(선거인수),
+                누적투표수 = sum(누적투표수)) %>% 
+  mutate(시간순서 = glue::glue("{사전투표일}-{시간}")) %>% 
+  arrange(시도명, 시간순서)  %>% 
+  mutate(사전투표율 = 누적투표수 / 선거인수) %>% 
+  mutate(구시군명 = "총계")
+
+ev_2018_total <- ev_2018_tbl %>% 
+    group_by(선거구분, 시도명, 시간, 사전투표일) %>% 
+  summarise(선거인수 = sum(선거인수),
+                누적투표수 = sum(누적투표수)) %>% 
+  mutate(시간순서 = glue::glue("{사전투표일}-{시간}")) %>% 
+  arrange(시도명, 시간순서)  %>% 
+  mutate(사전투표율 = 누적투표수 / 선거인수) %>% 
+  mutate(구시군명 = "총계")
+
+ev_gg <- bind_rows(ev_local_2022, ev_president_2022) %>% 
+  bind_rows(ev_2018_tbl) %>% 
+  bind_rows(ev_president_2022_total) %>% 
+  bind_rows(ev_local_2022_total)  %>% 
+  bind_rows(ev_2018_total) %>% 
+  mutate(시간순서 = str_remove(시간순서, "시"))
+
+```
+
+```{r shared-gg-include-select}
+
+
+shared_ev <- SharedData$new(ev_gg)
+
+filter_checkbox(
+  id = "선거구분",
+  label = "선거",
+  sharedData = shared_ev,
+  group = ~선거구분
+)
+
+filter_select(
+  id = "구시군명",
+  label = "구시군명",
+  sharedData = shared_ev,
+  group = ~구시군명
+)
+
+```
+
+
+Column {data-width=800}
+-------------------------------------
+
+### 그래프
+
+```{r sgg-comparison-casting-ev}
+
+plotly::ggplotly(
+  shared_ev %>% 
+    ggplot(aes(x=시간순서, y=사전투표율, group = 구시군명, color = 선거구분)) +
+    geom_line() +
+    geom_point() +
+    coord_flip() +
+    theme_election() +
+    labs(x="",
+         y="사전투표율(%)") +
+    scale_y_continuous(labels = scales::percent, limits = c(0, 0.45))   
+)
+```

@@ -1,0 +1,182 @@
+
+득표율(%) {data-icon="ion-stats-bars"}
+=====================================  
+
+Column {data-width=200}
+-------------------------------------
+
+### 구시군
+
+
+```{r crosstalk-cs, results='hide', echo=FALSE, message=FALSE}
+# https://nicar.r-journalism.com/docs/crosstalk-flexdashboard-leaflet-datatable/
+
+library(tidyverse)
+library(crosstalk)
+library(leaflet)
+library(DT)
+library(d3scatter)
+library(sf)
+
+gg_sgg_sf <- sf::st_read("data/map/gg_shapefile.shp")
+
+gg_sgg_sf <- gg_sgg_sf %>% 
+  mutate(구시군명 = stringi::stri_unescape_unicode(gusigun)) %>% 
+  select(-gusigun)
+
+gg_sgg_raw <- read_rds("data/gg_sgg_raw.rds")
+
+gg_sgg_tbl <- gg_sgg_sf %>% 
+  left_join(gg_sgg_raw) %>% 
+  mutate(centroids = st_centroid(st_geometry(.))) %>% 
+  mutate(lon = map_dbl(centroids, 1),
+         lat = map_dbl(centroids, 2) ) %>% 
+  st_drop_geometry() %>% 
+  select(-centroids)
+```
+
+
+```{r shared-gg-include}
+
+gg_sgg_rate <- gg_sgg_tbl %>% 
+  group_by(선거, 구시군명) %>% 
+  mutate(득표율 = 득표수 / sum(득표수)) %>% 
+  select(-득표수) %>% 
+  ungroup() %>% 
+  pivot_wider(names_from = 정당, values_from = 득표율, values_fill = 0) %>% 
+  select(선거, 구시군명, 민주당, 국민의힘, 그외정당, lon, lat)
+
+shared_rate_gg <- SharedData$new(gg_sgg_rate)
+
+filter_checkbox(
+  id = "선거",
+  label = "선거",
+  sharedData = shared_rate_gg,
+  group = ~선거
+)
+
+filter_select(
+  id = "구시군명",
+  label = "구시군명",
+  sharedData = shared_rate_gg,
+  group = ~구시군명
+)
+
+
+filter_slider(
+  id = "민주당",
+  label = "민주당 득표율",
+  sharedData = shared_rate_gg,
+  column = "민주당",
+  step = 0.05,
+  round = TRUE,
+  sep = "",
+  min = 0,
+  ticks = FALSE
+)
+
+filter_slider(
+  id = "국민의힘",
+  label = "국민의힘 득표율",
+  sharedData = shared_rate_gg,
+  column = "국민의힘",
+  step = 0.05,
+  round = TRUE,
+  sep = "",
+  min = 0,
+  ticks = FALSE
+)
+
+filter_slider(
+  id = "그외정당",
+  label = "그외정당 득표율",
+  sharedData = shared_rate_gg,
+  column = "그외정당",
+  step = 0.05,
+  round = TRUE,
+  sep = "",
+  min = 0,
+  ticks = FALSE
+)
+
+```
+
+
+Column {data-width=800}
+-------------------------------------
+
+### 표
+
+```{r}
+
+shared_rate_gg %>% 
+  DT::datatable(options=list(columnDefs = list(list(visible=FALSE, targets=c("lon", "lat"))))) %>% 
+  DT::formatPercentage("민주당", digits =1) %>% 
+  DT::formatPercentage("국민의힘", digits =1) %>% 
+  DT::formatPercentage("그외정당", digits =1) 
+```
+
+
+### 지도
+
+
+```{r gg-map, eval = FALSE}
+library(sf)
+library(tidyverse)
+
+# download.file(url = "https://raw.githubusercontent.com/vuski/admdongkor/master/ver20220401/HangJeongDong_ver20220401.geojson",
+#               destfile = "data/map/HangJeongDong_ver20220401.geojson")
+
+adm_sf <- sf::st_read("data/map/HangJeongDong_ver20220401.geojson")
+
+sf::sf_use_s2(FALSE)
+
+adm_sf$geometry <- adm_sf$geometry %>%
+  s2::s2_rebuild() %>%
+  sf::st_as_sfc()
+
+gg_sf <- adm_sf %>% 
+  filter(str_detect(sidonm, "경기도")) %>% 
+  separate(adm_nm, into = c("시도", "구시군명", "읍면동"), sep = " ") %>% 
+  mutate(구시군 = case_when(
+                      str_detect(구시군명, "고양시") ~ "고양시",
+                      str_detect(구시군명, "부천시") ~ "부천시",
+                      str_detect(구시군명, "성남시") ~ "성남시",
+                      str_detect(구시군명, "수원시") ~ "수원시",
+                      str_detect(구시군명, "안산시") ~ "안산시",
+                      str_detect(구시군명, "안양시") ~ "안양시",
+                      str_detect(구시군명, "용인시") ~ "용인시",
+                      str_detect(구시군명, "광명시") ~ "광명시",
+                      str_detect(구시군명, "광주시") ~ "광주시",
+                      str_detect(구시군명, "군포시") ~ "군포시",
+                      str_detect(구시군명, "김포시") ~ "김포시",
+                      str_detect(구시군명, "남양주") ~ "남양주",
+                      str_detect(구시군명, "의정부") ~ "의정부",
+                      str_detect(구시군명, "화성시") ~ "화성시",
+                      str_detect(구시군명, "파주시") ~ "파주시",
+                      str_detect(구시군명, "평택시") ~ "평택시",
+                      str_detect(구시군명, "시흥시") ~ "시흥시",
+                      TRUE ~ 구시군명)) %>% 
+  # st_drop_geometry() %>% 
+  group_by(구시군) %>% 
+  summarize(geometry = st_union(geometry)) %>% 
+  rename(gusigun = 구시군) %>% 
+  mutate(gusigun = stringi::stri_escape_unicode(gusigun))
+
+st_write(gg_sf, "data/map/gg_shapefile.shp")
+```
+
+
+
+```{r shared-gg}
+shared_rate_gg %>% 
+  leaflet() %>% 
+    addTiles() %>% 
+    setView(  lng=127.063, lat=37.513, zoom = 8 ) %>%  # korea, zoom 6
+    addMarkers( lng = ~lon, lat = ~lat, popup = ~glue::glue("구시군명: {구시군명}<br>",
+                                                            "민주당: {scales::percent(민주당, 0.1)}<br>",
+                                                            "국민의힘 : {scales::percent(국민의힘, 0.1 )}<br>",
+                                                            "그외정당 : {scales::percent(그외정당, 0.1)}<br>",
+                                                            "선거: {선거}")) %>% 
+    addPolygons(data=gg_sgg_sf, weight = 1, col = 'blue')   
+```

@@ -1,0 +1,53 @@
+
+
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+들어가며
+================================================================================
+
+
+Column {.tabset .tabset-fade}
+-------------------------------------------------------------------------------
+
+<br>
+<br>
+
+### 세계속의 경기도
+
+
+```{r local-gg}
+# https://echarts4r.john-coene.com/
+  
+library(tidyverse)
+library(echarts4r)
+library(echarts4r.assets)
+
+url <- "https://echarts.apache.org/examples/data-gl/asset/data/population.json"
+pop_data <- jsonlite::fromJSON(url)
+
+pop_tbl <- pop_data %>% 
+  as_tibble() %>% 
+  set_names( c("lon", "lat", "value") ) %>% 
+  filter(lat > 33, lat < 40) %>% 
+  filter(lon > 126, lon < 128) %>% 
+  slice(0)
+
+pop_tbl |> 
+  mutate(value = value) %>% 
+  e_charts(lon) |> 
+  e_globe(
+    environment = ea_asset("starfield"),
+    base_texture = ea_asset("world"), 
+    globeOuterRadius = 100,
+    displacementScale = 0.05
+  ) |> 
+  e_bar_3d(lat, value, coord_system = "globe") |> 
+  e_visual_map(show = FALSE)
+
+```
+
+

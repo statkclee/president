@@ -1,0 +1,272 @@
+---
+layout: page
+title: "대통령 선거 2022년"
+subtitle: "제20대 대통령 선거/여론조사"
+author:
+- name: "이광춘"
+  affiliation: "[Tidyverse Korea](https://www.facebook.com/groups/tidyverse/)"
+date: "`r Sys.Date()`"
+tags: ["여론조사", "제20대", "대통령 선거", "이재명", "윤석열", "홍준표", "이낙연", "추미애"]
+output:
+  html_document: 
+    include:
+      after_body: footer.html
+      before_body: header.html
+    toc: yes
+    toc_depth: 2
+    toc_float: true
+    highlight: tango
+    code_folding: show
+    number_section: true
+    self_contained: true
+bibliography: bibliography_presid.bib
+csl: biomed-central.csl
+urlcolor: blue
+linkcolor: blue
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE,
+                      comment="", digits = 3, tidy = FALSE, prompt = FALSE, fig.align = 'center')
+
+```
+
+# 여론조사 데이터 {#poll-data}
+
+[나무위키 여론조사](https://namu.wiki/w/제20대 대통령 선거/여론조사) 데이터 중 갤럽 조사 내용을 긁어와서 대권 후보 여론조사 결과를 데이터프레임으로 준비한다.
+
+```{r namu-url, eval = FALSE}
+library(tidyverse)
+library(rvest)
+
+## 나무에서 여론조사 긁어오기 -----------------------------------------------------
+Sys.setlocale("LC_ALL", "C")
+namu_url <- "https://namu.wiki/w/제20대 대통령 선거/여론조사"
+namu_html <- namu_url %>% 
+  read_html(encoding = "utf-8")
+
+gallop_2019 <- namu_html %>% 
+  html_nodes(xpath = '//*[@id="app"]/div/div[2]/article/div[3]/div[2]/div/div/div[10]/div[1]/table') %>% 
+  html_table()  %>% 
+  .[[1]] %>% 
+  as_tibble()
+
+gallop_2020 <- namu_html %>% 
+  html_nodes(xpath = '//*[@id="app"]/div/div[2]/article/div[3]/div[2]/div/div/div[13]/div/table') %>% 
+  html_table()  %>% 
+  .[[1]] %>% 
+  as_tibble()
+
+gallop_2021 <- namu_html %>% 
+  html_nodes(xpath = '//*[@id="app"]/div/div[2]/article/div[3]/div[2]/div/div/div[15]/div[1]/table') %>% 
+  html_table()  %>% 
+  .[[1]] %>% 
+  as_tibble()
+
+Sys.setlocale("LC_ALL", "Korean")
+
+## 데이터 정제 작업 -----------------------------------------------------------
+gallop_2019_tbl <- gallop_2019 %>% 
+  set_names(gallop_2019 %>% slice(1)) %>% 
+  filter(str_detect(월, "^[0-9]")) %>% 
+  mutate(연도 = 2019)
+
+gallop_2020_tbl <- gallop_2020 %>% 
+  set_names(gallop_2020 %>% slice(1)) %>% 
+  filter(str_detect(월, "^[0-9]")) %>% 
+  mutate(연도 = 2020)
+
+gallop_2021_tbl <- gallop_2021 %>% 
+  set_names(gallop_2021 %>% slice(1)) %>% 
+  janitor::clean_names(ascii = FALSE) %>% 
+  select(!starts_with("na")) %>% 
+  filter(str_detect(월, "^[0-9]")) %>% 
+  mutate(연도 = 2021)
+
+```
+
+비교를 위해 후보자 추출 단계를 진행한다.
+
+```{r clean-candidate, eval = FALSE}
+c(names(gallop_2019_tbl) %>% setdiff(c("월", "연도")), 
+  names(gallop_2020_tbl) %>% setdiff(c("월", "연도")), 
+  names(gallop_2021_tbl) %>% setdiff(c("월", "연도"))) %>% 
+  table() %>% 
+  sort(decreasing = TRUE)
+
+candidates <- c("이낙연", "이재명", "홍준표", "윤석열")
+```
+
+
+```{r make-dataframe, eval = FALSE}
+
+gallop_2019_df <- gallop_2019_tbl %>% 
+  select(연도, 월, all_of(candidates %>% setdiff("윤석열"))) %>% 
+  mutate(윤석열 = NA) %>% 
+  mutate_if(is.character, parse_number) %>% 
+  replace(., is.na(.), 0)
+
+gallop_2020_df <- gallop_2020_tbl %>% 
+  select(연도, 월, all_of(candidates)) %>% 
+  mutate_if(is.character, parse_number) %>% 
+  replace(., is.na(.), 0)
+
+gallop_2021_df <- gallop_2021_tbl %>% 
+  select(연도, 월, all_of(candidates)) %>% 
+  mutate_if(is.character, parse_number) %>% 
+  replace(., is.na(.), 0) %>%   
+  group_by(연도, 월) %>% 
+  summarise_all(mean) %>% 
+  ungroup()
+
+gallop_df <- bind_rows(gallop_2019_df, gallop_2020_df) %>% 
+  bind_rows(gallop_2021_df)
+
+gallop_tbl <- gallop_df %>% 
+  mutate(년월 = lubridate::make_date(year = 연도, month = 월, day = 15)) %>% 
+  select(년월, 이낙연:윤석열)
+
+gallop_tbl %>% 
+  write_csv("data/gallop_tbl_20210921.csv")
+```
+
+```{r show-dataframe, eval = TRUE}
+library(tidyverse)
+gallop_tbl <- 
+  read_csv("data/gallop_tbl_20210921.csv")
+
+gallop_tbl %>% 
+  reactable::reactable()
+```
+
+
+# 대선주자 이미지 {#photo}
+
+```{r photo-download, eval = FALSE}
+이낙연 <- "https://w.namu.la/s/86688a03b1b55f21c021332ecded85c4b50043b3a07cb7ccfadd2b446c2758102831e3fa9abdbac4c3e5f171a9c7ce9ddcf917a89f64881ff672aca01f7456576636667eb6485cfd8cb0a29f0faad9040a60c9f86c1302420b39c93fe1af9adc768db82dd624d3c4f1dc8dcf3afa5c60"
+이재명 <- "https://w.namu.la/s/ed1bce056fcf1f4476a74d523a6a1790c4042217afb6ef2157f3ad5dd64ebd385acf48131579e8f904615f79a4d37861ab66ec1245f0d7bb3428b1f101015edb73dbf6a942126ee094695a4b2c56b970ec16ac755fc288c8799b79615d59d6b7db38c6cd41bb5154403a7f3058091a4e"
+홍준표 <- "https://w.namu.la/s/08a72765f4b9ac4da868da2b286777bbe62971f5fca5cb74a957f0e734b11506838e9953887efb88a39002b7951892f6e204a624de069fab5d11752a3ebb62601715763976c8141ed4ffc690aafcd4e4a760ab3bceda07fef9026c9a4d2d195411330792b0e320716c7c45781d61b53f"
+윤석열 <- "https://w.namu.la/s/f87b603533b2894dd4a412765e0e28f79b57aaa036ca72e87096114eb2b9e1bf59cf0abdc6af964eef9434a6a657ff1787392d5e10d9d6c95f62efd8837a96e81cdaad7c76bbf4d3f9c89b392bfdef076e4c525dc7c28839a5cfdeb0dbed682d"
+
+download.file(이낙연, destfile = "fig/이낙연.png", mode = "wb")
+download.file(이재명, destfile = "fig/이재명.png", mode = "wb")
+download.file(홍준표, destfile = "fig/홍준표.png", mode = "wb")
+download.file(윤석열, destfile = "fig/윤석열.png", mode = "wb")
+```
+
+```{r image-magick}
+library(magick)
+
+ACS <- image_read("fig/안철수.png")
+OSH <- image_read("fig/오세훈.png")
+LNY <- image_read("fig/이낙연.png")
+LJM <- image_read("fig/이재명.png")
+HJP <- image_read("fig/홍준표.png")
+YSM <- image_read("fig/윤석열.png")
+
+image_append(c(ACS, OSH, LNY, LJM, HJP, YSM)) %>% 
+  image_resize("900")
+```
+
+
+# 지지율 시각화 {#visualize-polls}
+
+```{r visualize-polls}
+gallop_tbl %>% 
+  pivot_longer(안철수:윤석열, names_to = "후보", values_to = "지지율") %>% 
+  mutate(후보 = factor(후보, levels=c("안철수", "오세훈", "이낙연", "이재명", "홍준표", "윤석열"))) %>% 
+  ggplot(aes(x=년월, y=지지율, color = 후보)) +
+    geom_line() +
+    geom_point() +
+    theme_minimal(base_family = "NanumGothic") +
+    scale_color_manual(values = c("gray50", "gray50", "midnightblue", "blue", "gray50",  "red")) +
+    labs(x="",
+         title = "제20대 대통령 선거/여론조사") +
+    theme(legend.position = "top") +
+    guides(colour = guide_legend(nrow = 1))
+```
+
+
+# 지지율 애니메이션 {#visualize-polls-animation}
+
+```{r animate-polls}
+library(gganimate)
+library(extrafont)
+loadfonts()
+
+polls_gg <- gallop_tbl %>% 
+  pivot_longer(안철수:윤석열, names_to = "후보", values_to = "지지율") %>% 
+  mutate(후보 = factor(후보, levels=c("안철수", "오세훈", "이낙연", "이재명", "홍준표", "윤석열"))) %>% 
+  ggplot(aes(x = 년월, y = 지지율, color = 후보, group = 후보)) +
+    geom_line() +
+    geom_point(size = 2) +
+    scale_color_manual(values = c("gray50", "gray50", "midnightblue", "blue", "gray50",  "red")) +
+    geom_text(aes(x = as.Date("2021-07-01"), label = as.character(후보), family="NanumGothic"), hjust = 0) +
+    geom_segment(aes(xend = as.Date("2021-07-01"), yend = 지지율), 
+                 linetype = 3, colour = "grey50") +
+    theme_bw(base_family = "NanumGothic") +
+    labs(x="",
+         title = "제20대 대통령 선거/여론조사") +
+    theme(legend.position = "none") +
+    scale_x_date(limits = c(as.Date("2019-09-01"), as.Date("2021-08-01")))
+
+polls_gg
+```
+
+```{r animate-polls-II}
+polls_gg +
+  transition_reveal(년월)
+```
+
+
+# 사진 + 그래프 {#visualize-polls-animation-picture}
+
+
+```{r picture}
+library(ggimage)
+library(ggtext)
+library(extrafont)
+loadfonts()
+
+asp_ratio <- 1.618 
+
+gallop_profile_gg <- gallop_tbl %>% 
+  filter(년월 == max(년월)) %>% 
+  pivot_longer(안철수:윤석열, names_to = "후보", values_to = "지지율") %>% 
+  mutate(후보 = fct_reorder(후보, -지지율)) %>% 
+  mutate(profile_href = glue::glue("fig/{후보}.png")) %>% 
+  ggplot(aes(x=후보, y=지지율)) +
+    geom_col(width = 0.3) +
+    theme_minimal(base_family = "NanumGothic") +
+    labs(x="",
+         title = "제20대 대통령 선거/여론조사",
+         subtitle = "조사일자: 2021-05-15") +
+    geom_image(
+    aes(
+      x = 후보, y = 지지율,
+      image = profile_href,
+      asp = asp_ratio
+      ),
+      size = 0.07
+    ) +
+    theme(aspect.ratio = 1/asp_ratio,
+          axis.text    = element_text(colour = "grey50",
+                                      face   = 'bold',
+                                      size   =  13),
+          axis.title   = element_text(colour = "black",
+                                      face   = 'bold',
+                                      size   =  15),
+          axis.title.y = element_text(size = 14,
+                                       colour = 'black',
+                                       face='bold',
+                                       angle = 00),
+          plot.title = element_text(size = 17,
+                                    face = 'bold'))
+
+gallop_profile_gg
+
+```
+
+

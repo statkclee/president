@@ -1,0 +1,264 @@
+
+그래프
+=================================================================================================
+
+
+Row
+-------------------------------------------------------------------------------
+
+###  이재명
+
+```{r minju-one}
+ljm <- candidate_tbl %>% filter(후보자명 == "이재명") %>% pull(득표) %>% 
+  scales::comma(.)
+
+ljm_pcnt <- candidate_tbl %>% filter(후보자명 == "이재명") %>% pull(득표율) %>% 
+   scales::percent(accuracy = 0.1)
+
+ljm_vb <- glue::glue("{ljm} ({ljm_pcnt})")
+valueBox(ljm_vb, caption = "이재명", icon = "fa-one", color = "#4287f5")
+```
+
+### 이낙연
+
+```{r minju-four}
+lny <- candidate_tbl %>% filter(후보자명 == "이낙연") %>% pull(득표) %>% 
+  scales::comma(.)
+
+lny_pcnt <- candidate_tbl %>% filter(후보자명 == "이낙연") %>% pull(득표율) %>% 
+   scales::percent(accuracy = 0.1)
+
+lny_vb <- glue::glue("{lny} ({lny_pcnt})")
+valueBox(lny_vb, caption = "이낙연", icon = "fa-four", color = "#f54242")
+```
+
+### 박용진 
+
+```{r minju-five}
+pyj <- candidate_tbl %>% filter(후보자명 == "박용진") %>% pull(득표) %>% 
+  scales::comma(.)
+
+pyj_pcnt <- candidate_tbl %>% filter(후보자명 == "박용진") %>% pull(득표율) %>% 
+   scales::percent(accuracy = 0.1)
+
+pyj_vb <- glue::glue("{pyj} ({pyj_pcnt})")
+
+valueBox(pyj_vb, caption = "박용진", icon = "fa-five", color = "gray")
+```
+
+### 추미애 
+
+```{r minju-six}
+cma <- candidate_tbl %>% filter(후보자명 == "추미애") %>% pull(득표) %>% 
+  scales::comma(.)
+
+cma_pcnt <- candidate_tbl %>% filter(후보자명 == "추미애") %>% pull(득표율) %>% 
+   scales::percent(accuracy = 0.1)
+
+cma_vb <- glue::glue("{cma} ({cma_pcnt})")
+
+valueBox(cma_vb, caption = "추미애", icon = "fa-six", color = "#42f578")
+```
+
+
+Column {.tabset  .tabset-fade}
+-------------------------------------------------------------------------------
+
+### 선거인단
+
+
+```{r electoral_college-dashboard}
+library(patchwork)
+
+# 선거인단 ----------------
+votes_tbl <- race_tbl %>% 
+  group_by(시도) %>% 
+  summarise(총투표수 = sum(득표))
+
+electoral_g <- electoral_college %>% 
+  left_join(votes_tbl) %>% 
+  pivot_longer(-시도) %>%  
+  mutate(시도 = factor(시도, levels = c("대전충남", "세종충북", "대구경북", "강원", "1차 슈퍼데이", "광주전남", "전북", "제주", "부울경", "인천", "2차 슈퍼데이", "경기", "서울", "재외국민", "3차 슈퍼데이"))) %>% 
+  ggplot(aes(x = 시도, y = value, fill = name, width = ifelse(name == "총투표수", 0.3, 0.5))) +
+    geom_col(stat = "identity") +
+    theme_bw(base_family = "NanumGothic") +
+    theme(legend.position = "top",
+          legend.box = "horizontal",
+          legend.margin=margin(t = 0, unit='cm'),
+          legend.spacing.x = unit(0.5, 'cm'),
+          legend.text = element_text(margin = margin(r = 3, unit = 'cm')),
+          legend.key.height = unit(0.5, 'cm'), #change legend key height
+          legend.key.width  = unit(1.5, 'cm'), #change legend key width
+          axis.text.y = element_text(size = rel(1.5), colour = "gray35", family = "NanumBarunpen", face="bold"),
+          axis.text.x = element_text(size = rel(1.0), colour = "black", family = "NanumBarunpen", face="bold",
+                                     angle = 15, vjust = 0.5, hjust=0.5),
+          strip.background=element_rect(fill="gray95"),
+          plot.title=element_text(size=18, face="bold", family = "NanumBarunpen"),
+          plot.subtitle=element_text(face="bold", size=13, colour="grey10", family = "NanumBarunpen")) +
+    labs(x        = "",
+         y        = "",
+         title    = "제20대 대통령 선거 / 민주당 경선",
+         subtitle = glue::glue("{report_day} 기준 선거인단과 총투표수"),
+         fill     = "") +
+    scale_y_continuous(labels = scales::comma) +
+    # coord_flip() +
+    scale_fill_manual(values = c("gray77", "darkblue"))
+
+electoral_g
+```
+
+### 누적 득표수
+
+
+```{r cumulative-votes-dashboard}
+
+## 누적 ----------
+race_sum_tbl <- race_tbl %>% 
+  group_by(후보자명) %>% 
+  summarise(누적득표 = sum(득표)) %>% 
+  arrange(-누적득표)
+
+cumsum_g <- race_sum_tbl %>% 
+  mutate(후보자명 = factor(후보자명, levels = c("이재명", "이낙연", "박용진", "추미애"))) %>% 
+  ggplot(aes(x = 후보자명, y = 누적득표, fill = 후보자명)) +
+    geom_col(width = 0.3) +
+    theme_bw(base_family = "NanumGothic") +
+    theme(legend.position = "none",
+          axis.text.y = element_text(size = rel(1.5), colour = "gray35", family = "NanumBarunpen", face="bold"),
+          axis.text.x = element_text(size = rel(2.0), colour = "black", family = "NanumBarunpen", face="bold"),
+          strip.background=element_rect(fill="gray95"),
+          plot.title=element_text(size=18, face="bold", family = "NanumBarunpen"),
+          plot.subtitle=element_text(face="bold", size=13, colour="grey10", family = "NanumBarunpen")) +
+    labs(x = "",
+         y = "",
+         title = "제20대 대통령 선거 / 민주당 경선",
+         subtitle = glue::glue("{report_day} 기준 누적 득표수")) +
+         # caption = "자료 출처: 더불어 민주당 보도자료, https://theminjoo.kr/board/lists/presskit") +
+    scale_y_continuous(labels = scales::comma) +
+    scale_fill_manual(values = c("blue", "red", "gray", "green"))
+
+plotly::ggplotly(cumsum_g)
+```
+
+### 당원 국민선거인단
+
+
+```{r dashboard-party-people}
+
+cumsum_two_g <- race_tbl %>% 
+  group_by(당원여론, 후보자명) %>% 
+  summarise(득표 = sum(득표)) %>% 
+  ungroup() %>% 
+  pivot_wider(names_from = 당원여론, values_from = 득표) %>% 
+  mutate(누적득표 = 국민선거인단  + 당원) %>% 
+  pivot_longer(국민선거인단:누적득표, names_to = "구분", values_to = "득표") %>% 
+  mutate(후보자명 = factor(후보자명, levels = c("이재명", "김두관", "정세균", "이낙연", "박용진", "추미애")),
+         구분     = factor(구분, levels = c("누적득표", "국민선거인단", "당원", "재외국민"))) %>% 
+  ggplot(aes(x = 후보자명, y = 득표, fill = 후보자명)) +
+    geom_col(width = 0.5) +
+    facet_wrap(~구분) +
+    theme_bw(base_family = "NanumGothic") +
+    theme(legend.position = "none",
+          strip.text.x = element_text(size = rel(1.7), colour = "black", family = "NanumMyeongjo", face="bold"),
+          axis.text.y = element_text(size = rel(1.3), colour = "gray35", family = "NanumBarunpen", face="bold"),
+          axis.text.x = element_text(size = rel(1.3), colour = "black", family = "NanumBarunpen", face="bold"),
+          strip.background=element_rect(fill="gray95"),
+          plot.title=element_text(size=18, face="bold", family = "NanumBarunpen"),
+          plot.subtitle=element_text(face="bold", size=13, colour="grey10", family = "NanumBarunpen")) +
+    labs(x = "",
+         y = "",
+         title = "제20대 대통령 선거 / 민주당 경선",
+         subtitle = "국민선거인단, 당원 누적 득표수") +
+    scale_y_continuous(labels = scales::comma) +
+    scale_fill_manual(values = c("blue", "red", "gray", "green"))  
+
+plotly::ggplotly(cumsum_two_g)
+
+```
+
+
+
+
+### 국민선거인단
+
+
+```{r dashboard-people}
+
+people_g <- race_tbl %>% 
+  filter(str_detect(시도, "슈퍼")) %>% 
+  ggplot(aes(x = 후보자명, y = 득표, fill = 후보자명)) +
+    geom_col(width = 0.5) +
+    facet_wrap(~시도) +
+    theme_bw(base_family = "NanumGothic") +
+    theme(legend.position = "none",
+          strip.text.x = element_text(size = rel(1.7), colour = "black", family = "NanumMyeongjo", face="bold"),
+          axis.text.y = element_text(size = rel(1.3), colour = "gray35", family = "NanumBarunpen", face="bold"),
+          axis.text.x = element_text(size = rel(1.3), colour = "black", family = "NanumBarunpen", face="bold"),
+          strip.background=element_rect(fill="gray95"),
+          plot.title=element_text(size=18, face="bold", family = "NanumBarunpen"),
+          plot.subtitle=element_text(face="bold", size=13, colour="grey10", family = "NanumBarunpen")) +
+    labs(x = "",
+         y = "",
+         title = "제20대 대통령 선거 / 민주당 경선",
+         subtitle = "국민선거인단 득표수") +
+    scale_y_continuous(labels = scales::comma) +
+    scale_fill_manual(values = c("blue", "red", "gray", "green"))
+
+ggplotly(people_g)
+```
+
+### 지역별 득표수
+
+
+```{r dashboard-sido, out.width="120%"}
+
+sido_g <- race_tbl %>% 
+  filter(!str_detect(시도, "슈퍼|재외")) %>% 
+  ggplot(aes(x = 후보자명, y = 득표, fill = 후보자명)) +
+    geom_col(width = 0.4) +
+    facet_wrap(~시도) +
+    theme_bw(base_family = "NanumGothic") +
+    theme(legend.position = "none",
+          strip.text.x = element_text(size = rel(1.1), colour = "black", family = "NanumMyeongjo", face="bold"),
+          axis.text.y = element_text(size = rel(1.3), colour = "gray35", family = "NanumBarunpen", face="bold"),
+          axis.text.x = element_text(size = rel(1.0), colour = "black", family = "NanumBarunpen", face="bold"),
+          strip.background=element_rect(fill="gray95"),
+          plot.title=element_text(size=18, face="bold", family = "NanumBarunpen"),
+          plot.subtitle=element_text(face="bold", size=13, colour="grey10", family = "NanumBarunpen")) +
+    labs(x = "",
+         y = "",
+         title = "제20대 대통령 선거 / 민주당 경선",
+         subtitle = "지역순회 시도별 득표수") +
+    scale_y_continuous(labels = scales::comma) +
+    scale_fill_manual(values = c("blue", "red", "gray", "green"))
+
+plotly::ggplotly(sido_g)
+
+```
+
+
+### 재외국민 {#ggplot-cumsum-votes-sido-overseas}
+
+```{r ggplot-cumsum-votes-sido-overseas}
+
+overseas_g <- race_tbl %>% 
+  filter(str_detect(시도, "재외")) %>% 
+  ggplot(aes(x = 후보자명, y = 득표, fill = 후보자명)) +
+    geom_col(width = 0.3) +
+    theme_bw(base_family = "NanumGothic") +
+    theme(legend.position = "none",
+          strip.text.x = element_text(size = rel(1.7), colour = "black", family = "NanumMyeongjo", face="bold"),
+          axis.text.y = element_text(size = rel(1.1), colour = "gray35", family = "NanumBarunpen", face="bold"),
+          axis.text.x = element_text(size = rel(1.3), colour = "black", family = "NanumBarunpen", face="bold"),
+          strip.background=element_rect(fill="gray95"),
+          plot.title=element_text(size=18, face="bold", family = "NanumBarunpen"),
+          plot.subtitle=element_text(face="bold", size=13, colour="grey10", family = "NanumBarunpen")) +
+    labs(x = "",
+         y = "",
+         title = "제20대 대통령 선거 / 민주당 경선",
+         subtitle = "재외국민 득표수") +
+    scale_y_continuous(labels = scales::comma) +
+    scale_fill_manual(values = c("blue", "red", "gray", "green"))
+
+overseas_g
+```
