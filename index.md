@@ -47,7 +47,7 @@ subtitle: 대통령 선거 2022년
 1. **제8회 경기지사 선거**
     1. [득표율](gg-votes.html)
     1. [**대쉬보드**](gg-dashboard.html)
-1. [서울시장](seoul/seoul_2022.html)
+1. [서울시장](seoul_2022.html)
     
     
 
