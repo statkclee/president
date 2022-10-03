@@ -114,6 +114,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#구별" id="toc-구별" class="nav-link" data-scroll-target="#구별">구별</a></li>
   <li><a href="#전체-추세" id="toc-전체-추세" class="nav-link" data-scroll-target="#전체-추세">전체 추세</a></li>
   </ul></li>
+  <li><a href="#여론조사" id="toc-여론조사" class="nav-link" data-scroll-target="#여론조사">여론조사</a>
+  <ul class="collapse">
+  <li><a href="#정당지지율" id="toc-정당지지율" class="nav-link" data-scroll-target="#정당지지율">정당지지율</a></li>
+  <li><a href="#후보지지율" id="toc-후보지지율" class="nav-link" data-scroll-target="#후보지지율">후보지지율</a></li>
+  </ul></li>
   </ul>
 </nav>
 </div>
@@ -395,6 +400,205 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 </section>
 </section>
+<section id="여론조사" class="level1">
+<h1>여론조사</h1>
+<section id="정당지지율" class="level2">
+<h2 class="anchored" data-anchor-id="정당지지율">정당지지율</h2>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 00. Packages -----------------------------------------------</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readxl)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co"># 01. 데이터 -------------------------------------------------</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>seoul_tbl  <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="st">"data/seoul_song_tbl.rds"</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co"># 02. 정당지지율 -------------------------------------------------</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>party_raw <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">"z:/선거데이터/02_여론조사/제8회_지선_여론조사.xlsx"</span>, </span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>                        <span class="at">sheet =</span> <span class="st">"정당지지도"</span>, <span class="at">skip =</span> <span class="dv">3</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>party_tbl <span class="ot">&lt;-</span> party_raw <span class="sc">%&gt;%</span> </span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(등록번호 <span class="ot">=</span> <span class="st">`</span><span class="at">...1</span><span class="st">`</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  janitor<span class="sc">::</span><span class="fu">clean_names</span>(<span class="at">ascii =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(조사일자 <span class="ot">=</span> <span class="fu">str_extract</span>(조사기간, <span class="st">"</span><span class="sc">\\</span><span class="st">d{2}</span><span class="sc">\\</span><span class="st">.</span><span class="sc">\\</span><span class="st">d{1,2}</span><span class="sc">\\</span><span class="st">.</span><span class="sc">\\</span><span class="st">d{1,2}"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(등록번호, 조사일자, 더불어민주당, 국민의힘, 정의당, 기타정당, 응답_유보층) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> 더불어민주당<span class="sc">:</span>응답_유보층, </span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">"정당"</span>,</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>               <span class="at">values_to =</span> <span class="st">"지지율"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(지지율 <span class="ot">=</span> <span class="fu">parse_number</span>(지지율) <span class="sc">/</span> <span class="dv">100</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(조사일자 <span class="ot">=</span> lubridate<span class="sc">::</span><span class="fu">ymd</span>(조사일자)) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(정당 <span class="ot">=</span> <span class="fu">factor</span>(정당, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"국민의힘"</span>, <span class="st">"더불어민주당"</span>, <span class="st">"정의당"</span>, <span class="st">"기타정당"</span>, <span class="st">"응답_유보층"</span>)))</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>party_mean_tbl <span class="ot">&lt;-</span> party_tbl <span class="sc">%&gt;%</span> </span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(조사일자, 정당) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(지지율 <span class="ot">=</span> <span class="fu">mean</span>(지지율)) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() </span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>local_seoul_party_g <span class="ot">&lt;-</span> party_tbl <span class="sc">%&gt;%</span> </span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> 조사일자, <span class="at">y =</span> 지지율, <span class="at">color =</span> 정당)) <span class="sc">+</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="at">data =</span> party_mean_tbl, <span class="fu">aes</span>(<span class="at">x =</span> 조사일자, <span class="at">y =</span> 지지율)) <span class="sc">+</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"red"</span>, <span class="st">"blue"</span>, <span class="st">"yellow"</span>, <span class="st">"gray70"</span>, <span class="st">"gray30"</span>)) <span class="sc">+</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span>percent) <span class="sc">+</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_x_date</span>(<span class="at">date_labels =</span> <span class="st">"%m월%d일"</span>) <span class="sc">+</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_bw</span>(<span class="at">base_family =</span> <span class="st">"MaruBuri"</span>) <span class="sc">+</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"제8회 지방선거 여론조사"</span>,</span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>         <span class="at">subtitle =</span> <span class="st">"후보자등록 신청 마감일('22. 5. 14.) 이후 여론조사결과"</span>)</span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>local_seoul_party_g</span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>( glue<span class="sc">::</span><span class="fu">glue</span>(<span class="st">"fig/서울시_지선_정당지지율.png"</span>) , </span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>        local_seoul_party_g,</span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>        <span class="at">device =</span> ragg<span class="sc">::</span>agg_png, </span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>        <span class="at">width =</span> <span class="dv">297</span>, <span class="at">height =</span> <span class="dv">210</span>, <span class="at">units =</span> <span class="st">"mm"</span>, <span class="at">res =</span> <span class="dv">600</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="fig/서울시_지선_정당지지율.png" class="lightbox" data-gallery="quarto-lightbox-gallery-7"><img src="fig/서울시_지선_정당지지율.png" class="img-fluid figure-img"></a></p>
+</figure>
+</div>
+</section>
+<section id="후보지지율" class="level2">
+<h2 class="anchored" data-anchor-id="후보지지율">후보지지율</h2>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. 서울시장 -------------------------------------------------</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="do">## 3.1. 여론조사 결과 -----------------------------------------</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>seoul_raw <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">"z:/선거데이터/02_여론조사/제8회_지선_여론조사.xlsx"</span>, </span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>                        <span class="at">sheet =</span> <span class="st">"서울(광)"</span>, <span class="at">skip =</span> <span class="dv">3</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>seoul_interview <span class="ot">&lt;-</span> seoul_raw <span class="sc">%&gt;%</span> </span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(등록번호 <span class="ot">=</span> <span class="st">`</span><span class="at">...1</span><span class="st">`</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  janitor<span class="sc">::</span><span class="fu">clean_names</span>(<span class="at">ascii =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(조사일자 <span class="ot">=</span> <span class="fu">str_extract</span>(조사기간, <span class="st">"</span><span class="sc">\\</span><span class="st">d{2}</span><span class="sc">\\</span><span class="st">.</span><span class="sc">\\</span><span class="st">d{1,2}</span><span class="sc">\\</span><span class="st">.</span><span class="sc">\\</span><span class="st">d{1,2}"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(구분 <span class="ot">=</span> <span class="st">"전화인터뷰"</span>)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>seoul_ars <span class="ot">&lt;-</span> seoul_raw <span class="sc">%&gt;%</span> </span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">82</span><span class="sc">:</span>(<span class="dv">82</span><span class="sc">+</span><span class="dv">12</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(등록번호 <span class="ot">=</span> <span class="st">`</span><span class="at">...1</span><span class="st">`</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  janitor<span class="sc">::</span><span class="fu">clean_names</span>(<span class="at">ascii =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(조사일자 <span class="ot">=</span> <span class="fu">str_extract</span>(조사기간, <span class="st">"</span><span class="sc">\\</span><span class="st">d{2}</span><span class="sc">\\</span><span class="st">.</span><span class="sc">\\</span><span class="st">d{1,2}</span><span class="sc">\\</span><span class="st">.</span><span class="sc">\\</span><span class="st">d{1,2}"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(구분 <span class="ot">=</span> <span class="st">"ARS"</span>)</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>seoul_tbl <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(seoul_interview, seoul_ars) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(등록번호, 조사일자, 구분, 더불어민주당_송영길, </span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>         국민의힘_오세훈, 정의당_권수정, 기본소득당_신지혜, </span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>         무소속_김광종, 기타후보, 응답_유보층) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> 더불어민주당_송영길<span class="sc">:</span>응답_유보층,</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">"정당"</span>,</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>               <span class="at">values_to =</span> <span class="st">"지지율"</span>)  <span class="sc">%&gt;%</span> </span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(조사일자 <span class="ot">=</span> lubridate<span class="sc">::</span><span class="fu">ymd</span>(조사일자)) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(지지율 <span class="ot">=</span> <span class="fu">parse_number</span>(지지율) <span class="sc">/</span> <span class="dv">100</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(정당 <span class="ot">=</span> <span class="fu">factor</span>(정당, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"국민의힘_오세훈"</span>, </span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>                                    <span class="st">"더불어민주당_송영길"</span>,</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>                                    <span class="st">"정의당_권수정"</span>,</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>                                    <span class="st">"기본소득당_신지혜"</span>, </span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>                                    <span class="st">"무소속_김광종"</span>,</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>                                    <span class="st">"기타후보"</span>, </span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>                                    <span class="st">"응답_유보층"</span> )))</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a><span class="do">## 3.2. 여론조사 평균 -----------------------------------------</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>seoul_mean_tbl <span class="ot">&lt;-</span> seoul_tbl <span class="sc">%&gt;%</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(조사일자, 정당) <span class="sc">%&gt;%</span></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(지지율 <span class="ot">=</span> <span class="fu">mean</span>(지지율, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a><span class="do">## 3.3. 최종 결과 -----------------------------------------</span></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>seoul_actual <span class="ot">&lt;-</span> <span class="fu">tibble</span>(등록번호 <span class="ot">=</span> <span class="st">"10000"</span>,</span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>       조사일자 <span class="ot">=</span> <span class="fu">as.Date</span>(<span class="st">"2022-06-01"</span>), </span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>       구분     <span class="ot">=</span> <span class="st">"실제선거"</span>,</span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>       정당     <span class="ot">=</span> <span class="st">"더불어민주당_송영길"</span>,</span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>       지지율   <span class="ot">=</span> <span class="fl">0.3923</span></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>       ) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_row</span>(등록번호 <span class="ot">=</span> <span class="st">"10000"</span>,</span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>          조사일자 <span class="ot">=</span> <span class="fu">as.Date</span>(<span class="st">"2022-06-01"</span>), </span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>          구분     <span class="ot">=</span> <span class="st">"실제선거"</span>,</span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>          정당     <span class="ot">=</span> <span class="st">"국민의힘_오세훈"</span>,</span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>          지지율   <span class="ot">=</span> <span class="fl">0.5905</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_row</span>(등록번호 <span class="ot">=</span> <span class="st">"10000"</span>,</span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>          조사일자 <span class="ot">=</span> <span class="fu">as.Date</span>(<span class="st">"2022-06-01"</span>), </span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>          구분     <span class="ot">=</span> <span class="st">"실제선거"</span>,</span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>          정당     <span class="ot">=</span> <span class="st">"정의당_권수정"</span>,</span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>          지지율   <span class="ot">=</span> <span class="fl">0.0121</span>)   </span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a><span class="do">## 3.4. 연결선 -----------------------------------------</span></span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a>seoul_interpolation <span class="ot">&lt;-</span> seoul_mean_tbl <span class="sc">%&gt;%</span> </span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(조사일자 <span class="sc">==</span> <span class="fu">max</span>(조사일자)) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>(seoul_actual <span class="sc">%&gt;%</span> </span>
+<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a>              <span class="fu">select</span>(조사일자, 정당, 지지율))</span>
+<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a>seoul_polls_g <span class="ot">&lt;-</span> seoul_tbl <span class="sc">%&gt;%</span> </span>
+<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>( <span class="at">x=</span> 조사일자, <span class="at">y =</span> 지지율, <span class="at">color =</span> 정당)) <span class="sc">+</span></span>
+<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">data =</span> seoul_mean_tbl) <span class="sc">+</span></span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"red"</span>, <span class="st">"blue"</span>, <span class="st">"yellow"</span>, <span class="st">"gray30"</span>, <span class="st">"gray40"</span>, <span class="st">"gray50"</span>, <span class="st">"gray60"</span>)) <span class="sc">+</span></span>
+<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span>percent) <span class="sc">+</span></span>
+<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_date</span>(<span class="at">date_labels =</span> <span class="st">"%m월%d일"</span>) <span class="sc">+</span></span>
+<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>(<span class="at">base_family =</span> <span class="st">"MaruBuri"</span>) <span class="sc">+</span></span>
+<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"제8회 지방선거 여론조사 - 서울시장"</span>,</span>
+<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"후보자등록 신청 마감일('22. 5. 14.) 이후 여론조사결과"</span>) <span class="sc">+</span></span>
+<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> seoul_actual, <span class="at">size =</span> <span class="dv">5</span>) <span class="sc">+</span></span>
+<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">data =</span> seoul_interpolation, <span class="at">linetype =</span><span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="at">data =</span> seoul_actual, <span class="fu">aes</span>(<span class="at">label =</span> scales<span class="sc">::</span><span class="fu">percent</span>(지지율) ), <span class="at">vjust=</span> <span class="sc">-</span><span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">panel.background =</span> <span class="fu">element_rect</span>(<span class="at">fill =</span> <span class="st">"gray90"</span>))  </span>
+<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a>seoul_polls_g  </span>
+<span id="cb4-83"><a href="#cb4-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-84"><a href="#cb4-84" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>( glue<span class="sc">::</span><span class="fu">glue</span>(<span class="st">"fig/서울시_지선_여조_후보지지율.png"</span>) , </span>
+<span id="cb4-85"><a href="#cb4-85" aria-hidden="true" tabindex="-1"></a>        seoul_polls_g,</span>
+<span id="cb4-86"><a href="#cb4-86" aria-hidden="true" tabindex="-1"></a>        <span class="at">device =</span> ragg<span class="sc">::</span>agg_png, </span>
+<span id="cb4-87"><a href="#cb4-87" aria-hidden="true" tabindex="-1"></a>        <span class="at">width =</span> <span class="dv">297</span>, <span class="at">height =</span> <span class="dv">210</span>, <span class="at">units =</span> <span class="st">"mm"</span>, <span class="at">res =</span> <span class="dv">600</span>)</span>
+<span id="cb4-88"><a href="#cb4-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-89"><a href="#cb4-89" aria-hidden="true" tabindex="-1"></a><span class="do">## 여론조사 유형별로 구분 ------------------</span></span>
+<span id="cb4-90"><a href="#cb4-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-91"><a href="#cb4-91" aria-hidden="true" tabindex="-1"></a>seoul_polls_type_g <span class="ot">&lt;-</span> seoul_tbl <span class="sc">%&gt;%</span> </span>
+<span id="cb4-92"><a href="#cb4-92" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>( <span class="at">x=</span> 조사일자, <span class="at">y =</span> 지지율, <span class="at">color =</span> 정당)) <span class="sc">+</span></span>
+<span id="cb4-93"><a href="#cb4-93" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb4-94"><a href="#cb4-94" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">se =</span> <span class="cn">FALSE</span>, <span class="at">method =</span> <span class="st">"lm"</span>) <span class="sc">+</span></span>
+<span id="cb4-95"><a href="#cb4-95" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"red"</span>, <span class="st">"blue"</span>, <span class="st">"yellow"</span>, <span class="st">"gray30"</span>, <span class="st">"gray40"</span>, <span class="st">"gray50"</span>, <span class="st">"gray60"</span>)) <span class="sc">+</span></span>
+<span id="cb4-96"><a href="#cb4-96" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span>percent) <span class="sc">+</span></span>
+<span id="cb4-97"><a href="#cb4-97" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_date</span>(<span class="at">date_labels =</span> <span class="st">"%m월%d일"</span>) <span class="sc">+</span></span>
+<span id="cb4-98"><a href="#cb4-98" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>(<span class="at">base_family =</span> <span class="st">"MaruBuri"</span>) <span class="sc">+</span></span>
+<span id="cb4-99"><a href="#cb4-99" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"제8회 지방선거 조사방법별 여론조사 - 서울시장"</span>,</span>
+<span id="cb4-100"><a href="#cb4-100" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"후보자등록 신청 마감일('22. 5. 14.) 이후 여론조사결과"</span>) <span class="sc">+</span></span>
+<span id="cb4-101"><a href="#cb4-101" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>( <span class="sc">~</span> 구분) <span class="sc">+</span></span>
+<span id="cb4-102"><a href="#cb4-102" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">panel.background =</span> <span class="fu">element_rect</span>(<span class="at">fill =</span> <span class="st">"gray90"</span>))    </span>
+<span id="cb4-103"><a href="#cb4-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-104"><a href="#cb4-104" aria-hidden="true" tabindex="-1"></a>seoul_polls_type_g</span>
+<span id="cb4-105"><a href="#cb4-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-106"><a href="#cb4-106" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>( glue<span class="sc">::</span><span class="fu">glue</span>(<span class="st">"fig/서울시_지선_여조유형_후보지지율.png"</span>) , </span>
+<span id="cb4-107"><a href="#cb4-107" aria-hidden="true" tabindex="-1"></a>        seoul_polls_type_g,</span>
+<span id="cb4-108"><a href="#cb4-108" aria-hidden="true" tabindex="-1"></a>        <span class="at">device =</span> ragg<span class="sc">::</span>agg_png, </span>
+<span id="cb4-109"><a href="#cb4-109" aria-hidden="true" tabindex="-1"></a>        <span class="at">width =</span> <span class="dv">297</span>, <span class="at">height =</span> <span class="dv">210</span>, <span class="at">units =</span> <span class="st">"mm"</span>, <span class="at">res =</span> <span class="dv">600</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div id="fig-candidate" class="quarto-layout-panel">
+<figure class="figure">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-figure quarto-figure-center" style="flex-basis: 50.0%;justify-content: center;">
+<figure class="figure">
+<p><a href="fig/서울시_지선_여조_후보지지율.png" class="lightbox" data-gallery="quarto-lightbox-gallery-8"><img src="fig/서울시_지선_여조_후보지지율.png" class="img-fluid figure-img"></a></p>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center" style="flex-basis: 50.0%;justify-content: center;">
+<figure class="figure">
+<p><a href="fig/서울시_지선_여조유형_후보지지율.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9"><img src="fig/서울시_지선_여조유형_후보지지율.png" class="img-fluid figure-img"></a></p>
+</figure>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure 3: 여론조사 및 깜깜이 기간 이후 최종 후보 득표율</figcaption><p></p>
+</figure>
+</div>
+</section>
+</section>
 
 </main>
 <!-- /main column -->
@@ -496,7 +700,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 });
 </script>
 </div> <!-- /content -->
-<script>var lightboxQuarto = GLightbox({"openEffect":"zoom","loop":true,"selector":".lightbox","closeEffect":"zoom","descPosition":"bottom"});</script>
+<script>var lightboxQuarto = GLightbox({"openEffect":"zoom","closeEffect":"zoom","selector":".lightbox","loop":true,"descPosition":"bottom"});</script>
 
 
 
