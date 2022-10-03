@@ -1,8 +1,8 @@
 ---
-title: A Sample Title - The SocioEconomic Aspects of Stock Assessments
+title: A Sample Title - 한글 사랑 
 subtitle: with non-English diacritics in the author names. See documentation.
 author:
-  - name: Jane Doe
+  - name: 한글 Doe
     affiliations:
       - name: Minnesota Department of Natural Resources
         address: 500 Lafayette Road Saint Paul, MN 55155
@@ -48,11 +48,18 @@ format:
         % delete. this is for the example w CZ diacritics
         \usepackage{babel}
         \babelprovide[import]{czech}
+        % 한글 폰트 ----------------------------
+        \setmainhangulfont{NanumMyeongjo} % 나눔명조
+        \setsanshangulfont{NanumGothic}   % 나눔고딕
+        \setmonohangulfont{D2Coding}      % D2코딩
+mainfont: "NanumMyeongjo"
+sansfont: "NanumGothic"
+monofont: "D2Coding"        
 ---
 
 
 
-## YAML additions for themes
+## 한글...
 
 Some themes need some additional YAML information to work.
 
