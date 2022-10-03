@@ -1,0 +1,36 @@
+---
+title: "제8회 지방선거"
+subtitle: "서울시장"
+author:
+- name: "데이터 과학자 이광춘"
+date: "2022-10-03"
+output:
+  html_document: 
+    include:
+    toc: yes
+    toc_depth: 2
+    toc_float: true
+    highlight: tango
+    code_folding: hide
+    number_section: true
+    self_contained: true
+bibliography: bibliography_presid.bib
+csl: biomed-central.csl
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE,
+                      comment="", digits = 3, tidy = FALSE, prompt = FALSE, fig.align = 'center')
+library(tidyverse)
+library(rvest)
+library(lubridate)
+```
+
+# 서울시
+
+
+
+
+

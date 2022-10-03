@@ -1,9 +1,9 @@
-This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2022.10.2)  2 OCT 2022 10:06
+This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2022.10.2)  2 OCT 2022 17:38
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**seoul_2022.tex
-(./seoul_2022.tex
+**C:/code_states/president/seoul/seoul_2022.tex
+(c:/code_states/president/seoul/seoul_2022.tex
 LaTeX2e <2022-06-01> patch level 5
 L3 programming layer <2022-09-28> (c:/Users/statkclee/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/koma-script/scrbook.cls
 Document Class: scrbook 2022/07/04 v3.37 KOMA-Script document class (book)
@@ -756,12 +756,25 @@ For immediate help type H <return>.
 l.182 
        
 Here is how much of TeX's memory you used:
- 29378 strings out of 477743
- 659871 string characters out of 5842106
+ 29380 strings out of 477743
+ 659993 string characters out of 5842106
  1187884 words of memory out of 5000000
  50038 multiletter control sequences out of 15000+600000
  469275 words of font info for 30 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 108i,2n,106p,10605b,270s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 108i,2n,106p,10636b,270s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
 No pages of output.
+
+! name = Palatino, rootname = Palatino, pointsize = 
+! mktexmf: empty or non-existent rootfile!
+
+! kpathsea: Running mktexmf Palatino.mf
+
+! The command name is C:\Users\statkclee\AppData\Roaming\TinyTeX\bin\win32\mktexmf
+! Cannot find Palatino.mf.
+
+! kpathsea: Running mktextfm Palatino
+
+! The command name is C:\Users\statkclee\AppData\Roaming\TinyTeX\bin\win32\mktextfm
+! kpathsea: Appending font creation commands to missfont.log.
