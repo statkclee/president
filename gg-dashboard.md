@@ -1,78 +1,143 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="generator" content="pandoc">
-    <title>Software Carpentry: 제8회 지선</title>
-    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.css" />
-    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap-theme.css" />
-    <link rel="stylesheet" type="text/css" href="css/swc.css" />
-    <link rel="alternate" type="application/rss+xml" title="Software Carpentry Blog" href="http://software-carpentry.org/feed.xml"/>
-    <meta charset="UTF-8" />
-    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
-    <!--[if lt IE 9]>
-      <script src="https://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+---
+title: "제8회 지선"
+output: 
+  flexdashboard::flex_dashboard:
+  orientation: rows
+vertical_layout: fill
+theme: lumen
+logo: fig/Flag_of_South_Korea.png
+css: css/minju.css
+includes:
+  in_header: google_analytics.html
+editor_options: 
+  chunk_output_type: console
+---
+  
+  
 
 
-    <!--
-    <div id="google_translate_element"></div><script type="text/javascript">
-    function googleTranslateElementInit() {
-      new google.translate.TranslateElement({pageLanguage: 'ko', includedLanguages: 'en', layout: google.translate.TranslateElement.InlineLayout.SIMPLE}, 'google_translate_element');
-    }
-    </script><script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-    -->
-            
-  </head>
-  <body class="lesson">
-    <div class="container card">
-      <div class="banner">
-        <a href="http://software-carpentry.org" title="Software Carpentry">
-          <img alt="Software Carpentry banner" src="img/software-carpentry-banner.png" />
-        </a>
-      </div>
-      <article>
-      <div class="row">
-        <div class="col-md-10 col-md-offset-1">
-                    <h1 class="title">제8회 지선</h1>
-          <h1 id="들어가며">들어가며</h1>
-<h2 class="tabset tabset-fade" id="column">Column</h2>
-<p><br> <br></p>
-<h3 id="세계속의-경기도">세계속의 경기도</h3>
-<pre><code>Error in path.expand(path): 인자 &#39;path&#39;가 올바르지 않습니다.</code></pre>
-<h1 data-icon="icon-dashboard" id="역대-시도-선거">역대 시도 선거</h1>
-<h2 class="tabset tabset-fade" id="column-1">Column</h2>
-<h3 id="종합"><a
-href="http://www.ohmynews.com/NWS_Web/View/at_pg_w.aspx?CNTN_CD=A0002820588">종합</a></h3>
-<p><img src="fig/local-birds-eye-view.jpeg" style="width:100.0%" /></p>
-<h3 id="년-대선">’22년 대선</h3>
-<p><img src="fig/sido_tilemap_20_g.png" style="width:100.0%" /></p>
-<h3 id="년-총선">’20년 총선</h3>
-<p><img src="fig/sido_tilemap_2020_g.png" style="width:100.0%" /></p>
-<h3 id="년-지선">’18년 지선</h3>
-<p><img src="fig/sido_tilemap_2018_g.png" style="width:100.0%" /></p>
-<h3 id="년-대선-1">’17년 대선</h3>
-<p><img src="fig/sido_tilemap_19_g.png" style="width:100.0%" /></p>
-<h3 id="년-총선-1">’16년 총선</h3>
-<p><img src="fig/sido_tilemap_2016_g.png" style="width:100.0%" /></p>
-<h3 id="년-지선-1">’14년 지선</h3>
-<p><img src="fig/sido_tilemap_2014_g.png" style="width:100.0%" /></p>
-<h3 id="년-대선-2">’12년 대선</h3>
-<p><img src="fig/sido_tilemap_18_g.png" style="width:100.0%" /></p>
+
+
+
+
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+들어가며
+================================================================================
+
+
+Column {.tabset .tabset-fade}
+-------------------------------------------------------------------------------
+
+<br>
+<br>
+
+### 세계속의 경기도
+
+
+
+```
+Error in path.expand(path): 인자 'path'가 올바르지 않습니다.
+```
+
+
+
+
+
+
+
+역대 시도 선거 {data-icon="icon-dashboard"}
+=====================================  
+
+
+Column {.tabset .tabset-fade}
+-------------------------------------------------------------------------------
+
+### [종합](http://www.ohmynews.com/NWS_Web/View/at_pg_w.aspx?CNTN_CD=A0002820588)
+
+
+![](fig/local-birds-eye-view.jpeg){width=100%}
+
+
+### '22년 대선
+
+![](fig/sido_tilemap_20_g.png){width=100%}
+
+### '20년 총선
+
+
+
+![](fig/sido_tilemap_2020_g.png){width=100%}
+
+
+
+
+
+### '18년 지선
+
+
+
+
+![](fig/sido_tilemap_2018_g.png){width=100%}
+
+
+
+### '17년 대선
+
+
+
+
+![](fig/sido_tilemap_19_g.png){width=100%}
+
+### '16년 총선
+
+
+
+
+![](fig/sido_tilemap_2016_g.png){width=100%}
+
+### '14년 지선
+
+
+
+![](fig/sido_tilemap_2014_g.png){width=100%}
+
+### '12년 대선
+
+
+
+![](fig/sido_tilemap_18_g.png){width=100%}
+
+
+
 <!-- 투표율 -->
-<h1 data-icon="ion-stats-bars" id="투표율">투표율</h1>
-<h2 data-width="200" id="column-2">Column</h2>
-<h3 id="구시군">구시군</h3>
-<pre><code>Error: package or namespace load failed for &#39;sf&#39; in dyn.load(file, DLLpath = DLLpath, ...):
- 공유된 객체 &#39;/usr/local/lib/R/4.1/site-library/sf/libs/sf.so&#39;를 로드 할 수 없습니다:
+
+
+
+
+투표율 {data-icon="ion-stats-bars"}
+=====================================  
+
+
+Column {data-width=200}
+-------------------------------------
+
+### 구시군
+
+
+```
+Error: package or namespace load failed for 'sf' in dyn.load(file, DLLpath = DLLpath, ...):
+ 공유된 객체 '/usr/local/lib/R/4.1/site-library/sf/libs/sf.so'를 로드 할 수 없습니다:
   dlopen(/usr/local/lib/R/4.1/site-library/sf/libs/sf.so, 6): Library not loaded: /usr/local/opt/proj/lib/libproj.22.dylib
   Referenced from: /usr/local/lib/R/4.1/site-library/sf/libs/sf.so
-  Reason: image not found</code></pre>
-<!--html_preserve-->
-<div id="구시군명"
-class="form-group crosstalk-input-select crosstalk-input">
+  Reason: image not found
+```
+
+<!--html_preserve--><div id="구시군명" class="form-group crosstalk-input-select crosstalk-input">
 <label class="control-label" for="구시군명">구시군명</label>
 <div>
 <select multiple></select>
@@ -136,60 +201,128 @@ class="form-group crosstalk-input-select crosstalk-input">
   "group": ["SharedData0f45fa46"]
 }</script>
 </div>
-</div>
-<!--/html_preserve-->
-<h2 data-width="800" id="column-3">Column</h2>
-<h3 id="그래프">그래프</h3>
-<pre><code>Error in gsub(&quot;\n&quot;, br(), a, fixed = TRUE): 이 로케일에서는 입력문자열 1는 유효하지 않습니다</code></pre>
+</div><!--/html_preserve-->
+
+
+Column {data-width=800}
+-------------------------------------
+
+### 그래프
+
+
+```
+Error in gsub("\n", br(), a, fixed = TRUE): 이 로케일에서는 입력문자열 1는 유효하지 않습니다
+```
+
 <!-- 사전투표율 -->
-<h1 data-icon="fa-car-alt" id="사전투표">사전투표</h1>
-<h2 data-width="200" id="column-4">Column</h2>
-<h3 id="구시군-1">구시군</h3>
-<pre><code>Error: package or namespace load failed for &#39;sf&#39; in dyn.load(file, DLLpath = DLLpath, ...):
- 공유된 객체 &#39;/usr/local/lib/R/4.1/site-library/sf/libs/sf.so&#39;를 로드 할 수 없습니다:
+
+
+
+
+사전투표 {data-icon="fa-car-alt"}
+=====================================  
+
+Column {data-width=200}
+-------------------------------------
+
+### 구시군
+
+
+
+```
+Error: package or namespace load failed for 'sf' in dyn.load(file, DLLpath = DLLpath, ...):
+ 공유된 객체 '/usr/local/lib/R/4.1/site-library/sf/libs/sf.so'를 로드 할 수 없습니다:
   dlopen(/usr/local/lib/R/4.1/site-library/sf/libs/sf.so, 6): Library not loaded: /usr/local/opt/proj/lib/libproj.22.dylib
   Referenced from: /usr/local/lib/R/4.1/site-library/sf/libs/sf.so
-  Reason: image not found</code></pre>
-<pre><code>Error in `mutate()`:
+  Reason: image not found
+```
+
+```
+Error in `mutate()`:
 ! Problem while computing `구시군 = case_when(...)`.
 Caused by error in `stri_detect_regex()`:
-! 객체 &#39;구시군명&#39;를 찾을 수 없습니다</code></pre>
-<pre><code>Error in `mutate()`:
+! 객체 '구시군명'를 찾을 수 없습니다
+```
+
+```
+Error in `mutate()`:
 ! Problem while computing `구시군 = case_when(...)`.
 Caused by error in `stri_detect_regex()`:
-! 객체 &#39;구시군명&#39;를 찾을 수 없습니다</code></pre>
-<pre><code>Error in `group_by()`:
+! 객체 '구시군명'를 찾을 수 없습니다
+```
+
+```
+Error in `group_by()`:
 ! Must group by variables found in `.data`.
 Column `선거구분` is not found.
-Column `시간` is not found.</code></pre>
-<pre><code>Error in `group_by()`:
+Column `시간` is not found.
+```
+
+```
+Error in `group_by()`:
 ! Must group by variables found in `.data`.
 Column `선거구분` is not found.
-Column `시간` is not found.</code></pre>
-<pre><code>Error in `group_by()`:
+Column `시간` is not found.
+```
+
+```
+Error in `group_by()`:
 ! Must group by variables found in `.data`.
 Column `선거구분` is not found.
-Column `시도명` is not found.</code></pre>
-<pre><code>Error in list2(...): 객체 &#39;ev_president_2022_total&#39;를 찾을 수 없습니다</code></pre>
-<pre><code>Error in initialize(...): 객체 &#39;ev_gg&#39;를 찾을 수 없습니다</code></pre>
-<pre><code>Error in makeGroupOptions(sharedData, group, allLevels): 객체 &#39;shared_ev&#39;를 찾을 수 없습니다</code></pre>
-<pre><code>Error in makeGroupOptions(sharedData, group, allLevels): 객체 &#39;shared_ev&#39;를 찾을 수 없습니다</code></pre>
-<h2 data-width="800" id="column-5">Column</h2>
-<h3 id="그래프-1">그래프</h3>
-<pre><code>Error in ggplot(., aes(x = 시간순서, y = 사전투표율, group = 구시군명, : 객체 &#39;shared_ev&#39;를 찾을 수 없습니다</code></pre>
+Column `시도명` is not found.
+```
+
+```
+Error in list2(...): 객체 'ev_president_2022_total'를 찾을 수 없습니다
+```
+
+
+```
+Error in initialize(...): 객체 'ev_gg'를 찾을 수 없습니다
+```
+
+```
+Error in makeGroupOptions(sharedData, group, allLevels): 객체 'shared_ev'를 찾을 수 없습니다
+```
+
+```
+Error in makeGroupOptions(sharedData, group, allLevels): 객체 'shared_ev'를 찾을 수 없습니다
+```
+
+
+Column {data-width=800}
+-------------------------------------
+
+### 그래프
+
+
+```
+Error in ggplot(., aes(x = 시간순서, y = 사전투표율, group = 구시군명, : 객체 'shared_ev'를 찾을 수 없습니다
+```
+
 <!-- 시군구별 득표표 -->
-<h1 data-icon="ion-stats-bars" id="구시군별-득표율">구시군별
-득표(율)</h1>
-<h2 data-width="200" id="column-6">Column</h2>
-<h3 id="구시군-2">구시군</h3>
-<pre><code>Error: package or namespace load failed for &#39;sf&#39; in dyn.load(file, DLLpath = DLLpath, ...):
- 공유된 객체 &#39;/usr/local/lib/R/4.1/site-library/sf/libs/sf.so&#39;를 로드 할 수 없습니다:
+
+
+
+
+구시군별 득표(율) {data-icon="ion-stats-bars"}
+=====================================  
+
+Column {data-width=200}
+-------------------------------------
+
+### 구시군
+
+
+```
+Error: package or namespace load failed for 'sf' in dyn.load(file, DLLpath = DLLpath, ...):
+ 공유된 객체 '/usr/local/lib/R/4.1/site-library/sf/libs/sf.so'를 로드 할 수 없습니다:
   dlopen(/usr/local/lib/R/4.1/site-library/sf/libs/sf.so, 6): Library not loaded: /usr/local/opt/proj/lib/libproj.22.dylib
   Referenced from: /usr/local/lib/R/4.1/site-library/sf/libs/sf.so
-  Reason: image not found</code></pre>
-<!--html_preserve-->
-<div id="구시군명"
-class="form-group crosstalk-input-select crosstalk-input">
+  Reason: image not found
+```
+
+<!--html_preserve--><div id="구시군명" class="form-group crosstalk-input-select crosstalk-input">
 <label class="control-label" for="구시군명">구시군명</label>
 <div>
 <select></select>
@@ -235,65 +368,104 @@ class="form-group crosstalk-input-select crosstalk-input">
   "group": ["SharedDatac1c384ec"]
 }</script>
 </div>
-</div>
-<!--/html_preserve-->
-<h2 data-width="800" id="column-7">Column</h2>
-<h3 id="그래프-2">그래프</h3>
-<pre><code>Error in gsub(&quot;\n&quot;, br(), a, fixed = TRUE): 이 로케일에서는 입력문자열 1는 유효하지 않습니다</code></pre>
-<h1 data-icon="ion-stats-bars" id="득표율">득표율(%)</h1>
-<h2 data-width="200" id="column-8">Column</h2>
-<h3 id="구시군-3">구시군</h3>
-<pre><code>Error: package or namespace load failed for &#39;sf&#39; in dyn.load(file, DLLpath = DLLpath, ...):
- 공유된 객체 &#39;/usr/local/lib/R/4.1/site-library/sf/libs/sf.so&#39;를 로드 할 수 없습니다:
+</div><!--/html_preserve-->
+
+
+Column {data-width=800}
+-------------------------------------
+
+### 그래프
+
+
+```
+Error in gsub("\n", br(), a, fixed = TRUE): 이 로케일에서는 입력문자열 1는 유효하지 않습니다
+```
+
+
+
+득표율(%) {data-icon="ion-stats-bars"}
+=====================================  
+
+Column {data-width=200}
+-------------------------------------
+
+### 구시군
+
+
+
+```
+Error: package or namespace load failed for 'sf' in dyn.load(file, DLLpath = DLLpath, ...):
+ 공유된 객체 '/usr/local/lib/R/4.1/site-library/sf/libs/sf.so'를 로드 할 수 없습니다:
   dlopen(/usr/local/lib/R/4.1/site-library/sf/libs/sf.so, 6): Library not loaded: /usr/local/opt/proj/lib/libproj.22.dylib
   Referenced from: /usr/local/lib/R/4.1/site-library/sf/libs/sf.so
-  Reason: image not found</code></pre>
-<pre><code>Error in dyn.load(file, DLLpath = DLLpath, ...): 공유된 객체 &#39;/usr/local/lib/R/4.1/site-library/sf/libs/sf.so&#39;를 로드 할 수 없습니다:
+  Reason: image not found
+```
+
+```
+Error in dyn.load(file, DLLpath = DLLpath, ...): 공유된 객체 '/usr/local/lib/R/4.1/site-library/sf/libs/sf.so'를 로드 할 수 없습니다:
   dlopen(/usr/local/lib/R/4.1/site-library/sf/libs/sf.so, 6): Library not loaded: /usr/local/opt/proj/lib/libproj.22.dylib
   Referenced from: /usr/local/lib/R/4.1/site-library/sf/libs/sf.so
-  Reason: image not found</code></pre>
-<pre><code>Error in mutate(., 구시군명 = stringi::stri_unescape_unicode(gusigun)): 객체 &#39;gg_sgg_sf&#39;를 찾을 수 없습니다</code></pre>
-<pre><code>Error in st_drop_geometry(.): 함수 &quot;st_drop_geometry&quot;를 찾을 수 없습니다</code></pre>
-<pre><code>Error in group_by(., 선거, 구시군명): 객체 &#39;gg_sgg_tbl&#39;를 찾을 수 없습니다</code></pre>
-<!--html_preserve-->
-<div id="선거"
-class="form-group crosstalk-input-checkboxgroup crosstalk-input">
+  Reason: image not found
+```
+
+```
+Error in mutate(., 구시군명 = stringi::stri_unescape_unicode(gusigun)): 객체 'gg_sgg_sf'를 찾을 수 없습니다
+```
+
+```
+Error in st_drop_geometry(.): 함수 "st_drop_geometry"를 찾을 수 없습니다
+```
+
+
+
+```
+Error in group_by(., 선거, 구시군명): 객체 'gg_sgg_tbl'를 찾을 수 없습니다
+```
+
+<!--html_preserve--><div id="선거" class="form-group crosstalk-input-checkboxgroup crosstalk-input">
 <label class="control-label" for="선거">선거</label>
 <div class="crosstalk-options-group">
 <div class="checkbox">
-<p><label>
+<label>
 <input type="checkbox" name="선거" value="2012&lt;b3&gt;&lt;e2&gt;"/>
-<span>2012&lt;b3&gt;&lt;e2&gt;</span> </label></p>
+<span>2012&lt;b3&gt;&lt;e2&gt;</span>
+</label>
 </div>
 <div class="checkbox">
-<p><label>
+<label>
 <input type="checkbox" name="선거" value="2014&lt;b3&gt;&lt;e2&gt;"/>
-<span>2014&lt;b3&gt;&lt;e2&gt;</span> </label></p>
+<span>2014&lt;b3&gt;&lt;e2&gt;</span>
+</label>
 </div>
 <div class="checkbox">
-<p><label>
+<label>
 <input type="checkbox" name="선거" value="2016&lt;b3&gt;&lt;e2&gt;"/>
-<span>2016&lt;b3&gt;&lt;e2&gt;</span> </label></p>
+<span>2016&lt;b3&gt;&lt;e2&gt;</span>
+</label>
 </div>
 <div class="checkbox">
-<p><label>
+<label>
 <input type="checkbox" name="선거" value="2017&lt;b3&gt;&lt;e2&gt;"/>
-<span>2017&lt;b3&gt;&lt;e2&gt;</span> </label></p>
+<span>2017&lt;b3&gt;&lt;e2&gt;</span>
+</label>
 </div>
 <div class="checkbox">
-<p><label>
+<label>
 <input type="checkbox" name="선거" value="2018&lt;b3&gt;&lt;e2&gt;"/>
-<span>2018&lt;b3&gt;&lt;e2&gt;</span> </label></p>
+<span>2018&lt;b3&gt;&lt;e2&gt;</span>
+</label>
 </div>
 <div class="checkbox">
-<p><label>
+<label>
 <input type="checkbox" name="선거" value="2020&lt;b3&gt;&lt;e2&gt;"/>
-<span>2020&lt;b3&gt;&lt;e2&gt;</span> </label></p>
+<span>2020&lt;b3&gt;&lt;e2&gt;</span>
+</label>
 </div>
 <div class="checkbox">
-<p><label>
+<label>
 <input type="checkbox" name="선거" value="2022&lt;b3&gt;&lt;e2&gt;"/>
-<span>2022&lt;b3&gt;&lt;e2&gt;</span> </label></p>
+<span>2022&lt;b3&gt;&lt;e2&gt;</span>
+</label>
 </div>
 </div>
 <script type="application/json" data-for="선거">{
@@ -308,11 +480,7 @@ class="form-group crosstalk-input-checkboxgroup crosstalk-input">
   },
   "group": ["SharedData37bff9d8"]
 }</script>
-</div>
-<!--/html_preserve-->
-<!--html_preserve-->
-<div id="구시군명"
-class="form-group crosstalk-input-select crosstalk-input">
+</div><!--/html_preserve--><!--html_preserve--><div id="구시군명" class="form-group crosstalk-input-select crosstalk-input">
 <label class="control-label" for="구시군명">구시군명</label>
 <div>
 <select multiple></select>
@@ -358,117 +526,247 @@ class="form-group crosstalk-input-select crosstalk-input">
   "group": ["SharedData37bff9d8"]
 }</script>
 </div>
-</div>
-<!--/html_preserve-->
-<pre><code>Error in eval(expr, data, expr_env): 객체 &#39;민주당&#39;를 찾을 수 없습니다</code></pre>
-<pre><code>Error in eval(expr, data, expr_env): 객체 &#39;국민의힘&#39;를 찾을 수 없습니다</code></pre>
-<pre><code>Error in eval(expr, data, expr_env): 객체 &#39;그외정당&#39;를 찾을 수 없습니다</code></pre>
-<h2 data-width="800" id="column-9">Column</h2>
-<h3 id="표">표</h3>
-<pre><code>Error in convertIdx(targets, names): Some column names in the &#39;escape&#39; argument not found in data</code></pre>
-<h3 id="지도">지도</h3>
-<pre><code>Error in derivePolygons(data, lng, lat, missing(lng), missing(lat), &quot;addPolygons&quot;): 객체 &#39;gg_sgg_sf&#39;를 찾을 수 없습니다</code></pre>
-<h1 data-icon="ion-stats-bars" id="득표수">득표수</h1>
-<h2 data-width="200" id="column-10">Column</h2>
-<h3 id="구시군-4">구시군</h3>
-<pre><code>Error: package or namespace load failed for &#39;sf&#39; in dyn.load(file, DLLpath = DLLpath, ...):
- 공유된 객체 &#39;/usr/local/lib/R/4.1/site-library/sf/libs/sf.so&#39;를 로드 할 수 없습니다:
+</div><!--/html_preserve-->
+
+```
+Error in eval(expr, data, expr_env): 객체 '민주당'를 찾을 수 없습니다
+```
+
+```
+Error in eval(expr, data, expr_env): 객체 '국민의힘'를 찾을 수 없습니다
+```
+
+```
+Error in eval(expr, data, expr_env): 객체 '그외정당'를 찾을 수 없습니다
+```
+
+
+Column {data-width=800}
+-------------------------------------
+
+### 표
+
+
+```
+Error in convertIdx(targets, names): Some column names in the 'escape' argument not found in data
+```
+
+
+### 지도
+
+
+
+
+
+
+
+```
+Error in derivePolygons(data, lng, lat, missing(lng), missing(lat), "addPolygons"): 객체 'gg_sgg_sf'를 찾을 수 없습니다
+```
+
+
+
+
+득표수 {data-icon="ion-stats-bars"}
+=====================================  
+
+Column {data-width=200}
+-------------------------------------
+
+### 구시군
+
+
+
+```
+Error: package or namespace load failed for 'sf' in dyn.load(file, DLLpath = DLLpath, ...):
+ 공유된 객체 '/usr/local/lib/R/4.1/site-library/sf/libs/sf.so'를 로드 할 수 없습니다:
   dlopen(/usr/local/lib/R/4.1/site-library/sf/libs/sf.so, 6): Library not loaded: /usr/local/opt/proj/lib/libproj.22.dylib
   Referenced from: /usr/local/lib/R/4.1/site-library/sf/libs/sf.so
-  Reason: image not found</code></pre>
-<pre><code>Error in dyn.load(file, DLLpath = DLLpath, ...): 공유된 객체 &#39;/usr/local/lib/R/4.1/site-library/sf/libs/sf.so&#39;를 로드 할 수 없습니다:
+  Reason: image not found
+```
+
+```
+Error in dyn.load(file, DLLpath = DLLpath, ...): 공유된 객체 '/usr/local/lib/R/4.1/site-library/sf/libs/sf.so'를 로드 할 수 없습니다:
   dlopen(/usr/local/lib/R/4.1/site-library/sf/libs/sf.so, 6): Library not loaded: /usr/local/opt/proj/lib/libproj.22.dylib
   Referenced from: /usr/local/lib/R/4.1/site-library/sf/libs/sf.so
-  Reason: image not found</code></pre>
-<pre><code>Error in mutate(., 구시군명 = stringi::stri_unescape_unicode(gusigun)): 객체 &#39;gg_sgg_sf&#39;를 찾을 수 없습니다</code></pre>
-<pre><code>Error in st_drop_geometry(.): 함수 &quot;st_drop_geometry&quot;를 찾을 수 없습니다</code></pre>
-<pre><code>Error in pivot_wider(., names_from = 정당, values_from = 득표수, : 객체 &#39;gg_sgg_tbl&#39;를 찾을 수 없습니다</code></pre>
-<pre><code>Error in initialize(...): 객체 &#39;gg_sgg_sd&#39;를 찾을 수 없습니다</code></pre>
-<pre><code>Error in makeGroupOptions(sharedData, group, allLevels): 객체 &#39;shared_gg&#39;를 찾을 수 없습니다</code></pre>
-<pre><code>Error in makeGroupOptions(sharedData, group, allLevels): 객체 &#39;shared_gg&#39;를 찾을 수 없습니다</code></pre>
-<pre><code>Error in filter_slider(id = &quot;민주당&quot;, label = &quot;민주당 득표수&quot;, : 객체 &#39;shared_gg&#39;를 찾을 수 없습니다</code></pre>
-<pre><code>Error in filter_slider(id = &quot;국민의힘&quot;, label = &quot;국민의힘 득표수&quot;, : 객체 &#39;shared_gg&#39;를 찾을 수 없습니다</code></pre>
-<pre><code>Error in filter_slider(id = &quot;그외정당&quot;, label = &quot;그외정당 득표수&quot;, : 객체 &#39;shared_gg&#39;를 찾을 수 없습니다</code></pre>
-<h2 data-width="800" id="column-11">Column</h2>
-<h3 id="표-1">표</h3>
-<pre><code>Error in crosstalk::is.SharedData(data): 객체 &#39;shared_gg&#39;를 찾을 수 없습니다</code></pre>
-<h3 id="지도-1">지도</h3>
-<pre><code>Error in derivePolygons(data, lng, lat, missing(lng), missing(lat), &quot;addPolygons&quot;): 객체 &#39;gg_sgg_sf&#39;를 찾을 수 없습니다</code></pre>
+  Reason: image not found
+```
+
+```
+Error in mutate(., 구시군명 = stringi::stri_unescape_unicode(gusigun)): 객체 'gg_sgg_sf'를 찾을 수 없습니다
+```
+
+```
+Error in st_drop_geometry(.): 함수 "st_drop_geometry"를 찾을 수 없습니다
+```
+
+
+
+```
+Error in pivot_wider(., names_from = 정당, values_from = 득표수, : 객체 'gg_sgg_tbl'를 찾을 수 없습니다
+```
+
+```
+Error in initialize(...): 객체 'gg_sgg_sd'를 찾을 수 없습니다
+```
+
+```
+Error in makeGroupOptions(sharedData, group, allLevels): 객체 'shared_gg'를 찾을 수 없습니다
+```
+
+```
+Error in makeGroupOptions(sharedData, group, allLevels): 객체 'shared_gg'를 찾을 수 없습니다
+```
+
+```
+Error in filter_slider(id = "민주당", label = "민주당 득표수", : 객체 'shared_gg'를 찾을 수 없습니다
+```
+
+```
+Error in filter_slider(id = "국민의힘", label = "국민의힘 득표수", : 객체 'shared_gg'를 찾을 수 없습니다
+```
+
+```
+Error in filter_slider(id = "그외정당", label = "그외정당 득표수", : 객체 'shared_gg'를 찾을 수 없습니다
+```
+
+
+Column {data-width=800}
+-------------------------------------
+
+### 표
+
+
+```
+Error in crosstalk::is.SharedData(data): 객체 'shared_gg'를 찾을 수 없습니다
+```
+
+
+### 지도
+
+
+
+
+
+
+
+```
+Error in derivePolygons(data, lng, lat, missing(lng), missing(lat), "addPolygons"): 객체 'gg_sgg_sf'를 찾을 수 없습니다
+```
+
 <!-- 경기지사 여론조사와 빅데이터 -->
-<h1 data-icon="fa-pencil-alt" id="여론조사">여론조사</h1>
-<h2 class="tabset tabset-fade" id="column-12">Column</h2>
-<h3 id="경기지사">경기지사</h3>
-<pre><code>Error in path.expand(path): 인자 &#39;path&#39;가 올바르지 않습니다.</code></pre>
-<h1 data-icon="fa-pencil-alt" id="빅데이터">빅데이터</h1>
-<h2 class="tabset tabset-fade" id="column-13">Column</h2>
-<h3 id="구글-트렌드">구글 트렌드</h3>
-<pre><code>Error: package or namespace load failed for &#39;sf&#39; in dyn.load(file, DLLpath = DLLpath, ...):
- 공유된 객체 &#39;/usr/local/lib/R/4.1/site-library/sf/libs/sf.so&#39;를 로드 할 수 없습니다:
+
+
+
+
+
+여론조사 {data-icon="fa-pencil-alt"}
+=====================================  
+
+
+Column {.tabset .tabset-fade}
+-------------------------------------------------------------------------------
+
+### 경기지사
+
+
+```
+Error in path.expand(path): 인자 'path'가 올바르지 않습니다.
+```
+
+
+
+
+
+
+빅데이터 {data-icon="fa-pencil-alt"}
+=====================================  
+
+
+Column {.tabset .tabset-fade}
+-------------------------------------------------------------------------------
+
+### 구글 트렌드
+
+
+```
+Error: package or namespace load failed for 'sf' in dyn.load(file, DLLpath = DLLpath, ...):
+ 공유된 객체 '/usr/local/lib/R/4.1/site-library/sf/libs/sf.so'를 로드 할 수 없습니다:
   dlopen(/usr/local/lib/R/4.1/site-library/sf/libs/sf.so, 6): Library not loaded: /usr/local/opt/proj/lib/libproj.22.dylib
   Referenced from: /usr/local/lib/R/4.1/site-library/sf/libs/sf.so
-  Reason: image not found</code></pre>
-<pre><code>Error in seq.int(0, to0 - from, by): &#39;to&#39; must be a finite number</code></pre>
-<pre><code>Error in plotly::ggplotly(hubo_google_g): 객체 &#39;hubo_google_g&#39;를 찾을 수 없습니다</code></pre>
+  Reason: image not found
+```
+
+```
+Error in seq.int(0, to0 - from, by): 'to' must be a finite number
+```
+
+```
+Error in plotly::ggplotly(hubo_google_g): 객체 'hubo_google_g'를 찾을 수 없습니다
+```
+
 <!-- ![](fig/gg_google_20220531_g.png){width=100%} -->
-<h3 id="네이버-트렌드">네이버 트렌드</h3>
-<pre><code>Error in path.expand(path): 인자 &#39;path&#39;가 올바르지 않습니다.</code></pre>
-<h3 id="구글-연관검색어">구글 연관검색어</h3>
-<p><img src="fig/related_keywords_20220531.png"
-style="width:100.0%" /></p>
-<h1 id="제작-정보">제작 정보</h1>
-<h2 class="tabset tabset-fade" id="column-14">Column</h2>
-<h3 id="데이터">데이터</h3>
-<p><br> <br></p>
-<ul>
-<li>자료출처: 중앙선거관리위원회 - <a
-href="http://info.nec.go.kr/">선거통계시스템</a></li>
-</ul>
-<p><br> <br></p>
-<ul>
-<li>대통령선거
-<ul>
-<li>2012년</li>
-<li>2017년</li>
-<li>2022년</li>
-</ul></li>
-<li>총선
-<ul>
-<li>2016년</li>
-<li>2020년</li>
-</ul></li>
-<li>지방선거
-<ul>
-<li>2014년</li>
-<li>2018년</li>
-</ul></li>
-</ul>
-<h3 id="프로그래밍-언어">프로그래밍 언어</h3>
-<p><img src="fig/r-programming-language.jpg" /></p>
-<h3 id="대쉬보드">대쉬보드</h3>
-<p><img src="fig/flexdashboard.png" /></p>
-        </div>
-      </div>
-      </article>
-      <div class="footer">
-        <a class="label swc-blue-bg" href="http://software-carpentry.org">Software Carpentry</a>
-        <a class="label swc-blue-bg" href="https://github.com/swcarpentry/lesson-template">Source</a>
-        <a class="label swc-blue-bg" href="mailto:admin@software-carpentry.org">Contact</a>
-        <a class="label swc-blue-bg" href="LICENSE.html">License</a>
-      </div>
-    </div>
-    <!-- Javascript placed at the end of the document so the pages load faster -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-    <script src="css/bootstrap/bootstrap-js/bootstrap.js"></script>
-    <script src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
-    <script>
-      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
-      ga('create', 'UA-37305346-2', 'auto');
-      ga('send', 'pageview');
 
-    </script>
-  </body>
-</html>
+### 네이버 트렌드
+
+
+```
+Error in path.expand(path): 인자 'path'가 올바르지 않습니다.
+```
+
+
+### 구글 연관검색어
+
+
+
+![](fig/related_keywords_20220531.png){width=100%}
+
+
+
+
+
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+제작 정보
+================================================================================
+
+
+Column {.tabset .tabset-fade}
+-------------------------------------------------------------------------------
+
+### 데이터
+
+<br>
+<br>
+
+- 자료출처: 중앙선거관리위원회 - [선거통계시스템](http://info.nec.go.kr/)
+
+<br>
+<br>
+
+- 대통령선거
+    - 2012년 
+    - 2017년
+    - 2022년
+- 총선
+    - 2016년
+    - 2020년
+- 지방선거
+    - 2014년
+    - 2018년
+
+### 프로그래밍 언어
+
+![](fig/r-programming-language.jpg)
+
+
+### 대쉬보드
+
+![](fig/flexdashboard.png)
+
+

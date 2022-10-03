@@ -235,7 +235,7 @@
 <span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>( <span class="fu">str_detect</span>(구분, <span class="st">&quot;국가혁명배당금당|기독자유통일당|기본소득당|더불어민주당|무소속|미래통합당|민생당|민중당|우리공화당|정의당|친박신당&quot;</span>)) <span class="sc">%&gt;%</span> </span>
 <span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>  <span class="fu">separate</span>(구분, <span class="at">into =</span> <span class="fu">c</span>(<span class="st">&quot;정당&quot;</span>, <span class="st">&quot;후보&quot;</span>), <span class="at">sep =</span> <span class="st">&quot; &quot;</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(정당 <span class="ot">=</span> <span class="fu">case_when</span>(<span class="fu">str_detect</span>(정당, <span class="st">&quot;민주당&quot;</span>) <span class="sc">~</span> <span class="st">&quot;민주당&quot;</span>,</span>
-<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>                          <span class="fu">str_detect</span>(정당, <span class="st">&quot;새누리당&quot;</span>) <span class="sc">~</span> <span class="st">&quot;국민의힘&quot;</span>,</span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>                          <span class="fu">str_detect</span>(정당, <span class="st">&quot;미래통합&quot;</span>) <span class="sc">~</span> <span class="st">&quot;국민의힘&quot;</span>,</span>
 <span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>                          <span class="fu">str_detect</span>(정당, <span class="st">&quot;국민의당&quot;</span>) <span class="sc">~</span> <span class="st">&quot;국민의힘&quot;</span>,</span>
 <span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>                          <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">&quot;그외정당&quot;</span>)) <span class="sc">%&gt;%</span>   </span>
 <span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(구시군명, 정당) <span class="sc">%&gt;%</span> </span>
@@ -361,77 +361,84 @@ Caused by error in `chr_as_locations()`:
 <span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>(gg_2014_dat) <span class="sc">%&gt;%</span> </span>
 <span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>(gg_2018_dat)</span></code></pre></div>
 <pre><code>Error in list2(...): 객체 &#39;gg_2014_dat&#39;를 찾을 수 없습니다</code></pre>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>gg_raw <span class="sc">%&gt;%</span> </span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">write_rds</span>(<span class="st">&quot;data/gg_raw.rds&quot;</span>)</span></code></pre></div>
-<pre><code>Error in saveRDS(x, con, version = version, refhook = refhook, ascii = text): 객체 &#39;gg_raw&#39;를 찾을 수 없습니다</code></pre>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>gg_sgg_raw <span class="ot">&lt;-</span> gg_raw <span class="sc">%&gt;%</span> </span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(선거, 구시군명, 정당) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(득표수 <span class="ot">=</span> <span class="fu">sum</span>(득표수)) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span></code></pre></div>
+<pre><code>Error in group_by(., 선거, 구시군명, 정당): 객체 &#39;gg_raw&#39;를 찾을 수 없습니다</code></pre>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>gg_sgg_raw <span class="ot">&lt;-</span> krvote<span class="sc">::</span><span class="fu">clean_varnames</span>(gg_sgg_raw)</span></code></pre></div>
+<pre><code>Error in krvote::clean_varnames(gg_sgg_raw): 객체 &#39;gg_sgg_raw&#39;를 찾을 수 없습니다</code></pre>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>gg_sgg_raw <span class="sc">%&gt;%</span> </span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">write_rds</span>(<span class="st">&quot;data/gg_sgg_raw.rds&quot;</span>)</span></code></pre></div>
+<pre><code>Error in saveRDS(x, con, version = version, refhook = refhook, ascii = text): 객체 &#39;gg_sgg_raw&#39;를 찾을 수 없습니다</code></pre>
 <h1 id="시각화">시각화</h1>
 <h2 id="표">표</h2>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>gg_raw_tbl <span class="ot">&lt;-</span> gg_raw <span class="sc">%&gt;%</span> </span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(선거, 정당) <span class="sc">%&gt;%</span> </span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(득표수 <span class="ot">=</span> <span class="fu">sum</span>(득표수)) <span class="sc">%&gt;%</span> </span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(득표율 <span class="ot">=</span> 득표수 <span class="sc">/</span> 합계) </span></code></pre></div>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>gg_raw_tbl <span class="sc">%&gt;%</span> </span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">text =</span> glue<span class="sc">::</span><span class="fu">glue</span>(<span class="st">&quot;{scales::comma(득표수)} / {scales::comma(합계)} = {scales::percent(득표율, 0.1)}&quot;</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(선거, 정당, text) <span class="sc">%&gt;%</span> </span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> 정당, <span class="at">values_from =</span> text) <span class="sc">%&gt;%</span> </span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(선거, 민주당, 국민의힘, 그외정당)</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>gg_raw_tbl <span class="ot">&lt;-</span> gg_raw <span class="sc">%&gt;%</span> </span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(선거, 정당) <span class="sc">%&gt;%</span> </span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(득표수 <span class="ot">=</span> <span class="fu">sum</span>(득표수)) <span class="sc">%&gt;%</span> </span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(득표율 <span class="ot">=</span> 득표수 <span class="sc">/</span> 합계) </span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>gg_raw_tbl <span class="sc">%&gt;%</span> </span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">text =</span> glue<span class="sc">::</span><span class="fu">glue</span>(<span class="st">&quot;{scales::comma(득표수)} / {scales::comma(합계)} = {scales::percent(득표율, 0.1)}&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(선거, 정당, text) <span class="sc">%&gt;%</span> </span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> 정당, <span class="at">values_from =</span> text) <span class="sc">%&gt;%</span> </span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(선거, 민주당, 국민의힘, 그외정당)</span></code></pre></div>
 <h2 id="그래프">그래프</h2>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>gg_raw_tbl <span class="sc">%&gt;%</span> </span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> 선거, <span class="at">y =</span> 득표율, <span class="at">color =</span> 정당, <span class="at">group =</span> 정당)) <span class="sc">+</span></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>gg_raw_tbl <span class="sc">%&gt;%</span> </span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> 선거, <span class="at">y =</span> 득표율, <span class="at">color =</span> 정당, <span class="at">group =</span> 정당)) <span class="sc">+</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>()</span></code></pre></div>
 <h1 id="echarts">echarts</h1>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># https://www.infoworld.com/article/3607068/plot-in-r-with-echarts4r.html</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(echarts4r)</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>gg_raw <span class="sc">%&gt;%</span></span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(선거) <span class="sc">%&gt;%</span> </span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(득표수 <span class="ot">=</span> <span class="fu">sum</span>(득표수) ) <span class="sc">%&gt;%</span> </span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">e_charts</span>(<span class="at">x =</span> 선거) <span class="sc">%&gt;%</span> </span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">e_line</span>(<span class="at">serie =</span> 득표수)</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># https://www.infoworld.com/article/3607068/plot-in-r-with-echarts4r.html</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(echarts4r)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>gg_raw <span class="sc">%&gt;%</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(선거) <span class="sc">%&gt;%</span> </span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(득표수 <span class="ot">=</span> <span class="fu">sum</span>(득표수) ) <span class="sc">%&gt;%</span> </span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">e_charts</span>(<span class="at">x =</span> 선거) <span class="sc">%&gt;%</span> </span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">e_line</span>(<span class="at">serie =</span> 득표수)</span></code></pre></div>
 <pre><code>Error in group_by(., 선거): 객체 &#39;gg_raw&#39;를 찾을 수 없습니다</code></pre>
 <h1 id="echarts-지도">echarts 지도</h1>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(echarts4r)</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(echarts4r.maps)</span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(echarts4r)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(echarts4r.maps)</span></code></pre></div>
 <pre><code>Error in library(echarts4r.maps): &#39;echarts4r.maps&#39;이라고 불리는 패키지가 없습니다</code></pre>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">e_charts</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">em_map</span>(<span class="st">&quot;South_Korea&quot;</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">e_map</span>(<span class="at">map =</span> <span class="st">&quot;South_Korea&quot;</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">e_visual_map</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">e_charts</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">em_map</span>(<span class="st">&quot;South_Korea&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">e_map</span>(<span class="at">map =</span> <span class="st">&quot;South_Korea&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">e_visual_map</span>()</span></code></pre></div>
 <pre><code>Error in em_map(., &quot;South_Korea&quot;): 함수 &quot;em_map&quot;를 찾을 수 없습니다</code></pre>
 <h1 id="echarts-globe">echarts globe</h1>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(echarts4r.assets)</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>airports <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">paste0</span>(<span class="st">&quot;https://raw.githubusercontent.com/plotly/datasets/&quot;</span>,</span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>         <span class="st">&quot;master/2011_february_us_airport_traffic.csv&quot;</span>)</span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>airports <span class="sc">|&gt;</span> </span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">e_charts</span>(long) <span class="sc">|&gt;</span> </span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">e_globe</span>(</span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">environment =</span> <span class="fu">ea_asset</span>(<span class="st">&quot;starfield&quot;</span>),</span>
-<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">base_texture =</span> <span class="fu">ea_asset</span>(<span class="st">&quot;world&quot;</span>), </span>
-<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">globeOuterRadius =</span> <span class="dv">100</span></span>
-<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
-<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">e_scatter_3d</span>(lat, cnt, <span class="at">coord_system =</span> <span class="st">&quot;globe&quot;</span>, <span class="at">blendMode =</span> <span class="st">&#39;lighter&#39;</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">e_visual_map</span>(<span class="at">inRange =</span> <span class="fu">list</span>(<span class="at">symbolSize =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">10</span>)))</span></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(echarts4r.assets)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>airports <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">paste0</span>(<span class="st">&quot;https://raw.githubusercontent.com/plotly/datasets/&quot;</span>,</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>         <span class="st">&quot;master/2011_february_us_airport_traffic.csv&quot;</span>)</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>airports <span class="sc">|&gt;</span> </span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">e_charts</span>(long) <span class="sc">|&gt;</span> </span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">e_globe</span>(</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">environment =</span> <span class="fu">ea_asset</span>(<span class="st">&quot;starfield&quot;</span>),</span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">base_texture =</span> <span class="fu">ea_asset</span>(<span class="st">&quot;world&quot;</span>), </span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">globeOuterRadius =</span> <span class="dv">100</span></span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">e_scatter_3d</span>(lat, cnt, <span class="at">coord_system =</span> <span class="st">&quot;globe&quot;</span>, <span class="at">blendMode =</span> <span class="st">&#39;lighter&#39;</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">e_visual_map</span>(<span class="at">inRange =</span> <span class="fu">list</span>(<span class="at">symbolSize =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">10</span>)))</span></code></pre></div>
 <pre><code>Error in path.expand(path): 인자 &#39;path&#39;가 올바르지 않습니다.</code></pre>
 <h1 id="crosstalk">crosstalk</h1>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>gg_raw <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="st">&quot;data/gg_raw.rds&quot;</span>)</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>gg_raw <span class="sc">%&gt;%</span> </span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(구시군명 <span class="sc">==</span> <span class="st">&quot;가평군&quot;</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(정당 <span class="ot">=</span> <span class="fu">factor</span>(정당, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;민주당&quot;</span>, <span class="st">&quot;국민의힘&quot;</span>, <span class="st">&quot;그외정당&quot;</span>))) <span class="sc">%&gt;%</span> </span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> 선거, <span class="at">y =</span> 득표수, <span class="at">color =</span> 정당, <span class="at">group =</span> 정당)) <span class="sc">+</span></span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">&quot;blue&quot;</span>, <span class="st">&quot;red&quot;</span>, <span class="st">&quot;gray70&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>gg_raw <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="st">&quot;data/gg_raw.rds&quot;</span>)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>gg_raw <span class="sc">%&gt;%</span> </span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(구시군명 <span class="sc">==</span> <span class="st">&quot;가평군&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(정당 <span class="ot">=</span> <span class="fu">factor</span>(정당, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;민주당&quot;</span>, <span class="st">&quot;국민의힘&quot;</span>, <span class="st">&quot;그외정당&quot;</span>))) <span class="sc">%&gt;%</span> </span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> 선거, <span class="at">y =</span> 득표수, <span class="at">color =</span> 정당, <span class="at">group =</span> 정당)) <span class="sc">+</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">&quot;blue&quot;</span>, <span class="st">&quot;red&quot;</span>, <span class="st">&quot;gray70&quot;</span>))</span></code></pre></div>
 <pre><code>Error in `filter()`:
 ! Problem while computing `..1 = 구시군명 == &quot;가평군&quot;`.
-Caused by error:
+Caused by error in `mask$eval_all_filter()`:
 ! 객체 &#39;구시군명&#39;를 찾을 수 없습니다</code></pre>
         </div>
       </div>
